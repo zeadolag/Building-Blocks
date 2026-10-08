@@ -292,6 +292,22 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.45)}
 .appname{display:flex;align-items:center;gap:8px;font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-size:21px;font-weight:700;color:var(--ink)}
 .logo{display:block;width:30px;height:30px}
 .logo svg,.logo img{display:block;border-radius:7px}
+#tour{position:fixed;inset:0;z-index:60;display:none;touch-action:none}
+#tour.on{display:block}
+#tour .tspot{position:fixed;border-radius:14px;box-shadow:0 0 0 200vmax rgba(8,12,18,.66);transition:all .28s ease;pointer-events:none}
+#tour .tspot.ring{outline:2px solid #fff;outline-offset:2px}
+#tour .tcard{position:fixed;left:16px;right:16px;max-width:420px;margin:0 auto;background:var(--surface);color:var(--ink);border-radius:16px;padding:16px;box-shadow:0 12px 36px rgba(0,0,0,.35);transition:top .28s ease}
+#tour .tstep{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#tour .tcard h3{font-size:24px;margin:4px 0 6px}
+#tour .tcard p{margin:0 0 12px;font-size:15px}
+#tour .tbtns{display:flex;align-items:center;gap:8px}
+#tour .tbtns .btn{margin:0;width:auto;flex:1}
+#tour .tskip{border:0;background:none;color:var(--muted);text-decoration:underline;padding:10px 4px;font-size:14px;margin-right:auto}
+#tour .tdots{display:flex;gap:4px;margin:0 0 10px}
+#tour .tdots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+#tour .tdots i.on{background:var(--blue)}
+body.touring{overflow:hidden}
+@media (prefers-reduced-motion: reduce){#tour .tspot,#tour .tcard{transition:none}}
 .appicons{display:flex;gap:8px}
 body.onboarding .top,body.onboarding .week,body.onboarding .tabs{display:none}
 body.onboarding .welcome{margin-top:12px}
@@ -1349,7 +1365,7 @@ function guessStore(n){return "Supermarket";}
 function products(){
   const S=store.settings;if(Array.isArray(S.products))return S.products;
   const out=prices().map((p,i)=>({id:"p"+i,n:String(p.n).replace(/\s*\(Naanhof\)/,""),store:guessStore(p.n),price:num(p.e),mode:"packs",q:num(p.q)}));
-  const c=chick();out.push({id:"pc",n:"Chicken, "+c.packKg+" kg pack",store:"Naanhof",price:num(c.packEur),mode:"grams",packG:num(c.packKg)*1000,gpd:num(c.g)});
+  const c=chick();out.push({id:"pc",n:"Chicken, "+c.packKg+" kg pack",store:"Supermarket",price:num(c.packEur),mode:"grams",packG:num(c.packKg)*1000,gpd:num(c.g)});
   return out;
 }
 function ensureProducts(){const S=store.settings;if(!Array.isArray(S.products))S.products=JSON.parse(JSON.stringify(products()));return S.products;}
@@ -1541,13 +1557,13 @@ $("panel").addEventListener("click",e=>{
   }
   else if(act==="welcome"){S.welcomed=true;persist("settings");renderTrain();}
   else if(act==="welcomeskip"||act==="welcomecalc"){welcomeManual=act==="welcomeskip";renderTrain();}
-  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;persist("settings");render();toast("You're set. Tap ? at the top for a quick guide");}
+  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;persist("settings");render();if(!S.toured)setTimeout(tourStart,350);}
   else if(act==="welcomego"){const pf=Object.assign({sex:"m",act:1.55,goal:-550},S.profile||{});
     if(!S.profile&&latestWeight())pf.w=latestWeight();
     const r=calcTargets(pf);if(!r){toast("Fill in your age, height and weight");const f=document.querySelector('.welcome [data-pf="a"]');if(f&&!f.value)f.focus();return;}
     S.profile=pf;S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;S.welcomed=true;
     const t=todayKey();if(!latestWeight()&&num(pf.w)>0){ensureDay(t).weight=String(pf.w);persist("day-"+t);}
-    persist("settings");render();toast("Your targets: "+fmt(S.kcal)+" kcal and "+S.protein+" g protein a day. Tap ? for a quick guide");}
+    persist("settings");render();toast("Your targets: "+fmt(S.kcal)+" kcal and "+S.protein+" g protein a day");if(!S.toured)setTimeout(tourStart,350);}
   else if(act==="rmmeal"){
     const id=b.dataset.opt;
     if(id.startsWith("m:")){S.myMeals=myMeals().filter(x=>"m:"+x.id!==id);}
@@ -1970,6 +1986,62 @@ sheetEl.addEventListener("close",()=>{sheetEl._kind=null;});
 $("gear").addEventListener("click",openSettings);
 
 $("gear").innerHTML=gearSvg;
+// ---------- Guided tour ----------
+const TOUR=[
+  {t:"Quick tour",x:"Here's a one-minute look around the app. Tap Next to go through it, or Skip if you'd rather explore yourself."},
+  {sel:".top",t:"Moving between days",x:"Use ‹ and › to go to other days. When you're on a different day, tap Back to today under the date."},
+  {sel:"#week",t:"Your week",x:"Each circle is a day. The colour shows which workout falls on it, and it fills up as you log. Tap a circle to jump to that day."},
+  {sel:".tabs",t:"Five sections",x:"Train, Eat, Body, Spend and History. Here's what each one does."},
+  {tab:"train",sel:".dayhead",t:"Today's workout",x:"The workout planned for today and how long to rest. The dropdown swaps today's workout, and Edit workout and schedule lets you build your own split."},
+  {tab:"train",sel:".card.routine",t:"Warm-up",x:"About 5 minutes before you lift. Tick each item as you go. How to shows the steps and which muscles it loosens up."},
+  {tab:"train",sel:"article.ex .exhead",t:"Exercises",x:"Each exercise shows its sets and reps. Tap ⋯ to swap it or remove it for today. Under the name: the rest time (tap ⏱ to change it), what you lifted last time, and How to with the movement shown from the side and front."},
+  {tab:"train",sel:'article.ex .swr[data-sw="set"]',t:"Logging a set",x:"Type the kg and reps, then tap ✓. That starts the rest timer at the bottom. Swipe a set left to delete it or right to swap the exercise, drag ⋮⋮ to reorder, and tap the number to make it a drop set."},
+  {tab:"eat",sel:".card.meters",t:"Eat: your targets",x:"How many calories and how much protein you've had today, against your targets."},
+  {tab:"eat",sel:"#panel .swr",t:"Meals",x:"Tick what you ate for breakfast, lunch, snack and dinner. Swipe right to edit a meal, left to remove it. Further down: a food calculator, a meal builder and your supplements."},
+  {tab:"body",sel:"#panel section > .card",t:"Body",x:"Log your morning weight here. Below it, the weekly trend shows your average, and the calculator can update your targets as your weight changes."},
+  {tab:"spend",sel:"#panel section > .card",t:"Spend",x:"What you've spent this week, two weeks or month. Below, log purchases by store and add the things you buy regularly so the app works out what they cost you."},
+  {tab:"hist",sel:"#panel section > .card",t:"History",x:"A month at a glance: workouts, average calories and protein, and spending. Tap any day to open it."},
+  {sel:"#help",t:"Help",x:"Tap ? any time for the full guide, or to take this tour again.",round:1},
+  {sel:"#gear",t:"Settings",x:"Light or dark mode, colours, rest timer options and backups.",round:1},
+  {tab:"train",t:"You're all set",x:"Start with today's warm-up and log your first set. Have a good session!"}
+];
+const tourEl=document.createElement("div");tourEl.id="tour";tourEl.setAttribute("role","dialog");tourEl.setAttribute("aria-modal","true");tourEl.setAttribute("aria-label","App tour");
+tourEl.innerHTML=`<div class="tspot"></div><div class="tcard" aria-live="polite"></div>`;document.body.appendChild(tourEl);
+let tourI=-1,tourDir=1;
+function tourStart(){closeSheet();clearTimeout(toastT);toastEl.classList.remove("show");tourI=0;tourDir=1;tourEl.classList.add("on");document.body.classList.add("touring");tourShow();}
+function tourEnd(){tourEl.classList.remove("on");document.body.classList.remove("touring");tourI=-1;
+  if(!store.settings.toured){store.settings.toured=true;persist("settings");}
+  if(tab!=="train"){tab="train";render();}window.scrollTo(0,0);}
+function tourShow(){
+  if(tourI<0)return;if(tourI>=TOUR.length){tourEnd();return;}
+  const st=TOUR[tourI];
+  if(st.tab&&tab!==st.tab){tab=st.tab;render();}
+  const t=st.sel?document.querySelector(st.sel):null;
+  if(st.sel&&(!t||!t.offsetParent)){tourI+=tourDir;if(tourI<0){tourI=0;tourDir=1;}tourShow();return;}
+  if(t){const r=t.getBoundingClientRect();if(r.top<70||r.bottom>innerHeight-230)window.scrollTo(0,Math.max(0,scrollY+r.top-90));}
+  else window.scrollTo(0,0);
+  const card=tourEl.querySelector(".tcard"),n=TOUR.length;
+  card.innerHTML=`<div class="tdots" aria-hidden="true">${TOUR.map((_,i)=>`<i class="${i===tourI?"on":""}"></i>`).join("")}</div><p class="tstep">${tourI+1} of ${n}</p><h3>${esc(st.t)}</h3><p>${esc(st.x)}</p>
+   <div class="tbtns">${tourI<n-1?`<button type="button" class="tskip" data-tour="skip">Skip tour</button>`:`<span style="margin-right:auto"></span>`}${tourI>0?`<button type="button" class="btn ghost" data-tour="back">Back</button>`:""}<button type="button" class="btn" data-tour="next">${tourI===n-1?"Start":"Next"}</button></div>`;
+  requestAnimationFrame(()=>tourPlace(t,st));
+  setTimeout(()=>{const b=card.querySelector('[data-tour="next"]');if(b)b.focus({preventScroll:true});},50);
+}
+function tourPlace(t,st){
+  if(tourI<0)return;
+  const spot=tourEl.querySelector(".tspot"),card=tourEl.querySelector(".tcard"),vh=innerHeight,ch=card.offsetHeight;
+  if(!t){Object.assign(spot.style,{left:"50%",top:"50%",width:"0px",height:"0px"});spot.classList.remove("ring");card.style.top=Math.max(16,(vh-ch)/2)+"px";return;}
+  const r=t.getBoundingClientRect(),p=st.round?4:6;
+  let top=Math.max(8,r.top-p),bot=Math.min(vh-8,r.bottom+p);
+  Object.assign(spot.style,{left:(r.left-p)+"px",top:top+"px",width:(r.width+2*p)+"px",height:Math.max(0,bot-top)+"px",borderRadius:st.round?"50%":"14px"});
+  spot.classList.add("ring");
+  let y;if(vh-bot>=ch+28)y=bot+14;else if(top>=ch+28)y=top-14-ch;else y=vh-ch-16;
+  card.style.top=Math.max(12,y)+"px";
+}
+tourEl.addEventListener("click",e=>{const b=e.target.closest("[data-tour]");if(!b)return;const a=b.dataset.tour;
+  if(a==="skip")tourEnd();else if(a==="next"){if(tourI===TOUR.length-1){tourEnd();return;}tourDir=1;tourI++;tourShow();}else if(a==="back"){tourDir=-1;tourI--;tourShow();}});
+tourEl.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+addEventListener("resize",()=>{if(tourI>=0){const st=TOUR[tourI];tourPlace(st.sel?document.querySelector(st.sel):null,st);}});
+addEventListener("keydown",e=>{if(tourI<0)return;if(e.key==="Escape")tourEnd();else if(e.key==="ArrowRight"){tourEl.querySelector('[data-tour="next"]').click();}else if(e.key==="ArrowLeft"&&tourI>0){tourEl.querySelector('[data-tour="back"]').click();}});
 // ---------- Guide ----------
 function guideHtml(){
   const ua=navigator.userAgent||"",ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),android=/Android/.test(ua);
@@ -1977,7 +2049,7 @@ function guideHtml(){
   const iosB=`<ol><li>Open the app's web address in <b>Safari</b>. Chrome on iPhone works too, through the same Share menu.</li><li>Tap the <b>Share</b> button: the square with an arrow pointing up. On newer iPhones it's behind the <kbd>•••</kbd> button at the bottom right.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Leave <b>Open as Web App</b> switched on if you see it, then tap <b>Add</b>.</li></ol><p>Building Blocks now opens full screen from its own icon, like a normal app.</p>`;
   const andB=`<ol><li>Open the app's web address in <b>Chrome</b>.</li><li>Tap the <kbd>⋮</kbd> menu at the top right.</li><li>Tap <b>Add to Home screen</b> (sometimes called <b>Install app</b>), then <b>Install</b> or <b>Add</b>.</li></ol><p>Samsung Internet: tap <kbd>☰</kbd>, then <b>Add page to</b> → <b>Home screen</b>.</p>`;
   const devs=ios?[["iPhone and iPad",iosB,"Your phone"],["Android",andB]]:android?[["Android",andB,"Your phone"],["iPhone and iPad",iosB]]:[["iPhone and iPad",iosB],["Android",andB]];
-  return `<div class="guide">
+  return `<div class="guide"><button type="button" class="btn" style="margin:0 0 12px" data-gtour>Take the tour</button>
   ${sec("Getting started",`<ol><li>Set your daily calories and protein. If you don't know them, use <b>Calculate your targets</b> in the <b>Body</b> tab and tap <b>Use as my daily targets</b>.</li><li>On the <b>Train</b> tab, tap <b>Edit workout and schedule</b> to build your own split, or keep the sample one.</li><li>In the <b>Eat</b> tab, remove the sample meals you don't eat and add your own.</li></ol><p>Use <kbd>‹</kbd> and <kbd>›</kbd> at the top to move between days. On another day, tap <b>Back to today</b> under the date. Everything saves as you type.</p>`,true)}
   ${sec("Logging a workout",`<ul><li>Each exercise shows its sets. Type the <b>kg</b> and <b>reps</b>, then tap <kbd>✓</kbd> when the set is done.</li><li><b>+ Set</b> and <b>+ Drop set</b> add rows. Tap a set's number to switch it between a normal set and a drop set.</li><li>Drag <kbd>⋮⋮</kbd> to move a set up or down.</li><li><b>Last time</b> shows what you did in that exercise before. When you hit the top of the rep range on every set, it tells you to add weight.</li><li><b>How to and notes</b> shows the movement from the side (and from the front where it helps), which muscles it works, form cues and a box for your own notes, like seat height.</li><li>For bodyweight exercises the kg box is for <i>extra</i> weight, so leave it empty for plain pushups.</li></ul>`)}
   ${sec("Swiping, swapping and removing",`<ul><li>Swipe a <b>set</b> to the left to delete it (red), or to the right to swap the exercise.</li><li>Swipe a <b>food, purchase or meal</b> to the right to edit it, or to the left to delete it.</li><li>The <kbd>⋯</kbd> next to an exercise name lets you swap it or remove it just for today.</li><li>Deleted something by mistake? Tap <b>Undo</b> in the message at the bottom.</li></ul>`)}
@@ -1997,6 +2069,7 @@ function guideHtml(){
   </div>`;
 }
 function openGuide(){openSheet("How to use Building Blocks",guideHtml(),[{label:"Done"}]);sheetEl._kind="guide";}
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind==="guide"&&e.target.closest("[data-gtour]")){closeSheet();setTimeout(tourStart,150);}});
 $("help").addEventListener("click",openGuide);
 // ---------- Backup (website version) ----------
 function isLocalMode(){return mode==="local";}
