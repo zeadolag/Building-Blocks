@@ -1302,7 +1302,7 @@ function lastSession(id,k){
 function shortDate(k){return parseKey(k).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});}
 
 // ---------- Render ----------
-function render(){applyTheme();const onb=showWelcome()||!!onbStage();document.body.classList.toggle("onboarding",onb);if(onb){tab="train";sel=todayKey();}if(!TABDEF[tab])tab="train";
+function render(){applyTheme();{const S=store.settings;if(isLocalMode()&&S.welcomed&&!S.level&&!S.onb&&!S.onbOffered){S.onb="level";S.onbOffered=true;delete S.toured;persist("settings");}}const onb=showWelcome()||!!onbStage();document.body.classList.toggle("onboarding",onb);if(onb){tab="train";sel=todayKey();}if(!TABDEF[tab])tab="train";
   document.body.classList.toggle("tab-settings",tab==="settings");syncCustomLib();renderHeader();renderWeek();renderTabs();
   if(tab==="train")renderTrain();else if(tab==="eat")renderEat();else if(tab==="spend")renderSpend();else if(tab==="hist")renderHistory();else if(tab==="settings")renderSettings();else renderBody();
   const hn=hiddenTabNote();if(hn)$("panel").insertAdjacentHTML("afterbegin",hn);}
