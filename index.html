@@ -445,6 +445,52 @@ textarea.field.area{height:auto;min-height:96px;padding:10px;resize:vertical;lin
 .platevis .pl8{display:grid;place-items:center;width:22px;border-radius:4px;background:var(--ink);color:var(--paper);font-size:10px;font-weight:600;writing-mode:vertical-rl}
 .platevis .barend{width:56px;height:8px;border-radius:4px;background:var(--muted)}
 .summary .tgrid{margin-top:2px}
+.recipe{padding:0;overflow:hidden}
+.rechd{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:14px}
+.rechd span{flex:1;min-width:0}
+.rechd strong{display:block;font-weight:500}
+.rechd small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.rechd svg{flex:none;color:var(--muted);transition:transform .15s}
+.rechd[aria-expanded="true"] svg{transform:rotate(180deg)}
+.recbody{padding:0 14px 14px;border-top:1px solid var(--line)}
+.recbody .lbl{margin-top:12px}
+.recbody ul,.recbody ol{margin:0 0 6px;padding-left:20px}
+.recbody li{margin:0 0 4px}
+.recbody .pair .btn{margin-top:10px}
+.addrec summary{cursor:pointer;font-weight:500;list-style:none}
+.addrec summary::after{content:" +";color:var(--muted)}
+.addrec[open] summary::after{content:" −"}
+.chartwrap{position:relative}
+.chart{width:100%;height:auto;display:block;margin-top:8px;touch-action:pan-y}
+.ctip{position:absolute;top:2px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);pointer-events:none;display:grid;gap:1px;white-space:nowrap;z-index:2}
+.ctip b{font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);opacity:.6;display:inline-block}
+.lg-line{width:16px;height:2px;border-radius:2px;background:var(--blue);display:inline-block}
+.lg-zone{display:inline-block;width:14px;height:8px;background:color-mix(in srgb,var(--blue) 10%,transparent);border-left:1px dashed var(--blue);border-right:1px dashed var(--blue);vertical-align:0}
+.msets{display:grid;gap:6px}
+.msrow{display:grid;grid-template-columns:96px 1fr 34px;gap:8px;align-items:center;font-size:13px}
+.msrow b{text-align:right;font-weight:600}
+.mstrack{position:relative;height:10px;border-radius:999px;background:transparent}
+.mszone{position:absolute;top:-4px;bottom:-4px;background:color-mix(in srgb,var(--blue) 10%,transparent);border-left:1px dashed color-mix(in srgb,var(--blue) 55%,transparent);border-right:1px dashed color-mix(in srgb,var(--blue) 55%,transparent)}
+.msbar{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:4px}
+.measgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.measgrid small{display:block;margin-top:2px;font-size:12px}
+.bnote{display:flex;gap:8px;align-items:flex-start;border-top:1px solid var(--line);padding:8px 0}
+.bnote div{flex:1;min-width:0}
+.bnote p{margin:2px 0 0;font-size:15px}
+.phcmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.phcmp figure{margin:0}
+.phcmp img,.phbig{width:100%;border-radius:10px;display:block;object-fit:cover}
+.phcmp img{aspect-ratio:3/4}
+.phcmp figcaption{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
+.phgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.phth{border:0;padding:0;background:none;text-align:center}
+.phth img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;display:block}
+.phth small{font-size:11px;color:var(--muted)}
+.gtitle{margin:18px 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.guide .chn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--mutedbg);font-size:12px;font-weight:600;margin-right:10px;vertical-align:1px}
 /* ---- tab island ---- */
 .island{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;gap:2px;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--surface) 80%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40}
 .itab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;border-radius:999px;padding:7px 2px 6px;color:var(--muted);font-size:11px;font-weight:500;line-height:1.1}
@@ -1550,7 +1596,7 @@ function slotOpts(slot){
   const hid=hiddenMeals();
   const os=store.settings.fresh?[]:slot.opts.filter(o=>!hid.includes(o.id));
   for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,mine:1});
-  if(slot.recipes)for(const r of recipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0});
+  if(slot.recipes)for(const r of allRecipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0});
   return os;
 }
 function chosen(slot,day){const v=(day.meals||{})[slot.id];if(!v)return null;const os=slotOpts(slot);if(v===true)return os[0];return os.find(o=>o.id===v)||null;}
@@ -1612,15 +1658,7 @@ function renderEat(){
   h+=`<h2 class="sec-title">Supplements</h2>`;
   if(SU.length)h+=SU.map((n,i)=>`<div class="swr" style="margin-bottom:10px" data-sw="supp" data-i="${i}">${swbg("Rename","Remove")}<div class="sw chip-row"><button class="toggle" style="margin:0" data-act="supp" data-i="${i}" aria-pressed="${!!ds[n]}"><span class="box">✓</span><span class="txt"><strong>${esc(n)}</strong></span></button><button class="chip-x" data-act="rmsupp" data-i="${i}" aria-label="Remove ${esc(n)}">×</button></div></div>`).join("");
   else h+=`<p class="note">No supplements listed.</p>`;
-  // meal prep
-  const R=recipes();
-  h+=`<h2 class="sec-title">Meal prep recipes</h2><div class="card">`;
-  if(R.length)h+=R.map((r,i)=>`<div class="swr li" data-sw="recipe" data-i="${i}">${swbg("Edit","Delete")}<div class="sw extra"><button class="entry" data-act="editentry">${esc(r.n)}<br><small class="of">${fmt(Number(r.k)||0)} kcal, ${Math.round(Number(r.p)||0)} g protein per serving, makes ${esc(r.s)}${r.note?". "+esc(r.note):""}</small></button><button class="rm" data-act="rmrecipe" data-i="${i}" aria-label="Remove ${esc(r.n)}">×</button></div></div>`).join("")+`<div style="height:10px"></div>`;
-  else h+=`<p class="note" style="margin:0 0 10px">Recipes you add here show up as options under Lunch and Evening.</p>`;
-  h+=`<input class="field" id="rN" placeholder="Recipe name" aria-label="Recipe name">
-  <div class="qa" style="margin-top:8px"><input class="field" id="rK" inputmode="numeric" placeholder="kcal each" aria-label="Calories per serving"><input class="field" id="rP" inputmode="decimal" placeholder="protein g" aria-label="Protein per serving"><input class="field" id="rS" inputmode="numeric" placeholder="servings" aria-label="Number of servings"></div>
-  <button class="btn" data-act="addrecipe">Add recipe</button>
-  ${store.settings.halal?`<p class="note">Buy halal-certified meat for these, and check sauces and stock for alcohol or gelatin.</p>`:""}</div></section>`;
+  h+=recipesHtml()+`</section>`;
   $("panel").innerHTML=h;
 }
 
@@ -1628,35 +1666,174 @@ function weekAvg(monKey){
   const v=[];for(let i=0;i<7;i++){const d=store.days[addDays(monKey,i)];if(d&&Number(d.weight)>0)v.push(Number(d.weight));}
   return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
 }
+// ---------- Body tab ----------
+let bodyRange="3m",strengthId="";
+const CH={};
+function lineChart(cid,series,opt){
+  const all=series.flatMap(x=>x.pts);if(all.length<2)return "";
+  const W=330,H=160,pl=36,pr=10,pt=12,pb=24;
+  let lo=Math.min(...all.map(p=>p.v)),hi=Math.max(...all.map(p=>p.v));const pad=Math.max((hi-lo)*0.12,opt.minPad||0.5);lo-=pad;hi+=pad;
+  const t0=Math.min(...all.map(p=>p.t)),t1=Math.max(...all.map(p=>p.t));
+  const x=t=>pl+(t-t0)*(W-pl-pr)/Math.max(1,t1-t0),y=v=>pt+(hi-v)*(H-pt-pb)/(hi-lo);
+  const dec=opt.dec??1,ticks=[lo+pad,(lo+hi)/2,hi-pad];
+  let g=ticks.map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${(y(v)+4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="var(--muted)">${v.toFixed(dec)}</text>`).join("");
+  const kf=series[0].pts[0].k,kl=series[0].pts[series[0].pts.length-1].k,sd=k=>parseKey(k).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+  g+=`<text x="${pl}" y="${H-6}" font-size="10.5" fill="var(--muted)">${sd(kf)}</text><text x="${W-pr}" y="${H-6}" font-size="10.5" fill="var(--muted)" text-anchor="end">${sd(kl)}</text>`;
+  for(const sr of series){
+    if(sr.kind==="dots")g+=sr.pts.map(p=>`<circle cx="${x(p.t).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="3" fill="var(--muted)" opacity=".45"/>`).join("");
+    else if(sr.pts.length){g+=`<path d="${sr.pts.map((p,j)=>(j?"L":"M")+x(p.t).toFixed(1)+" "+y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+      const lp=sr.pts[sr.pts.length-1];g+=`<circle cx="${x(lp.t).toFixed(1)}" cy="${y(lp.v).toFixed(1)}" r="4.5" fill="var(--blue)" stroke="var(--surface)" stroke-width="2"/>`;}
+  }
+  CH[cid]={series,x,y,W,H,pl,pr,pt,pb,t0,t1,unit:opt.unit,dec};
+  const leg=series.length>1?`<div class="legend">${series.map(sr=>`<span><i class="${sr.kind==="dots"?"lg-dot":"lg-line"}"></i>${esc(sr.name)}</span>`).join("")}</div>`:"";
+  return `${leg}<div class="chartwrap"><svg class="chart" data-cid="${cid}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label)}">${g}<line class="xh" x1="0" x2="0" y1="${pt}" y2="${H-pb}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/></svg><div class="ctip" hidden></div></div>`;
+}
+function chartHover(svg,ev){
+  const C=CH[svg.dataset.cid];if(!C)return;const r=svg.getBoundingClientRect(),vx=(ev.clientX-r.left)*C.W/r.width;
+  const tEst=C.t0+(vx-C.pl)*(C.t1-C.t0)/Math.max(1,C.W-C.pl-C.pr);let best=null;
+  for(const sr of C.series)for(const p of sr.pts)if(!best||Math.abs(p.t-tEst)<Math.abs(best.t-tEst))best=p;
+  if(!best)return;const xh=svg.querySelector(".xh"),tip=svg.parentElement.querySelector(".ctip"),X=C.x(best.t);
+  xh.setAttribute("x1",X);xh.setAttribute("x2",X);xh.setAttribute("visibility","visible");
+  const vals=C.series.map(sr=>{const p=sr.pts.find(q=>q.t===best.t);return p?`<span>${esc(sr.name)}: <b>${p.v.toFixed(C.dec)} ${C.unit}</b>${p.note?` <small>${esc(p.note)}</small>`:""}</span>`:"";}).join("");
+  tip.innerHTML=`<b>${parseKey(best.k).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}</b>${vals}`;tip.hidden=false;
+  const px=X/C.W*r.width;tip.style.left=Math.max(4,Math.min(r.width-tip.offsetWidth-4,px-tip.offsetWidth/2))+"px";
+}
+$("panel").addEventListener("pointermove",e=>{const svg=e.target.closest&&e.target.closest(".chart[data-cid]");if(svg)chartHover(svg,e);});
+$("panel").addEventListener("pointerdown",e=>{const svg=e.target.closest&&e.target.closest(".chart[data-cid]");if(svg){chartHover(svg,e);if(e.pointerType!=="mouse"){clearTimeout(svg._t);svg._t=setTimeout(()=>{const l=svg.querySelector(".xh");if(l)l.setAttribute("visibility","hidden");const t=svg.parentElement.querySelector(".ctip");if(t)t.hidden=true;},3000);}}});
+$("panel").addEventListener("pointerleave",()=>{document.querySelectorAll(".chart .xh").forEach(l=>l.setAttribute("visibility","hidden"));document.querySelectorAll(".ctip").forEach(t=>t.hidden=true);},true);
+function weightSeries(endKey){
+  const days=bodyRange==="1m"?30:bodyRange==="3m"?91:3650,start=addDays(endKey,-days+1),raw=[];
+  for(const [k,d] of Object.entries(store.days))if(k>=start&&k<=endKey&&num(d.weight)>0)raw.push({k,v:num(d.weight)});
+  raw.sort((a,b)=>a.k<b.k?-1:1);const pts=raw.map(p=>({t:dayDiff(start,p.k),k:p.k,v:p.v}));
+  const avg=pts.map(p=>{const w=pts.filter(q=>q.t<=p.t&&q.t>p.t-7);return {t:p.t,k:p.k,v:w.reduce((a,b)=>a+b.v,0)/w.length};});
+  return {pts,avg};
+}
+function bodyKgOn(k){const ks=Object.keys(store.days).filter(x=>x<=k&&num(store.days[x].weight)>0).sort();const w=ks.length?num(store.days[ks[ks.length-1]].weight):num((store.settings.profile||{}).w);return toKg(w);}
+const CARDIO_MET={Walk:[3,4.3],"Walk to and from the gym":[3,4.3],Run:[7,10],"Easy run":[6,8.5],"Incline walk":[5,7],Bike:[5,8],Other:[4,7]};
+function exKcal(k){
+  const d=store.days[k]||{},w=bodyKgOn(k);if(!(w>0))return [0,0];let lo=0,hi=0,sets=0;const at=[];
+  for(const rows of Object.values(d.sets||{}))for(const r of rows)if(r.d){sets++;if(r.at)at.push(r.at);}
+  if(sets){let mins=at.length>1?(Math.max(...at)-Math.min(...at))/60000+3:0;if(!(mins>sets*1.2))mins=sets*2.5;mins=Math.min(mins,sets*5);lo+=(3.5-1)*w*mins/60;hi+=(6-1)*w*mins/60;}
+  for(const c of d.cardioLog||[]){const m=CARDIO_MET[c.t]||CARDIO_MET.Other,min=num(c.m);lo+=(m[0]-1)*w*min/60;hi+=(m[1]-1)*w*min/60;}
+  return [lo,hi];
+}
+function compareKcal(lo,hi){
+  const r=(n,u)=>{const a=Math.round(lo/n),b=Math.round(hi/n);return a===b?`${a}`:`${a}–${b}`;};
+  const fat=hi>=770?`${(lo/7700).toFixed(1)}–${(hi/7700).toFixed(1)} kg`:`${Math.round(lo/7.7)}–${Math.round(hi/7.7)} g`;
+  const food=hi<450?`${r(105)} bananas`:hi<3000?`${r(285)} slices of pizza`:`${r(1100)} whole pizzas`;
+  return `That's about as much energy as <b>${fat} of body fat</b>, or ${food}.`;
+}
+function burnHtml(){
+  const pf=Object.assign({sex:"m",act:1.55,goal:-550},profile()),t=todayKey(),R=calcTargets(pf);
+  const [lo,hi]=exKcal(t);let firstK=null,sLo=0,sHi=0;
+  for(const k of Object.keys(store.days).sort()){if(k>t)continue;const [a,b]=exKcal(k);if(b>0){if(!firstK)firstK=k;sLo+=a;sHi+=b;}}
+  let h=`<h2 class="sec-title">Calories burned</h2><div class="card">`;
+  if(R){h+=`<div><span class="big">${hi>0?fmt(R.bmr+lo)+"–"+fmt(R.bmr+hi):fmt(R.bmr)}</span> <span class="of">kcal today</span></div><p class="note" style="margin-top:2px">Resting burn ${fmt(R.bmr)} kcal${hi>0?` plus ${fmt(lo)}–${fmt(hi)} kcal from today's training and cardio`:", plus whatever training you log today"}. Everyday movement like walking around isn't counted, so your real total is higher.</p>`;}
+  else h+=`<p class="note" style="margin-top:0">Add your age, height and weight under Calculate your targets to see your resting burn.</p>`;
+  if(firstK)h+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><span class="lbl">Since you started on ${parseKey(firstK).toLocaleDateString(undefined,{day:"numeric",month:"long"})}</span><span class="big">${fmt(sLo)}–${fmt(sHi)}</span> <span class="of">kcal from exercise</span><p class="note" style="margin-top:2px">${compareKcal(sLo,sHi)}</p></div>`;
+  else h+=`<p class="note">Log a workout or some cardio and your running total since you started shows up here.</p>`;
+  return h+`<p class="note">Estimates from standard activity values (METs) and your weight, so they're shown as a range.</p></div>`;
+}
+function adaptive(){
+  const t=todayKey(),start=addDays(t,-27),W=[],F=[];
+  for(let i=0;i<28;i++){const k=addDays(start,i),d=store.days[k];if(!d)continue;if(num(d.weight)>0)W.push({x:i,y:toKg(d.weight)});const et=eatTotals(d);if(et.k>0)F.push(et.k);}
+  if(W.length<8||W[W.length-1].x-W[0].x<14||F.length<10)return {need:true,w:W.length,f:F.length};
+  const n=W.length,mx=W.reduce((a,p)=>a+p.x,0)/n,my=W.reduce((a,p)=>a+p.y,0)/n,slope=W.reduce((a,p)=>a+(p.x-mx)*(p.y-my),0)/W.reduce((a,p)=>a+(p.x-mx)**2,0);
+  const intake=F.reduce((a,b)=>a+b,0)/F.length;return {tdee:intake-slope*7700,intake,perWeek:slope*7};
+}
+function adaptiveHtml(){
+  const A=adaptive(),pf=Object.assign({goal:-550},profile()),R=calcTargets(Object.assign({sex:"m",act:1.55},pf));
+  let h=`<h2 class="sec-title">Your real maintenance</h2><div class="card">`;
+  if(A.need)return h+`<p class="note" style="margin-top:0">Formulas can be off by 10% or more. After about two weeks of logging, the app works out your real maintenance from how your weight actually changes compared with what you eat.</p><div class="tgrid"><div><span class="big">${Math.min(A.w,8)}/8</span><span class="of">weigh-ins</span></div><div><span class="big">${Math.min(A.f,10)}/10</span><span class="of">days of food logged</span></div></div><p class="note">It needs weigh-ins spread over at least 14 days, and only works well if you log everything you eat.</p></div>`;
+  const sug=Math.round((A.tdee+num(pf.goal))/10)*10,U1=U()==="lb"?2.20462:1;
+  return h+`<div><span class="big">${fmt(A.tdee)}</span> <span class="of">kcal a day</span></div><p class="note" style="margin-top:2px">Over the last 4 weeks you ate about ${fmt(A.intake)} kcal a day and your weight changed by ${(A.perWeek*U1>0?"+":"")+(A.perWeek*U1).toFixed(2)} ${U()} a week.${R?` The formula guessed ${fmt(R.tdee)}.`:""}</p>
+  <button class="btn ghost" data-act="adapt" data-v="${sug}">Set my target to ${fmt(sug)} kcal</button><p class="note">That's your real maintenance plus your goal from the calculator. It assumes you logged all your food.</p></div>`;
+}
+function muscleSetsHtml(k){
+  const d0=parseKey(k),mon=addDays(k,-((d0.getDay()+6)%7)),cnt={};
+  for(let i=0;i<7;i++){const d=store.days[addDays(mon,i)];if(!d)continue;for(const [id,rows] of Object.entries(d.sets||{})){const n=rows.filter(r=>r.d).length;if(!n)continue;const I=getInfo(id)||{m:[],s:[]};for(const m of I.m||[])cnt[m]=(cnt[m]||0)+n;for(const m of I.s||[])cnt[m]=(cnt[m]||0)+n*0.5;}}
+  const rows=Object.entries(cnt).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  let h=`<h2 class="sec-title">Sets per muscle this week</h2><div class="card">`;
+  if(!rows.length)return h+`<p class="note" style="margin-top:0">Tick off sets on the Train tab and this shows how much work each muscle got this week.</p></div>`;
+  const max=Math.max(22,...rows.map(r=>r[1]));
+  h+=`<div class="msets" role="table" aria-label="Hard sets per muscle this week">`+rows.map(([m,v])=>`<div class="msrow" role="row"><span role="cell">${esc((MNAME[m]||m).replace(/^./,c=>c.toUpperCase()))}</span><span class="mstrack" role="cell"><i class="mszone" style="left:${10/max*100}%;width:${10/max*100}%"></i><i class="msbar" style="width:${Math.min(100,v/max*100)}%"></i></span><b role="cell">${v%1?v.toFixed(1):v}</b></div>`).join("")+`</div>`;
+  return h+`<p class="note"><i class="lg-zone"></i> The shaded band is 10–20 sets, a good weekly range for growth. Helper muscles count as half a set.</p></div>`;
+}
+function strengthHtml(k){
+  const ids={};for(const [x,d] of Object.entries(store.days)){if(x>k)continue;for(const [id,rows] of Object.entries(d.sets||{}))if(rows.some(r=>num(r.w)>0&&num(r.r)>0))ids[id]=(ids[id]||0)+1;}
+  const list=Object.keys(ids).sort((a,b)=>ids[b]-ids[a]);
+  let h=`<h2 class="sec-title">Strength</h2><div class="card">`;
+  if(!list.length)return h+`<p class="note" style="margin-top:0">Log weights on the Train tab and you can follow each exercise's progress here.</p></div>`;
+  if(!list.includes(strengthId))strengthId=list[0];
+  const pts=[];const ks=Object.keys(store.days).filter(x=>x<=k).sort();const t0=ks[0];
+  for(const x of ks){const rows=((store.days[x].sets||{})[strengthId]||[]).filter(r=>num(r.w)>0&&num(r.r)>0);if(!rows.length)continue;
+    let best=null;for(const r of rows){const e=num(r.w)*(1+Math.min(num(r.r),12)/30);if(!best||e>best.e)best={e,r};}
+    pts.push({t:dayDiff(t0,x),k:x,v:best.e,note:`best set ${best.r.w} × ${best.r.r}`});}
+  h+=`<select class="field" data-strength aria-label="Exercise">${list.map(id=>`<option value="${id}"${id===strengthId?" selected":""}>${esc((LIB[id]||{}).n||id)}</option>`).join("")}</select>`;
+  if(pts.length<2)h+=`<p class="note">Log this exercise on one more day to see a trend.${pts.length?` So far: estimated max ${pts[0].v.toFixed(1)} ${U()} (${esc(pts[0].note)}).`:""}</p>`;
+  else{const d=pts[pts.length-1].v-pts[0].v;h+=`<p class="note" style="margin:10px 0 0"><b>${(d>=0?"+":"")+d.toFixed(1)} ${U()}</b> estimated one-rep max since ${shortDate(pts[0].k)}.</p>`+lineChart("str",[{name:"Estimated one-rep max",kind:"line",pts}],{unit:U(),label:"Estimated one-rep max over time",dec:1,minPad:1});}
+  return h+`<p class="note">Estimated from your best set each day, so you never need to test a real max.</p></div>`;
+}
+const MEAS=[["waist","Waist"],["chest","Chest"],["hips","Hips"],["arm","Arm"],["thigh","Thigh"]];
+function measHtml(k){
+  const d=store.days[k]||{},m=d.meas||{},first={},last={};
+  for(const x of Object.keys(store.days).sort()){const mm=store.days[x].meas||{};for(const [key] of MEAS)if(num(mm[key])>0){if(first[key]==null)first[key]={v:num(mm[key]),k:x};last[key]={v:num(mm[key]),k:x};}}
+  return `<h2 class="sec-title">Measurements</h2><div class="card"><p class="note" style="margin:0 0 8px">In cm, measured relaxed, ideally the same day each week. Your waist often shows fat loss better than the scale.</p>
+  <div class="measgrid">${MEAS.map(([key,l])=>{const f=first[key],L=last[key],dd=f&&L&&L.k!==f.k?L.v-f.v:null;return `<label><span class="lbl">${l}</span><input class="field" data-meas="${key}" inputmode="decimal" placeholder="${L?L.v:"cm"}" value="${esc(m[key]||"")}">${dd!=null?`<small class="of">${dd>0?"+":""}${dd.toFixed(1)} cm since ${shortDate(f.k)}</small>`:""}</label>`;}).join("")}</div></div>`;
+}
+function notesHtml(){
+  const N=Array.isArray(store.settings.bodyNotes)?store.settings.bodyNotes:[];
+  return `<h2 class="sec-title">Notes</h2><div class="card"><textarea class="field area" id="bnT" placeholder="Anything you want to remember: how you feel, sleep, an injury, a goal…" aria-label="New note"></textarea><button class="btn" data-act="bnadd">Save note</button>
+  ${N.length?`<div style="margin-top:10px">${N.map((n,i)=>`<div class="bnote"><div><small class="of">${shortDate(n.k)}</small><p>${esc(n.t).replace(/\n/g,"<br>")}</p></div><button class="rm" data-act="bnrm" data-i="${i}" aria-label="Delete note from ${shortDate(n.k)}">×</button></div>`).join("")}</div>`:""}</div>`;
+}
+// progress photos: stored on the device only (IndexedDB), website version
+const PH={db:null,list:[],urls:{},loaded:false};
+function phOpen(){return new Promise((res,rej)=>{if(PH.db)return res(PH.db);if(!window.indexedDB)return rej();const q=indexedDB.open("bb-photos",1);q.onupgradeneeded=()=>q.result.createObjectStore("p",{keyPath:"id"});q.onsuccess=()=>{PH.db=q.result;res(PH.db);};q.onerror=()=>rej();});}
+async function phLoad(){try{const db=await phOpen();PH.list=await new Promise(r=>{const out=[];db.transaction("p").objectStore("p").openCursor().onsuccess=e=>{const c=e.target.result;if(c){out.push(c.value);c.continue();}else r(out);};});PH.list.sort((a,b)=>a.k<b.k?-1:a.k>b.k?1:a.at-b.at);for(const p of PH.list)if(!PH.urls[p.id])PH.urls[p.id]=URL.createObjectURL(p.blob);}catch(e){}PH.loaded=true;if(tab==="body")renderBody();}
+function phShrink(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const s=Math.min(1,1080/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(),"image/jpeg",0.82);};img.onerror=rej;img.src=u;});}
+async function phAdd(file){try{const blob=await phShrink(file),db=await phOpen(),p={id:Date.now().toString(36),k:sel,at:Date.now(),blob};await new Promise((r,j)=>{const tx=db.transaction("p","readwrite");tx.objectStore("p").put(p);tx.oncomplete=r;tx.onerror=j;});PH.list.push(p);PH.urls[p.id]=URL.createObjectURL(blob);PH.list.sort((a,b)=>a.k<b.k?-1:a.k>b.k?1:a.at-b.at);renderBody();toast("Photo saved on this phone");}catch(e){toast("Couldn't save that photo");}}
+async function phDel(id){try{const db=await phOpen();await new Promise(r=>{const tx=db.transaction("p","readwrite");tx.objectStore("p").delete(id);tx.oncomplete=r;});PH.list=PH.list.filter(p=>p.id!==id);renderBody();toast("Photo deleted");}catch(e){}}
+function photosHtml(){
+  let h=`<h2 class="sec-title">Progress photos</h2><div class="card">`;
+  if(!isLocalMode())return h+`<p class="note" style="margin-top:0">Progress photos work in the website version of the app, where they're saved only on your phone.</p></div>`;
+  if(!PH.loaded){phLoad();return h+`<p class="note" style="margin-top:0">Loading…</p></div>`;}
+  const L=PH.list;
+  if(L.length>=2){const a=L[0],b=L[L.length-1];h+=`<p class="lbl" style="margin-top:0">First and latest</p><div class="phcmp"><figure><img src="${PH.urls[a.id]}" alt="Progress photo from ${shortDate(a.k)}"><figcaption>${shortDate(a.k)}</figcaption></figure><figure><img src="${PH.urls[b.id]}" alt="Progress photo from ${shortDate(b.k)}"><figcaption>${shortDate(b.k)}</figcaption></figure></div>`;}
+  if(L.length)h+=`<div class="phgrid">${L.slice().reverse().map(p=>`<button type="button" class="phth" data-act="phview" data-id="${p.id}" aria-label="Photo from ${shortDate(p.k)}"><img src="${PH.urls[p.id]}" alt=""><small>${shortDate(p.k)}</small></button>`).join("")}</div>`;
+  else h+=`<p class="note" style="margin-top:0">Same spot, same light, same time of day, every 2–4 weeks. Photos stay on this phone and aren't in backups.</p>`;
+  return h+`<label class="btn ghost" style="display:grid;place-items:center;cursor:pointer">Add a photo for ${sel===todayKey()?"today":shortDate(sel)}<input type="file" accept="image/*" data-photo hidden></label></div>`;
+}
 function renderBody(){
   const k=sel,day=store.days[k]||{},S=store.settings;
-  const d=parseKey(k),mon=addDays(k,-((d.getDay()+6)%7));
-  const cur=weekAvg(mon),prev=weekAvg(addDays(mon,-7));
-  let h=`<section><div class="card"><div class="pair">
-    <label><span class="lbl">Morning weight (${U()})</span><input class="field" data-body="weight" inputmode="decimal" placeholder="e.g. 84.6" value="${esc(day.weight)}"></label>
-    <label><span class="lbl">Steps</span><input class="field" data-body="steps" inputmode="numeric" placeholder="7,000–10,000" value="${esc(day.steps)}"></label></div>
+  const d=parseKey(k),mon=addDays(k,-((d.getDay()+6)%7)),cur=weekAvg(mon),prev=weekAvg(addDays(mon,-7));
+  let h=`<section><div class="card"><label><span class="lbl">Morning weight (${U()})</span><input class="field" data-body="weight" inputmode="decimal" placeholder="e.g. 84.6" value="${esc(day.weight)}"></label>
     <p class="note">Weigh in after the bathroom, before eating. Watch the weekly average, not single days.</p></div>`;
-  h+=`<h2 class="sec-title">Weekly trend</h2><div class="card">`;
-  if(cur!=null){
-    h+=`<div><span class="big">${cur.toFixed(1)} ${U()}</span> <span class="of">average this week</span></div>`;
-    if(prev!=null){
-      const diff=cur-prev;
-      h+=`<p class="note">${diff<=0?"Down":"Up"} ${Math.abs(diff).toFixed(1)} ${U()} from last week (${prev.toFixed(1)} ${U()}).</p>`;
-      let g;
-      if(diff<-1)g="That's faster than about 1 kg a week. Once you're past the first two weeks, add 150–200 kcal. The extra rice is an easy place to start.";
-      else if(diff<=-0.3)g="Right on pace for your target.";
-      else if(diff<=0.2)g="Slower than planned. Check that portions are weighed before cutting calories further.";
-      else g="Up this week. Water, salt and creatine can all do this, so give it another week before changing anything.";
-      h+=`<p class="note" style="color:var(--ink)">${g}</p>`;
-    }
-  }
-  h+=chart(k)+`<p class="note">Creatine can add 1–2 kg of water weight in the first few weeks, so judge progress by the weekly average after week 2.</p></div>`;
+  const {pts,avg}=weightSeries(k);
+  h+=`<h2 class="sec-title">Progress</h2><div class="card"><div class="seg seg3" role="group" aria-label="Time range">${[["1m","1 month"],["3m","3 months"],["all","All"]].map(([v,l])=>`<button type="button" data-act="brange" data-v="${v}" aria-pressed="${bodyRange===v}">${l}</button>`).join("")}</div>`;
+  if(cur!=null){h+=`<div><span class="big">${cur.toFixed(1)} ${U()}</span> <span class="of">average this week</span></div>`;
+    if(prev!=null){const diff=cur-prev,goal=num((S.profile||{}).goal);h+=`<p class="note" style="margin-top:2px">${diff<=0?"Down":"Up"} ${Math.abs(diff).toFixed(1)} ${U()} from last week (${prev.toFixed(1)} ${U()}).${goal<0&&diff>0.2?" Water, salt and new training can all do this, so give it another week before changing anything.":goal<0&&diff<-1?" That's faster than about 1 kg a week. After the first two weeks, think about eating 150–200 kcal more.":""}</p>`;}}
+  h+=pts.length>=2?lineChart("wt",[{name:"Daily weigh-ins",kind:"dots",pts},{name:"7-day average",kind:"line",pts:avg}],{unit:U(),label:`Weight from ${pts[0].v} to ${pts[pts.length-1].v} ${U()}`,dec:1}):`<p class="empty">Log your morning weight on a few days to see your progress here.</p>`;
+  h+=`</div>`;
+  h+=burnHtml()+adaptiveHtml()+muscleSetsHtml(k)+strengthHtml(k)+measHtml(k)+photosHtml()+notesHtml();
   h+=targetsCalcHtml();
   h+=`<h2 class="sec-title">Daily targets</h2><div class="card"><div class="pair">
     <label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(S.kcal)}"></label>
     <label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(S.protein)}"></label></div></div></section>`;
   $("panel").innerHTML=h;
 }
+$("panel").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b||tab!=="body")return;const a=b.dataset.act,S=store.settings;
+  if(a==="brange"){bodyRange=b.dataset.v;renderBody();}
+  else if(a==="adapt"){const u=snap(["settings"]);S.kcal=+b.dataset.v;persist("settings");renderBody();toast("Daily target set to "+fmt(S.kcal)+" kcal",u);}
+  else if(a==="bnadd"){const t=$("bnT").value.trim();if(!t){$("bnT").focus();return;}S.bodyNotes=[{k:sel,t,id:Date.now().toString(36)}].concat(Array.isArray(S.bodyNotes)?S.bodyNotes:[]);persist("settings");renderBody();toast("Note saved");}
+  else if(a==="bnrm"){const u=snap(["settings"]);S.bodyNotes.splice(+b.dataset.i,1);persist("settings");renderBody();toast("Note deleted",u);}
+  else if(a==="phview"){const p=PH.list.find(x=>x.id===b.dataset.id);if(!p)return;openSheet(shortDate(p.k),`<img class="phbig" src="${PH.urls[p.id]}" alt="Progress photo from ${shortDate(p.k)}">`,[{label:"Delete photo",cls:"btn danger",fn:()=>{phDel(p.id);}},{label:"Close",cls:"btn ghost"}]);}
+});
+$("panel").addEventListener("change",e=>{const t=e.target;if(tab!=="body")return;
+  if(t.dataset.strength!==undefined){strengthId=t.value;renderBody();}
+  else if(t.dataset.photo!==undefined&&t.files&&t.files[0])phAdd(t.files[0]);
+  else if(t.dataset.meas){renderBody();}});
+$("panel").addEventListener("input",e=>{const t=e.target;if(tab!=="body"||!t.dataset.meas)return;const d=ensureDay(sel);d.meas=d.meas||{};const v=t.value.replace(",",".").trim();if(v==="")delete d.meas[t.dataset.meas];else if(num(v)>0)d.meas[t.dataset.meas]=num(v);persist("day-"+sel);});
 function chart(endKey){
   const pts=[];for(let i=41;i>=0;i--){const k=addDays(endKey,-i),d=store.days[k];if(d&&Number(d.weight)>0)pts.push({i:41-i,w:Number(d.weight)});}
   if(pts.length<2)return `<p class="empty">Log your morning weight on a few days to see your trend here.</p>`;
@@ -1677,6 +1854,33 @@ function chart(endKey){
 function quick(){return Array.isArray(store.settings.quick)?store.settings.quick:(store.settings.fresh?[]:DEFAULT_QUICK);}
 function ensureQuick(){if(!Array.isArray(store.settings.quick))store.settings.quick=JSON.parse(JSON.stringify(DEFAULT_QUICK));return store.settings.quick;}
 function recipes(){return Array.isArray(store.settings.recipes)?store.settings.recipes:[];}
+// Built-in recipes, shown to everyone. Your own recipes are added in the app.
+const RECIPES=[{id:"cajunchk",n:"Creamy garlic herb Cajun chicken with mash",s:4,k:540,p:54,time:"45 min",tag:"Meal prep",
+  ing:["700 g chicken breast (raw weight)","1.2 kg floury potatoes","300 ml high-protein milk","30 g light butter","25 g parmesan, grated","3 garlic cloves, crushed","2 tsp Cajun seasoning","1 tsp dried mixed herbs, or a handful of fresh parsley","1 tsp olive oil","1 tsp cornflour","100 ml chicken stock (halal-certified)","Salt and pepper"],
+  steps:["Peel the potatoes, cut them into chunks and boil in salted water for 15–20 min until soft.","Cut the chicken into strips and toss with the Cajun seasoning and a pinch of salt.","Heat the oil in a large pan and cook the chicken over medium-high heat for 6–8 min until browned and cooked through. Set it aside.","Turn the heat down, add the garlic and fry for 30 seconds. Stir the cornflour into 200 ml of the milk, then pour it in with the stock and stir until it thickens.","Stir in the parmesan and herbs, put the chicken back in and warm it through.","Drain the potatoes and mash them with the light butter and the last 100 ml of milk. Season to taste.","Split into 4 boxes. Keeps 3–4 days in the fridge."],
+  note:"Protein milk, light butter and parmesan keep it creamy for far fewer calories than cream."}];
+function allRecipes(){const mine=recipes();
+  const out=RECIPES.map(b=>{const m=mine.find(x=>x.id===b.id);return Object.assign({},b,m||{},{ing:m&&Array.isArray(m.ing)&&m.ing.length?m.ing:b.ing,steps:m&&Array.isArray(m.steps)&&m.steps.length?m.steps:b.steps,time:(m&&m.time)||b.time,b:1,mi:m?mine.indexOf(m):-1});});
+  mine.forEach((m,i)=>{if(!RECIPES.some(b=>b.id===m.id))out.push(Object.assign({},m,{mi:i}));});return out;}
+const openRec=new Set();
+function recipesHtml(){
+  const R=allRecipes(),S=store.settings;
+  let h=`<h2 class="sec-title">Recipes</h2><p class="note" style="margin:-4px 0 10px">Recipes also show up as options under Lunch and Evening. Tap one for ingredients and steps.</p>`;
+  h+=R.map(r=>{const open=openRec.has(r.id);return `<div class="card recipe"><button type="button" class="rechd" data-act="recopen" data-id="${esc(r.id)}" aria-expanded="${open}"><span><strong>${esc(r.n)}</strong><small>${fmt(num(r.k))} kcal · ${Math.round(num(r.p))} g protein per serving · makes ${esc(r.s)}${r.time?" · "+esc(r.time):""}</small></span>${IC.chev}</button>
+    ${open?`<div class="recbody">${(r.ing||[]).length?`<p class="lbl">Ingredients, for ${esc(r.s)} servings</p><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}${(r.steps||[]).length?`<p class="lbl">Method</p><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:""}${r.note?`<p class="note">${esc(r.note)}</p>`:""}
+    <div class="pair"><button type="button" class="btn" data-act="reclog" data-id="${esc(r.id)}">Log 1 serving today</button>${r.mi>=0?`<button type="button" class="btn ghost" data-act="recedit" data-i="${r.mi}">Edit</button>`:`<button type="button" class="btn ghost" data-act="reccopy" data-id="${esc(r.id)}">Make my own copy</button>`}</div>
+    ${r.mi>=0&&!r.b?`<button type="button" class="linkbtn" style="color:var(--red)" data-act="rmrecipe" data-i="${r.mi}">Delete recipe</button>`:""}</div>`:""}</div>`;}).join("");
+  h+=`<details class="card addrec"><summary>Add your own recipe</summary>
+    <input class="field" id="rN" style="margin-top:10px" placeholder="Recipe name" aria-label="Recipe name">
+    <div class="qa" style="margin-top:8px"><input class="field" id="rK" inputmode="numeric" placeholder="kcal each" aria-label="Calories per serving"><input class="field" id="rP" inputmode="decimal" placeholder="protein g" aria-label="Protein per serving"><input class="field" id="rS" inputmode="numeric" placeholder="servings" aria-label="Number of servings"></div>
+    <textarea class="field area" id="rI" style="margin-top:8px" placeholder="Ingredients, one per line" aria-label="Ingredients"></textarea>
+    <textarea class="field area" id="rM" style="margin-top:8px" placeholder="Steps, one per line" aria-label="Method"></textarea>
+    <button class="btn" data-act="addrecipe">Add recipe</button>
+    <p class="note">Not sure of the calories? Build it with the food calculator above first, then copy the totals here.</p></details>`;
+  if(S.halal)h+=`<p class="note">Buy halal-certified meat for these, and check sauces and stock for alcohol or gelatin.</p>`;
+  return h;
+}
+const lines=v=>String(v||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
 function ensureRecipes(){if(!Array.isArray(store.settings.recipes))store.settings.recipes=[];return store.settings.recipes;}
 function supps(){return Array.isArray(store.settings.supps)?store.settings.supps:(store.settings.fresh?[]:DEFAULT_SUPPS);}
 function ensureSupps(){if(!Array.isArray(store.settings.supps))store.settings.supps=supps().slice();return store.settings.supps;}
@@ -1803,7 +2007,7 @@ $("panel").addEventListener("click",e=>{
   else if(act==="addrecipe"){
     const n=$("rN").value.trim(),kc=num($("rK").value),pr=num($("rP").value),sv=Math.round(num($("rS").value))||1;
     if(!n){$("rN").focus();return;} if(!(kc>0)){$("rK").focus();return;}
-    ensureRecipes().push({id:Date.now().toString(36),n,k:kc,p:pr,s:sv});persist("settings");renderEat();
+    const id=Date.now().toString(36);ensureRecipes().push({id,n,k:kc,p:pr,s:sv,ing:lines($("rI").value),steps:lines($("rM").value)});openRec.add(id);persist("settings");renderEat();toast("Recipe added");
   }else if(act==="rmrecipe"){ensureRecipes().splice(+b.dataset.i,1);persist("settings");renderEat();}
   else if(act==="view"){store.settings.spendView=b.dataset.v;persist("settings");renderSpend();}
   else if(act==="bulk"){const c=ensureChicken();c.bulk=!c.bulk;persist("settings");renderSpend();}
@@ -2145,8 +2349,10 @@ function editSupp(i){
 }
 function editRecipe(i){
   const list=ensureRecipes(),r=list[i];if(!r)return;
-  openSheet("Edit recipe",fld("Name","sN",r.n)+`<div class="pair">${fld("kcal per serving","sK",r.k,"numeric")}${fld("Protein per serving (g)","sP",r.p,"decimal")}</div>`+fld("Servings","sS",r.s,"numeric")+fld("Note (optional)","sD",r.note||""),
-    [{label:"Save",fn:()=>{const kc=num(sv("sK"));if(!(kc>0)||!sv("sN"))return false;const u=snap(["settings"]);r.n=sv("sN");r.k=kc;r.p=num(sv("sP"));r.s=Math.max(1,Math.round(num(sv("sS")))||1);r.note=sv("sD");persist("settings");renderEat();toast("Recipe updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
+  const B=RECIPES.find(x=>x.id===r.id)||{},ing=(r.ing&&r.ing.length?r.ing:B.ing)||[],stp=(r.steps&&r.steps.length?r.steps:B.steps)||[];
+  openSheet("Edit recipe",fld("Name","sN",r.n)+`<div class="pair">${fld("kcal per serving","sK",r.k,"numeric")}${fld("Protein per serving (g)","sP",r.p,"decimal")}</div>`+fld("Servings","sS",r.s,"numeric")+
+    `<label class="sfld"><span class="lbl">Ingredients, one per line</span><textarea class="field area" id="sI">${esc(ing.join("\n"))}</textarea></label><label class="sfld"><span class="lbl">Steps, one per line</span><textarea class="field area" id="sM">${esc(stp.join("\n"))}</textarea></label>`+fld("Note (optional)","sD",r.note||""),
+    [{label:"Save",fn:()=>{const kc=num(sv("sK"));if(!(kc>0)||!sv("sN"))return false;const u=snap(["settings"]);r.n=sv("sN");r.k=kc;r.p=num(sv("sP"));r.s=Math.max(1,Math.round(num(sv("sS")))||1);r.note=sv("sD");r.ing=lines(sheetEl.querySelector("#sI").value);r.steps=lines(sheetEl.querySelector("#sM").value);persist("settings");renderEat();toast("Recipe updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function editMeal(slotId,opt){
   if(opt.startsWith("r:")){const i=recipes().findIndex(r=>"r:"+r.id===opt);if(i>=0)editRecipe(i);return;}
@@ -2432,6 +2638,13 @@ $("panel").addEventListener("click",e=>{
     persist("settings");renderTrain();if(a==="rtadd"){const inp=$(kind==="w"?"rtW":"rtS");if(inp)inp.focus();}}
 });
 $("panel").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches('.exttl[data-act="exmenu"]')){e.preventDefault();e.target.click();}});
+$("panel").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b||tab!=="eat")return;const a=b.dataset.act;
+  if(a==="recopen"){const id=b.dataset.id;if(openRec.has(id))openRec.delete(id);else openRec.add(id);renderEat();}
+  else if(a==="reclog"){const r=allRecipes().find(x=>x.id===b.dataset.id);if(!r)return;const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:r.n+", 1 serving",k:Math.round(num(r.k)),p:Math.round(num(r.p))});persist("day-"+k);renderEat();toast("Logged 1 serving of "+r.n,u);}
+  else if(a==="recedit")editRecipe(+b.dataset.i);
+  else if(a==="reccopy"){const r=RECIPES.find(x=>x.id===b.dataset.id);if(!r)return;ensureRecipes().push({id:r.id,n:r.n,k:r.k,p:r.p,s:r.s,ing:r.ing.slice(),steps:r.steps.slice(),note:r.note});persist("settings");renderEat();toast("Saved your own copy. Change anything with Edit");}
+});
 // ---------- Experience level and split ----------
 const LEVELS=[["new","New to the gym","Less than 6 months. You'll get a ready-made plan, beginner tips and suggested starting weights."],
   ["some","Some experience","6 months to 2 years. Start from a suggested plan, or from an empty one."],
@@ -2578,28 +2791,34 @@ $("panel").addEventListener("change",e=>{const t=e.target;if(t.dataset&&t.datase
 // ---------- Guide ----------
 function guideHtml(){
   const ua=navigator.userAgent||"",ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),android=/Android/.test(ua);
-  const sec=(t,b,open,tag)=>`<details${open?" open":""}><summary><span>${t}${tag?`<span class="yours">${tag}</span>`:""}</span></summary><div class="gb">${b}</div></details>`;
-  const iosB=`<ol><li>Open the app's web address in <b>Safari</b>. Chrome on iPhone works too, through the same Share menu.</li><li>Tap the <b>Share</b> button: the square with an arrow pointing up. On newer iPhones it's behind the <kbd>•••</kbd> button at the bottom right.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Leave <b>Open as Web App</b> switched on if you see it, then tap <b>Add</b>.</li></ol><p>Body Builder now opens full screen from its own icon, like a normal app.</p>`;
-  const andB=`<ol><li>Open the app's web address in <b>Chrome</b>.</li><li>Tap the <kbd>⋮</kbd> menu at the top right.</li><li>Tap <b>Add to Home screen</b> (sometimes called <b>Install app</b>), then <b>Install</b> or <b>Add</b>.</li></ol><p>Samsung Internet: tap <kbd>☰</kbd>, then <b>Add page to</b> → <b>Home screen</b>.</p>`;
-  const devs=ios?[["iPhone and iPad",iosB,"Your phone"],["Android",andB]]:android?[["Android",andB,"Your phone"],["iPhone and iPad",iosB]]:[["iPhone and iPad",iosB],["Android",andB]];
-  return `<div class="guide"><button type="button" class="btn" style="margin:0 0 12px" data-gtour>Take the tour</button>
-  ${sec("Getting started",`<ol><li>Set your daily calories and protein. If you don't know them, use <b>Calculate your targets</b> in the <b>Body</b> tab and tap <b>Use as my daily targets</b>.</li><li>On the <b>Train</b> tab, tap <b>Edit workout and schedule</b> to build your own split, or keep the sample one.</li><li>In the <b>Eat</b> tab, remove the sample meals you don't eat and add your own.</li></ol><p>Use <kbd>‹</kbd> and <kbd>›</kbd> at the top to move between days. On another day, tap <b>Back to today</b> under the date. Everything saves as you type.</p>`,true)}
-  ${sec("Logging a workout",`<ul><li>Each exercise shows its sets. Type the <b>kg</b> and <b>reps</b>, then tap <kbd>✓</kbd> when the set is done.</li><li><b>+ Set</b> and <b>+ Drop set</b> add rows. Tap a set's number to switch it between a normal set and a drop set.</li><li>Drag <kbd>⋮⋮</kbd> to move a set up or down.</li><li><b>Last time</b> shows what you did in that exercise before. When you hit the top of the rep range on every set, it tells you to add weight.</li><li><b>How to and notes</b> shows the movement from the side (and from the front where it helps), which muscles it works, form cues and a box for your own notes, like seat height.</li><li>For bodyweight exercises the kg box is for <i>extra</i> weight, so leave it empty for plain pushups.</li></ul>`)}
-  ${sec("Swiping, swapping and removing",`<ul><li>Swipe a <b>set</b> to the left to delete it (red). To swap the exercise, tap ⋯ next to its name.</li><li>Swipe a <b>food, purchase or meal</b> to the right to edit it, or to the left to delete it.</li><li>The <kbd>⋯</kbd> next to an exercise name lets you swap it or remove it just for today.</li><li>Deleted something by mistake? Tap <b>Undo</b> in the message at the bottom.</li></ul>`)}
-  ${sec("Rest timer",`<ul><li>When you tick a set, a timer starts at the bottom with the recommended rest for that exercise.</li><li>Tap the clock to pause, <b>−15</b> or <b>+15</b> to adjust, <kbd>✕</kbd> to skip. It beeps when rest is over.</li><li>Before a drop set, and between the exercises in a superset, it tells you to go straight on instead.</li><li>Tap the <b>⏱ time</b> under any exercise to set your own rest time for it.</li><li>Stretches with a hold time have a <b>▶</b> button for a hold timer.</li><li>Turn the auto-start, beep or keep-screen-on off in Settings → Rest timer.</li></ul><p>On iPhone the beep can't play while the screen is locked, so keep <b>Keep the screen on</b> switched on, and check the silent switch.</p>`)}
-  ${sec("Supersets",`<p>In <b>Edit workout and schedule</b>, switch on <b>Superset with next</b> for an exercise. It joins with the one below and shows as one card, logged round by round: A1, B1, then rest, then A2, B2. Use <b>+ Round</b> for an extra round.</p>`)}
-  ${sec("Editing your workouts",`<ul><li><b>Edit workout and schedule</b> lets you rename the day, add exercises from the library (search by name or muscle, grouped into Chest, Back, Shoulders, Biceps and more), change sets and reps, reorder, add a drop set or make supersets.</li><li>You can also create a new workout day, choose which workout falls on which weekday, and add your own exercise if it isn't in the library.</li><li>The dropdown <b>Workout for this day</b> changes just one day, for example if you swap Legs and Pull.</li></ul>`)}
-  ${sec("Warm-up and stretches",`<p>Above the workout is a short warm-up, and below it are stretches, split into sections. Tick each one as you go. <b>How to</b> shows the muscles and the steps.</p>`)}
-  ${sec("Eat tab",`<ul><li>Pick a meal for breakfast, lunch, snack and dinner, and add extras. The bar at the top shows calories and protein against your targets.</li><li><b>Food calculator</b>: choose an ingredient (meat, rice, vegetables and more), type the grams, and see its calories, protein, carbs and fat. <b>Add to today</b> logs it.</li><li><b>Meal builder</b>: add several ingredients with <b>Add to meal builder</b>, then log the whole meal or save it as one of your meals.</li><li>Missing an ingredient? Add it from its label, per 100 g.</li><li>Supplements are ticked off here too.</li></ul>`)}
-  ${sec("Body tab",`<ul><li>Log your morning weight. The weekly average matters more than any single day, since water can move it 1–2 kg.</li><li><b>Calculate your targets</b> works out calories and protein from your sex, age, height, weight, activity and goal (lose, keep or gain).</li></ul>`)}
-  ${sec("Spend tab",`<ul><li>Switch between <b>Weekly</b>, <b>2 weeks</b> and <b>Monthly</b>.</li><li>Add products with the store you buy them in, the price and how long they last. That can be days, pack size plus grams per day, or packs per week. The app works out the cost for each period.</li><li>To log a purchase, tap the store, then the product, or type a receipt total.</li><li>The shopping list is grouped by store.</li></ul>`)}
-  ${sec("History",`<p>Shows past days, so you can look back at what you lifted and ate. Tap a day to open it.</p>`)}
-  ${sec("Settings",`<p>The last tab in the tab bar. Light or dark mode, background, accent colour, a colour for each workout day, the tab bar (reorder or hide tabs), currency, kg or lb, rest timer options and backups. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`)}
-  <h3 style="margin:16px 0 8px;font-size:22px">Add it to your home screen</h3>
-  <p class="note" style="margin-top:0">Then it opens full screen from its own icon, like a normal app, and works without internet once loaded.</p>
-  ${devs.map(d=>sec(d[0],d[1],!!d[2],d[2])).join("")}
-  ${sec("Where your data is saved",`<p>Everything is saved on this phone or browser only. Nobody else can see it, and everyone who uses the app has their own separate data. Use <b>Download backup</b> in Settings now and then, and to move to a new phone.</p>`)}
-  </div>`;
+  let n=0;const ch=(t,b)=>`<details><summary><span><span class="chn">${++n}</span>${t}</span></summary><div class="gb">${b}</div></details>`;
+  const iosB=`<ol><li>Open the app's web address in <b>Safari</b>. Chrome on iPhone works too, through the same Share menu.</li><li>Tap <b>Share</b>: the square with an arrow pointing up. On newer iPhones it's behind <kbd>•••</kbd> at the bottom right.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Leave <b>Open as Web App</b> on if you see it, then tap <b>Add</b>.</li></ol>`;
+  const andB=`<ol><li>Open the app's web address in <b>Chrome</b>.</li><li>Tap <kbd>⋮</kbd> at the top right.</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b>, then confirm.</li></ol><p>Samsung Internet: <kbd>☰</kbd> → <b>Add page to</b> → <b>Home screen</b>.</p>`;
+  let h=`<div class="guide"><button type="button" class="btn" style="margin:0 0 12px" data-gtour>Take the tour again</button>
+  <p class="gtitle">Using the app</p>`;
+  h+=ch("Getting started",`<p>Setup asks for your details to work out your calories and protein, then your gym experience, then your weekly split. Change any of it later: targets in <b>Body</b>, your split with <b>Edit</b> on the Train tab, and your experience level in <b>Settings → Training</b>.</p><p>Use <kbd>‹</kbd> and <kbd>›</kbd> at the top to move between days, or tap a circle in the week strip. Everything saves as you type.</p>`);
+  h+=ch("Train: logging a workout",`<ul><li>Type the weight and reps, then tap <kbd>✓</kbd>. That starts the rest timer.</li><li>Tap <kbd>⌄</kbd> next to a set to see what you did on that set last time, and your best.</li><li><b>+ Set</b> and <b>+ Drop set</b> add rows. Tap a set's number to switch it between a normal set and a drop set. Drag <kbd>⋮⋮</kbd> to reorder.</li><li>Swipe a set left to delete it. Deleted something by mistake? Tap <b>Undo</b>.</li><li>Beat your best and you'll see a <b>New record</b> message. Once you've logged a set, a summary shows your sets, total weight and time.</li></ul>`);
+  h+=ch("Train: exercise options",`<ul><li><b>Tap an exercise's name</b> to swap it (today or every time), remove it for today, open the how-to, add a note, pick a rep style, or use the plate calculator for barbell lifts.</li><li>The <b>eye</b> shows how to do it: the movement, muscles worked and form tips. The <b>pen</b> adds a note, like seat height.</li><li>The swap list is grouped by muscle, with the same muscle group first.</li><li>New and Some experience see a suggested starting weight the first time, and a reminder to focus on form.</li></ul>`);
+  h+=ch("Train: your plan and layout",`<ul><li><b>Edit</b>, at the top right under the week, opens everything you can change: the order of the sections on the page (so the warm-up can come after), which sections show, your own warm-ups and stretches, the exercises in each workout, and your weekly schedule.</li><li><b>Change your weekly split</b> lets you pick a template, set each day, add custom or Dynamic days, and choose how long the split runs.</li><li>On a <b>Dynamic</b> day you pick which workout to do on the day itself.</li><li><b>Workout for this day</b> swaps just one day.</li></ul>`);
+  h+=ch("Rest timer",`<p>Starts by itself when you tick a set, with the right rest for that exercise and rep style. Tap the clock to pause, <b>−15</b>/<b>+15</b> to adjust, <kbd>✕</kbd> to skip. Before a drop set or between exercises in a superset it tells you to keep going. Tap the <b>⏱</b> time on any exercise to set your own. Stretches have a <b>▶</b> hold timer.</p><p>On iPhone the beep can't play while the screen is locked, so keep <b>Keep the screen on</b> switched on in Settings → Rest timer, and check the silent switch.</p>`);
+  h+=ch("Eat",`<ul><li>The bar at the top shows calories and protein against your targets.</li><li>Tick what you ate for each meal. Swipe a meal right to edit it, left to remove it.</li><li>The <b>food calculator</b> works out any ingredient by weight. Use the <b>meal builder</b> to combine several and save the result as a meal.</li><li><b>Recipes</b> show ingredients and steps. Tap <b>Log 1 serving today</b> after eating one, or add your own.</li></ul>`);
+  h+=ch("Body",`<ul><li>Weigh in each morning. The <b>Progress</b> chart shows each weigh-in and the 7-day average. Tap the chart to see the numbers.</li><li><b>Calories burned</b> estimates today's total and what your training has burned since you started.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li><b>Sets per muscle</b>, <b>Strength</b>, <b>Measurements</b>, <b>Progress photos</b> and <b>Notes</b> sit further down.</li></ul>`);
+  h+=ch("Spend and History",`<p><b>Spend</b> works out what your food and supplements cost per week, two weeks or month, grouped by store. Add products with how long they last, then tap a store and a product to log a purchase.</p><p><b>History</b> shows a month at a glance. Tap any day to open it.</p>`);
+  h+=ch("Settings and the tab bar",`<p>Theme and colours, the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units and currency, rest timer, backups, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
+  h+=ch("Add it to your home screen",`${(ios?[["iPhone and iPad",iosB],["Android",andB]]:[["Android",andB],["iPhone and iPad",iosB]]).map(([t,b])=>`<h4>${t}</h4>${b}`).join("")}`);
+  h+=ch("Your data and backups",`<p>${isLocalMode()?"Everything is saved on this phone or browser only. Nobody else can see it, and everyone who uses the app has their own data. Use <b>Settings → Backup</b> now and then, and to move to a new phone. Progress photos stay on the phone and aren't in backups.":"Your data is saved to your Claude account and syncs between your devices."}</p>`);
+  h+=`<p class="gtitle">Training basics</p>`;
+  h+=ch("How muscle grows",`<p>Muscle grows when you train it hard enough to send a signal, eat enough protein to repair it, and recover between sessions. Training is the signal, food and sleep do the building. You don't grow in the gym, you grow in the days after.</p><p>For most people, training each muscle about twice a week with 10–20 hard sets in total gives the best results.</p>`);
+  h+=ch("Sets, reps and rest",`<ul><li>A <b>rep</b> is one movement. A <b>set</b> is a group of reps done without stopping.</li><li>Muscle grows across a wide range, from about 5 to 30 reps, as long as the set ends close to failure.</li><li>Rest 2–3 minutes after heavy compound lifts like squats and presses, and 60–90 seconds after smaller exercises. Resting too little makes the next set weaker.</li><li>Stop most sets with 1–3 reps left <b>in the tank</b>. Going all the way to failure on every set adds fatigue without much extra benefit.</li></ul>`);
+  h+=ch("Rep styles: light, medium and heavy",`<ul><li><b>Heavy (4–6 reps)</b> builds the most strength. It needs longer rest and more care with form.</li><li><b>Medium (8–12)</b> is the sweet spot for muscle growth for most exercises.</li><li><b>Light (12–20)</b> suits isolation work like lateral raises, and is easier on the joints.</li></ul><p>A good plan mixes them: heavier for big lifts, lighter for small muscles.</p>`);
+  h+=ch("Progressive overload",`<p>To keep improving, slowly ask more of your muscles: one more rep, a little more weight, or one more set. A simple method is <b>double progression</b>. Pick a rep range like 8–12. When you reach 12 on every set, add the smallest weight step and work back up from 8.</p><p>The app tells you when you've hit the top of the range, and for calisthenics suggests the next harder variation.</p>`);
+  h+=ch("Warming up and form",`<ul><li>Start with 3–5 minutes of light movement, then a few <b>ramp-up sets</b> of your first exercise, for example 50% and then 75% of your working weight.</li><li>Good form means a full, controlled range of motion. Lower the weight in 2–3 seconds and don't bounce.</li><li>If your form breaks down, the weight is too heavy. Lower it. Ego lifting is the fastest way to get injured.</li><li>Sharp or joint pain is a stop sign. Normal muscle burn and soreness the next day are fine.</li></ul>`);
+  h+=ch("Supersets and drop sets",`<p>A <b>superset</b> is two exercises back to back, then rest. It saves time and works best for opposite or unrelated muscles, like biceps and triceps.</p><p>A <b>drop set</b> means lowering the weight by about 25–30% straight after your last set and going to failure again. It adds a lot of work in little time. Use it on machines and isolation exercises, not heavy barbell lifts.</p>`);
+  h+=ch("Calisthenics",`<p>Bodyweight training uses <b>progressions</b> instead of adding weight: you move to a harder version of the exercise. For example, knee pushups → pushups → diamond pushups → archer pushups. When you can do the top of the rep range on every set, move up a step. The app shows a <b>Move up</b> button when you're ready.</p>`);
+  h+=ch("Recovery and sleep",`<ul><li>Aim for 7–9 hours of sleep. Muscle repair and hormone release happen mostly while you sleep.</li><li>Give a muscle about 48 hours before training it hard again.</li><li>Every 6–10 weeks, an easier <b>deload</b> week (about half the sets) helps you come back stronger.</li></ul>`);
+  h+=ch("Calories, protein and your goal",`<ul><li>To <b>lose fat</b>, eat a bit less than you burn: 300–500 kcal under maintenance is about 0.3–0.5 kg a week. Keep protein high and keep lifting so the weight you lose is fat, not muscle.</li><li>To <b>build muscle</b>, eat 200–300 kcal over maintenance. Gaining faster than about 0.25–0.5 kg a week mostly adds fat.</li><li><b>Protein</b>: about 1.6–2.2 g per kg of body weight a day, at the higher end when cutting, spread over 3–5 meals.</li><li>The calorie calculator is a starting point. After 2–3 weeks, your weight trend shows your real maintenance, and the Body tab works it out for you.</li></ul>`);
+  h+=ch("Tracking your weight properly",`<p>Your weight can swing 1–2 kg from day to day because of water, salt, carbs and digestion. Weigh in every morning after the bathroom, before eating, and judge progress by the <b>weekly average</b>. Measurements and photos help too, because you can lose fat and gain muscle at the same weight.</p>`);
+  return h+`</div>`;
 }
 function openGuide(){openTab("settings");setTimeout(()=>{const h=$("helpsec");if(h)h.scrollIntoView();},30);}
 bothOn("click",e=>{if((sheetEl._kind==="guide"||inSettings(e))&&e.target.closest("[data-gtour]")){closeSheet();setTimeout(tourStart,150);}});
