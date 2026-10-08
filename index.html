@@ -1152,9 +1152,7 @@ function supersetCard(group,ctx){
 function renderTrain(){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],day=store.days[k]||{},v2=k>=NEWPLAN;
   let h=`<section style="--c:${P.color};--on:${P.on}">`;
-  if(showWelcome())h+=`<div class="card welcome"><h2 style="font-size:24px">Welcome to Building Blocks</h2><p class="note" style="margin:6px 0 10px">This starts with a sample 5-day plan and meal plan. Set your daily targets here, or work them out with the calculator in the Body tab. Then tap <b>Edit workout</b> to build your own split, and remove the sample meals in the Eat tab. Tap <b>?</b> at the top any time for the full guide.</p>
-    <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
-    <button class="btn" data-act="welcome">Got it</button></div>`;
+  if(showWelcome()){h+=welcomeHtml()+`</section>`;$("panel").innerHTML=h;return;}
   h+=`<div class="dayhead"><h2>${esc(P.name)}</h2><p>${p==="rest"?"Recovery day. Aim for 7–10k steps and an easy stretch.":esc(P.rest)}</p>
   <label class="swap">Workout for this day <select data-act="plan">${Object.keys(PL).map(id=>`<option value="${id}"${id===p?" selected":""}>${esc(PL[id].name)}</option>`).join("")}</select></label>
   ${v2&&!editPlan?`<button class="linkbtn" data-act="editplan">Edit workout and schedule</button>`:""}</div>`;
@@ -1540,6 +1538,14 @@ $("panel").addEventListener("click",e=>{
     const day=ensureDay(sel);delete day.plan;persist("day-"+sel);persist("settings");editPlan=false;render();
   }
   else if(act==="welcome"){S.welcomed=true;persist("settings");renderTrain();}
+  else if(act==="welcomeskip"||act==="welcomecalc"){welcomeManual=act==="welcomeskip";renderTrain();}
+  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;persist("settings");render();toast("You're set. Tap ? at the top for a quick guide");}
+  else if(act==="welcomego"){const pf=Object.assign({sex:"m",act:1.55,goal:-550},S.profile||{});
+    if(!S.profile&&latestWeight())pf.w=latestWeight();
+    const r=calcTargets(pf);if(!r){toast("Fill in your age, height and weight");const f=document.querySelector('.welcome [data-pf="a"]');if(f&&!f.value)f.focus();return;}
+    S.profile=pf;S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;S.welcomed=true;
+    const t=todayKey();if(!latestWeight()&&num(pf.w)>0){ensureDay(t).weight=String(pf.w);persist("day-"+t);}
+    persist("settings");render();toast("Your targets: "+fmt(S.kcal)+" kcal and "+S.protein+" g protein a day. Tap ? for a quick guide");}
   else if(act==="rmmeal"){
     const id=b.dataset.opt;
     if(id.startsWith("m:")){S.myMeals=myMeals().filter(x=>"m:"+x.id!==id);}
@@ -1662,14 +1668,28 @@ function targetsOut(pf){
 }
 function targetsCalcHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
-  return `<h2 class="sec-title">Calculate your targets</h2><div class="card tcalc">
-  <div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label><label><span class="lbl">Age</span><input class="field" data-pf="a" inputmode="numeric" value="${esc(pf.a||"")}"></label></div>
+  return `<h2 class="sec-title">Calculate your targets</h2><div class="card tcalc">${profileFields(pf)}
+  <button class="btn" data-act="usetargets">Use as my daily targets</button></div>`;
+}
+function profileFields(pf){
+  return `<div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label><label><span class="lbl">Age</span><input class="field" data-pf="a" inputmode="numeric" value="${esc(pf.a||"")}"></label></div>
   <div class="pair" style="margin-top:8px"><label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="numeric" value="${esc(pf.h||"")}"></label><label><span class="lbl">Weight (kg)</span><input class="field" data-pf="w" inputmode="decimal" value="${esc(pf.w||"")}"></label></div>
   <label class="sfld"><span class="lbl">Activity</span><select class="field" data-pf="act">${ACTS.map(([v,l])=>`<option value="${v}"${num(pf.act)===v?" selected":""}>${l}</option>`).join("")}</select></label>
   <label class="sfld"><span class="lbl">Goal</span><select class="field" data-pf="goal">${GOALS.map(([v,l])=>`<option value="${v}"${num(pf.goal)===v?" selected":""}>${l}</option>`).join("")}</select></label>
   <label class="sfld"><span class="lbl">Body fat % (optional, makes it more accurate)</span><input class="field" data-pf="bf" inputmode="decimal" value="${esc(pf.bf||"")}"></label>
-  <div id="tOut" style="margin-top:12px">${targetsOut(pf)}</div>
-  <button class="btn" data-act="usetargets">Use as my daily targets</button></div>`;
+  <div id="tOut" style="margin-top:12px">${targetsOut(pf)}</div>`;
+}
+let welcomeManual=false;
+function welcomeHtml(){
+  const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
+  if(welcomeManual)return `<div class="card welcome"><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
+    <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
+    <button class="btn" data-act="welcomeman">Save and start</button><button class="linkbtn" style="margin-top:10px" data-act="welcomecalc">Work them out from my details instead</button></div>`;
+  return `<div class="card welcome tcalc"><h2 style="font-size:26px">Welcome to Building Blocks</h2>
+    <p class="note" style="margin:6px 0 12px">First, a few details so the app can work out how much you should eat each day. They stay on your device.</p>
+    ${profileFields(pf)}
+    <button class="btn" data-act="welcomego">Save and start</button>
+    <button class="linkbtn" style="margin-top:10px" data-act="welcomeskip">I already know my targets</button></div>`;
 }
 // ---------- Swipe, drag, sheets, undo ----------
 const toastEl=document.createElement("div");toastEl.id="toast";toastEl.setAttribute("role","status");toastEl.setAttribute("aria-live","polite");document.body.appendChild(toastEl);
