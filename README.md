@@ -1,4 +1,4 @@
-# Building Blocks
+# Body Builder
 
 A training, food and budget tracker that runs in the browser and can be added to your phone's home screen.
 
