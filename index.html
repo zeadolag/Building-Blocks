@@ -293,6 +293,8 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.45)}
 .logo{display:block;width:30px;height:30px}
 .logo svg,.logo img{display:block;border-radius:7px}
 .appicons{display:flex;gap:8px}
+body.onboarding .top,body.onboarding .week,body.onboarding .tabs{display:none}
+body.onboarding .welcome{margin-top:12px}
 #help{font:700 19px/1 "Barlow Condensed",Arial,sans-serif}
 .guide details{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:0 0 8px}
 .guide summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:44px}
@@ -1010,7 +1012,7 @@ function lastSession(id,k){
 function shortDate(k){return parseKey(k).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});}
 
 // ---------- Render ----------
-function render(){applyTheme();syncCustomLib();renderHeader();renderWeek();renderTabs();
+function render(){applyTheme();const onb=showWelcome();document.body.classList.toggle("onboarding",onb);if(onb){tab="train";sel=todayKey();}syncCustomLib();renderHeader();renderWeek();renderTabs();
   if(tab==="train")renderTrain();else if(tab==="eat")renderEat();else if(tab==="spend")renderSpend();else if(tab==="hist")renderHistory();else renderBody();}
 function renderHeader(){
   const d=parseKey(sel),t=todayKey();
