@@ -395,6 +395,20 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.6)}
 .histday .hd{font-weight:500}
 #rt:not(.show){visibility:hidden;transition:transform .22s,visibility 0s .22s}
 .welcome{border-color:var(--line)}
+.stepl{margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.notice{border-color:var(--line)}
+.notice strong{display:block;font-weight:600}
+.tplgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tpl{border:1px solid var(--line);background:transparent;border-radius:var(--radius);padding:10px 12px;text-align:left;box-shadow:var(--shadow);min-height:64px}
+.tpl strong{display:block;font-weight:500;font-size:14px;line-height:1.25}
+.tpl small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.tpl[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.dynrow{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;margin:0 -2px;-webkit-overflow-scrolling:touch}
+.dynbtn{flex:0 0 42%;scroll-snap-align:start;border:1px solid var(--line);background:transparent;border-radius:12px;padding:12px;text-align:left;box-shadow:var(--shadow)}
+.dynbtn .dot{display:block;width:12px;height:12px;border-radius:50%;background:var(--c);margin-bottom:8px}
+.dynbtn strong{display:block;font-weight:600}
+.dynbtn small{color:var(--muted);font-size:12px}
+.toggle.radio{margin-bottom:8px}
 /* ---- tab island ---- */
 .island{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;gap:2px;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--surface) 80%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40}
 .itab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;border-radius:999px;padding:7px 2px 6px;color:var(--muted);font-size:11px;font-weight:500;line-height:1.1}
@@ -488,6 +502,10 @@ const PLANS2={
   legs:{name:"Legs",color:"var(--black)",on:"var(--paper)",
     rest:"Rest 2–3 min between exercises. Ab superset, then bodyweight squats to finish.",
     ex:[["legpress","Leg press",2,"8–12","",1],["bss","Bulgarian split squat",2,"8–10 per leg"],["hipthrust","Hip thrust",3,"8–12"],["backext","45° back extension",2,"12–15","bw"],["legext","Leg extension",2,"10–15","",1],["slegcurl","Seated leg curl",2,"10–12","",1],["abd","Abductor machine",2,"12–15"],["scalf","Seated calf raise",2,"12–15","",1],["ccrunch","Cable crunch",3,"10–15","",0,null,"core2"],["chop","Cable woodchopper",3,"10–12 per side","",0,null,"core2"],["bwsquat","Bodyweight squats to failure",1,"max","bw"]]},
+  full:{name:"Full body",color:"#7C3AED",on:"#fff",
+    rest:"Rest about 2 min between exercises. Leave 2–3 reps in the tank while you learn the movements.",
+    ex:[["squat","Back squat",3,"8–10"],["bench","Bench press",3,"8–10"],["csrow","Chest-supported row",3,"8–12"],["rdl","Romanian deadlift",2,"8–10"],["pulldown","Lat pulldown",2,"10–12"],["ohp","Overhead press",2,"8–10"],["splank","Side plank",2,"20–30 s per side","time"]]},
+  dyn:{name:"Dynamic",color:"var(--muted)",on:"#fff",rest:"Choose which workout to do today.",ex:[]},
   rest:{name:"Rest",color:"var(--line)",on:"var(--ink)",rest:"",ex:[]}
 };
 const WEEK2=["rest","upper","lower","run","push","pull","legs"];
@@ -503,6 +521,7 @@ const WARMUP={
   upper:["Walk to the gym","Arm circles, 10 each way","Band pull-aparts or light face pulls, 15","Scapular push-ups, 10","2–3 light warm-up sets of bench press"],
   lower:["Walk to the gym","Leg swings, front-back and side to side, 10 each","Bodyweight squats, 10","Walking lunges with a twist, 6 per leg","Glute bridges, 10","2–3 light warm-up sets of squats"],
   run:["Brisk walk, 3–5 min","Leg swings, 10 each","Walking lunges, 6 per leg","High knees and butt kicks, 20 s each"],
+  full:["Brisk walk, 3–5 min","Arm circles, 10 each way","Leg swings, 10 each","Bodyweight squats, 10","2–3 light warm-up sets of squats"],
   push:["Walk to the gym","Arm circles, 10 each way","Band pull-aparts, 15","Scapular push-ups, 10","1–2 light warm-up sets of incline press"],
   pull:["Walk to the gym","Arm circles, 10 each way","Dead hang, 20–30 s","Scapular pull-ups, 8","1–2 light warm-up sets of lat pulldown"],
   legs:["Walk to the gym","Leg swings, 10 each","Hip circles, 10 each way","Bodyweight squats, 10","Glute bridges, 10","1–2 light warm-up sets of leg press"]
@@ -511,6 +530,7 @@ const STRETCH={
   upper:["Doorway chest stretch","Lat stretch","Cross-body shoulder stretch","Overhead triceps stretch"],
   lower:["Kneeling hip flexor stretch","Hamstring stretch","Standing quad stretch","Butterfly stretch","Calf stretch against a wall"],
   run:["Calf stretch against a wall","Standing quad stretch","Kneeling hip flexor stretch","Hamstring stretch"],
+  full:["Kneeling hip flexor stretch","Hamstring stretch","Doorway chest stretch","Lat stretch","Child's pose"],
   push:["Doorway chest stretch","Cross-body shoulder stretch","Overhead triceps stretch","Child's pose"],
   pull:["Lat stretch","Biceps stretch against a wall","Child's pose","Dead hang, 20–30 s"],
   legs:["Kneeling hip flexor stretch","Figure-four glute stretch","Standing quad stretch","Butterfly stretch","Seated calf stretch","Standing side bend"],
@@ -882,11 +902,15 @@ function plansBase(k){
   for(const [id,d] of Object.entries(c.extra||{}))out[id]=Object.assign({color:"var(--dayblue)",on:"#fff",rest:"Rest about 2 min between exercises.",ex:[]},d);
   return out;
 }
+function weekEntry(k){const c=custom();if(!Array.isArray(c.weeks))return null;let best=null;for(const e of c.weeks)if(e&&e.from<=k&&(!best||e.from>=best.from))best=e;return best;}
 function weekFor(k){
   if(k<NEWPLAN)return WEEK;
-  const w=custom().week,PL=plansFor(k);
-  return Array.isArray(w)&&w.length===7&&w.every(x=>PL[x])?w:WEEK2;
+  const c=custom(),PL=plansFor(k),ok=w=>Array.isArray(w)&&w.length===7&&w.every(x=>PL[x]);
+  const e=weekEntry(k);if(e&&ok(e.week))return e.week;
+  return ok(c.week)?c.week:WEEK2;
 }
+function setWeekDay(k,i,v){const S=store.settings,c=S.custom||(S.custom={});const e=weekEntry(k);
+  if(e){e.week=e.week.slice();e.week[i]=v;}else{c.week=weekFor(k).slice();c.week[i]=v;}}
 function ensureEditable(p){
   const c=store.settings.custom||(store.settings.custom={});
   if(PLANS2[p]){c.plans=c.plans||{};if(!c.plans[p])c.plans[p]={name:PLANS2[p].name,ex:JSON.parse(JSON.stringify(PLANS2[p].ex))};if(!Array.isArray(c.plans[p].ex))c.plans[p].ex=JSON.parse(JSON.stringify(PLANS2[p].ex));return c.plans[p];}
@@ -923,7 +947,7 @@ function renderEditPlan(k,p,P){
     <div id="libRes">${libResults()}</div>
     <div class="qa" style="margin-top:10px;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)"><input class="field" id="cxN" placeholder="Custom exercise" aria-label="Custom exercise name"><input class="field" id="cxS" inputmode="numeric" placeholder="sets" aria-label="Sets"><input class="field" id="cxR" placeholder="reps" aria-label="Reps"></div>
     <button class="linkbtn" data-act="addcustomex">Add custom exercise</button>`;
-  h+=`<p class="lbl" style="margin-top:18px">Weekly schedule</p>`+days.map((d,j)=>`<label class="wkrow"><span>${d}</span><select class="field" data-wk="${idx[j]}">${Object.keys(PL).map(id=>`<option value="${id}"${W[idx[j]]===id?" selected":""}>${esc(PL[id].name)}</option>`).join("")}</select></label>`).join("");
+  h+=`<p class="lbl" style="margin-top:18px">Weekly schedule</p><button class="btn ghost" style="margin:0 0 6px" data-act="changesplit">Change your weekly split</button>`+days.map((d,j)=>`<label class="wkrow"><span>${d}</span><select class="field" data-wk="${idx[j]}">${Object.keys(PL).map(id=>`<option value="${id}"${W[idx[j]]===id?" selected":""}>${esc(PL[id].name)}</option>`).join("")}</select></label>`).join("");
   h+=`<button class="linkbtn" data-act="newplan">Create a new workout</button>`;
   if(PLANS2[p])h+=`<button class="linkbtn" style="color:var(--red);display:block" data-act="resetplan">Reset this workout to the original</button>`;
   else h+=`<button class="linkbtn" style="color:var(--red);display:block" data-act="delplan">Delete this workout</button>`;
@@ -948,13 +972,13 @@ function renderHistory(){
     if(cm)bits.push(`${fmt(cm)} min cardio`);
     if(et.k)bits.push(`${fmt(et.k)} kcal, ${Math.round(et.p)} g protein`);
     if(day.steps)bits.push(`${fmt(day.steps)} steps`);
-    if(Number(day.weight)>0)bits.push(`${day.weight} kg`);
+    if(Number(day.weight)>0)bits.push(`${day.weight} ${U()}`);
     if(buys)bits.push(`${eur(buys)} spent`);
     rows.push(`<button class="histday" data-act="openday" data-day="${k}"><span class="hd">${parseKey(k).toLocaleDateString(undefined,{weekday:"short",day:"numeric"})}</span><span class="hb">${bits.join("<br>")}</span></button>`);
   }
   let h=`<section><div class="mnav"><button class="navbtn" data-act="hprev" aria-label="Previous month">‹</button><h2>${label}</h2><button class="navbtn" data-act="hnext" aria-label="Next month">›</button></div>`;
   h+=`<div class="card"><div class="pair"><div><span class="big">${workouts}</span> <span class="of">workouts</span></div><div><span class="big">${kcalN?fmt(kcalSum/kcalN):"–"}</span> <span class="of">avg kcal</span></div><div><span class="big">${kcalN?Math.round(protSum/kcalN):"–"}</span> <span class="of">avg g protein</span></div><div><span class="big">${eur(spent)}</span> <span class="of">spent</span></div></div>`;
-  if(weights.length>1){weights.sort((a,b)=>a.k<b.k?-1:1);const d=weights[weights.length-1].w-weights[0].w;h+=`<p class="note">Weight: ${weights[0].w} to ${weights[weights.length-1].w} ${U()} (${d<=0?"":"+"}${d.toFixed(1)} kg)</p>`;}
+  if(weights.length>1){weights.sort((a,b)=>a.k<b.k?-1:1);const d=weights[weights.length-1].w-weights[0].w;h+=`<p class="note">Weight: ${weights[0].w} to ${weights[weights.length-1].w} ${U()} (${d<=0?"":"+"}${d.toFixed(1)} ${U()})</p>`;}
   h+=`</div>`;
   h+=rows.length?`<div class="card" style="padding:4px 14px">${rows.join("")}</div>`:`<p class="empty">Nothing logged in ${label}.</p>`;
   h+=`<p class="note">Tap a day to open it.</p></section>`;
@@ -964,6 +988,8 @@ function renderHistory(){
 const GEN_WARM=["5 min light cardio or a brisk walk","Arm circles and leg swings, 10 each","1–2 light warm-up sets of your first exercise"];
 const GEN_STRETCH=["Stretch each muscle you trained, 30–45 s"];
 function showWelcome(){return (mode==="local"||migrated)&&!store.settings.welcomed;}
+function onbStage(){const S=store.settings,o=S.onb;return S.welcomed&&(o==="level"||o==="split")?o:null;}
+function afterTargets(){const S=store.settings;if(!S.level&&isLocalMode()){S.onb="level";persist("settings");render();window.scrollTo(0,0);}else{persist("settings");render();if(!S.toured)setTimeout(tourStart,350);}}
 
 const SLOTS=[
   {id:"breakfast",name:"Breakfast",opts:[{id:"smoothie",n:"Quark smoothie",d:"500 g quark, 258 g protein milk, 50 g Schoko Müsli",k:670,p:85}]},
@@ -1109,7 +1135,7 @@ function lastSession(id,k){
 function shortDate(k){return parseKey(k).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});}
 
 // ---------- Render ----------
-function render(){applyTheme();const onb=showWelcome();document.body.classList.toggle("onboarding",onb);if(onb){tab="train";sel=todayKey();}if(!TABDEF[tab])tab="train";
+function render(){applyTheme();const onb=showWelcome()||!!onbStage();document.body.classList.toggle("onboarding",onb);if(onb){tab="train";sel=todayKey();}if(!TABDEF[tab])tab="train";
   document.body.classList.toggle("tab-settings",tab==="settings");syncCustomLib();renderHeader();renderWeek();renderTabs();
   if(tab==="train")renderTrain();else if(tab==="eat")renderEat();else if(tab==="spend")renderSpend();else if(tab==="hist")renderHistory();else if(tab==="settings")renderSettings();else renderBody();
   const hn=hiddenTabNote();if(hn)$("panel").insertAdjacentHTML("afterbegin",hn);}
@@ -1270,10 +1296,19 @@ function renderTrain(){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],day=store.days[k]||{},v2=k>=NEWPLAN;
   let h=`<section style="--c:${P.color};--on:${P.on}">`;
   if(showWelcome()){h+=welcomeHtml()+`</section>`;$("panel").innerHTML=h;return;}
+  const stg=onbStage();
+  if(stg==="level"){h+=levelHtml()+`</section>`;$("panel").innerHTML=h;return;}
+  if(stg==="split"||splitOpen){if(!splitDraft)draftInit();h+=splitHtml(stg==="split")+`</section>`;$("panel").innerHTML=h;return;}
+  const sp=store.settings.split;
+  if(sp&&sp.until&&todayKey()>sp.until)h+=`<div class="card notice"><strong>Your split ended on ${shortDate(sp.until)}</strong><p class="note" style="margin:4px 0 10px">Keep going with the same week, or set up a new split.</p><div class="pair"><button class="btn ghost" style="margin:0" data-act="splitkeep">Keep it going</button><button class="btn" style="margin:0" data-act="splitnew">New split</button></div></div>`;
+  if(store.settings.presetNote)h+=`<div class="card notice"><strong>This is a suggested plan</strong><p class="note" style="margin:4px 0 10px">It was picked for your experience level. Change any exercise, any day, or the whole split whenever you like with <b>Edit workout and schedule</b>.</p><button class="btn ghost sm" data-act="presetok">Got it</button></div>`;
   h+=`<div class="dayhead"><h2>${esc(P.name)}</h2><p>${p==="rest"?"Recovery day. Aim for 7–10k steps and an easy stretch.":esc(P.rest)}</p>
   <label class="swap">Workout for this day <select data-act="plan">${Object.keys(PL).map(id=>`<option value="${id}"${id===p?" selected":""}>${esc(PL[id].name)}</option>`).join("")}</select></label>
   ${v2&&!editPlan?`<button class="linkbtn" data-act="editplan">Edit workout and schedule</button>`:""}</div>`;
   if(v2&&editPlan){h+=renderEditPlan(k,p,P)+`</section>`;$("panel").innerHTML=h;return;}
+  if(p==="dyn"){const opts=Object.keys(PL).filter(id=>!["rest","dyn"].includes(id));
+    h+=`<div class="card"><p class="lbl" style="margin-bottom:8px">Pick today's workout</p><div class="dynrow">${opts.map(id=>`<button type="button" class="dynbtn" data-act="dynpick" data-v="${id}" style="--c:${PL[id].color}"><span class="dot"></span><strong>${esc(PL[id].name)}</strong><small>${PL[id].ex.length?PL[id].ex.length+" exercises":id==="run"?"Cardio":"Empty"}</small></button>`).join("")}</div><p class="note">Scroll sideways to see them all. You can switch again with Workout for this day.</p></div></section>`;
+    $("panel").innerHTML=h;return;}
   let WU=v2?(WARMUP[p]||(P.ex.length?GEN_WARM:null)):null;if(WU&&store.settings.fresh)WU=WU.map(n=>n==="Walk to the gym"?"Brisk walk, 3–5 min":n);
   if(WU&&WU.length){
     h+=`<h2 class="sec-title" style="margin-top:0">Warm-up, before ${p==="run"?"the run":"training"}</h2><p class="note" style="margin:-4px 0 6px">About 5 minutes. Keep it moving, and save the long holds for after.</p>`;
@@ -1658,13 +1693,13 @@ $("panel").addEventListener("click",e=>{
   }
   else if(act==="welcome"){S.welcomed=true;persist("settings");renderTrain();}
   else if(act==="welcomeskip"||act==="welcomecalc"){welcomeManual=act==="welcomeskip";renderTrain();}
-  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).length)S.fresh=true;persist("settings");render();if(!S.toured)setTimeout(tourStart,350);}
+  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).length)S.fresh=true;afterTargets();}
   else if(act==="welcomego"){const pf=Object.assign({sex:"m",act:1.55,goal:-550},S.profile||{});
     if(!S.profile&&latestWeight())pf.w=latestWeight();
     const r=calcTargets(pf);if(!r){toast("Fill in your age, height and weight");const f=document.querySelector('.welcome [data-pf="a"]');if(f&&!f.value)f.focus();return;}
     S.profile=pf;S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).filter(k=>k!==todayKey()).length)S.fresh=true;
     const t=todayKey();if(!latestWeight()&&num(pf.w)>0){ensureDay(t).weight=String(pf.w);persist("day-"+t);}
-    persist("settings");render();toast("Your targets: "+fmt(S.kcal)+" kcal and "+S.protein+" g protein a day");if(!S.toured)setTimeout(tourStart,350);}
+    afterTargets();toast("Your targets: "+fmt(S.kcal)+" kcal and "+S.protein+" g protein a day");}
   else if(act==="rmmeal"){
     const id=b.dataset.opt;
     if(id.startsWith("m:")){S.myMeals=myMeals().filter(x=>"m:"+x.id!==id);}
@@ -1699,7 +1734,7 @@ $("panel").addEventListener("change",e=>{
   const t=e.target,S=store.settings;
   if(t.dataset.pp&&(t.dataset.pp==="store"||t.tagName==="SELECT")){renderSpend();return;}
   if(t.dataset.pf&&t.closest(".tcalc")&&t.tagName==="SELECT"){S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");const o=$("tOut");if(o)o.innerHTML=targetsOut(S.profile);return;}
-  if(t.dataset.wk!==undefined){const c=S.custom||(S.custom={});c.week=weekFor(sel).slice();c.week[+t.dataset.wk]=t.value;persist("settings");renderWeek();}
+  if(t.dataset.wk!==undefined){setWeekDay(sel,+t.dataset.wk,t.value);persist("settings");renderWeek();}
   else if(t.dataset.ed==="name"||t.dataset.exI!==undefined){renderTrain();renderWeek();}
 });
 
@@ -1805,10 +1840,10 @@ function profileFields(pf){
 let welcomeManual=false;
 function welcomeHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
-  if(welcomeManual)return `<div class="card welcome"><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
+  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 3</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
     <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
     <button class="btn" data-act="welcomeman">Save and start</button><button class="linkbtn" style="margin-top:10px" data-act="welcomecalc">Work them out from my details instead</button>${restoreLink()}</div>`;
-  return `<div class="card welcome tcalc"><h2 style="font-size:26px">Welcome to Body Builder</h2>
+  return `<div class="card welcome tcalc"><p class="stepl">Step 1 of 3</p><h2 style="font-size:26px">Welcome to Body Builder</h2>
     <p class="note" style="margin:6px 0 12px">First, a few details so the app can work out how much you should eat each day. They stay on your device.</p>
     ${profileFields(pf)}
     <button class="btn" data-act="welcomego">Save and start</button>
@@ -2097,21 +2132,11 @@ sheetEl.addEventListener("close",()=>{sheetEl._kind=null;});
 
 // ---------- Guided tour ----------
 const TOUR=[
-  {t:"Quick tour",x:"Here's a one-minute look around the app. Tap Next to go through it, or Skip if you'd rather explore yourself."},
-  {sel:".top",t:"Moving between days",x:"Use ‹ and › to go to other days. When you're on a different day, tap Back to today under the date."},
-  {sel:"#week",t:"Your week",x:"Each circle is a day. The colour shows which workout falls on it, and it fills up as you log. Tap a circle to jump to that day."},
-  {sel:".island",t:"Tab bar",x:"Train, Eat, Body, Spend, History and Settings. You can reorder or hide tabs in Settings."},
-  {tab:"train",sel:".dayhead",t:"Today's workout",x:"The workout planned for today and how long to rest. The dropdown swaps today's workout, and Edit workout and schedule lets you build your own split."},
-  {tab:"train",sel:".card.routine",t:"Warm-up",x:"About 5 minutes before you lift. Tick each item as you go. How to shows the steps and which muscles it loosens up."},
-  {tab:"train",sel:"article.ex .exhead",t:"Exercises",x:"Each exercise shows its sets and reps. Tap ⋯ to swap it or remove it for today. Under the name: the rest time (tap ⏱ to change it), what you lifted last time, and How to with the movement shown from the side and front."},
-  {tab:"train",sel:'article.ex .swr[data-sw="set"]',t:"Logging a set",x:"Type the kg and reps, then tap ✓. That starts the rest timer at the bottom. Swipe a set left to delete it, drag ⋮⋮ to reorder, and tap the number to make it a drop set."},
-  {tab:"eat",sel:".card.meters",t:"Eat: your targets",x:"How many calories and how much protein you've had today, against your targets."},
-  {tab:"eat",sel:"#panel .swr",t:"Meals",x:"Tick what you ate for breakfast, lunch, snack and dinner. Swipe right to edit a meal, left to remove it. Further down: a food calculator, a meal builder and your supplements."},
-  {tab:"body",sel:"#panel section > .card",t:"Body",x:"Log your morning weight here. Below it, the weekly trend shows your average, and the calculator can update your targets as your weight changes."},
-  {tab:"spend",sel:"#panel section > .card",t:"Spend",x:"What you've spent this week, two weeks or month. Below, log purchases by store and add the things you buy regularly so the app works out what they cost you."},
-  {tab:"hist",sel:"#panel section > .card",t:"History",x:"A month at a glance: workouts, average calories and protein, and spending. Tap any day to open it."},
-  {sel:'.island [data-tab="settings"]',t:"Settings and help",x:"Appearance, tab bar, units and currency, rest timer, backups, and the full help guide. You can take this tour again from there."},
-  {tab:"train",t:"You're all set",x:"Start with today's warm-up and log your first set. Have a good session!"}
+  {tab:"train",sel:".dayhead",t:"Train",x:"Today's workout. Tap a day in the week strip to look ahead. Type the kg and reps, then tap ✓ to log a set, which starts the rest timer. Swipe a set left to delete it. Edit workout and schedule changes exercises or your whole split."},
+  {tab:"eat",sel:".card.meters",t:"Eat",x:"Calories and protein against your daily targets. Tick meals as you eat them, add anything else with the food calculator, and save meals you eat often."},
+  {tab:"body",sel:"#panel section > .card",t:"Body",x:"Log your weight each morning. The weekly average shows your real trend, and the calculator below updates your targets as you go."},
+  {tab:"spend",sel:".island",t:"Spend and History",x:"Spend shows what your food and supplements cost per week, two weeks or month, grouped by store. History lets you look back at any day."},
+  {tab:"train",sel:'.island [data-tab="settings"]',t:"Settings and help",x:"Theme and colours, tab order, kg or lb, currency, rest timer, backups, and the full help guide. You can replay this tour from there too."}
 ];
 const tourEl=document.createElement("div");tourEl.id="tour";tourEl.setAttribute("role","dialog");tourEl.setAttribute("aria-modal","true");tourEl.setAttribute("aria-label","App tour");
 tourEl.innerHTML=`<div class="tspot"></div><div class="tcard" aria-live="polite"></div>`;document.body.appendChild(tourEl);
@@ -2150,6 +2175,87 @@ tourEl.addEventListener("click",e=>{const b=e.target.closest("[data-tour]");if(!
 tourEl.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
 addEventListener("resize",()=>{if(tourI>=0){const st=TOUR[tourI];tourPlace(st.sel?document.querySelector(st.sel):null,st);}});
 addEventListener("keydown",e=>{if(tourI<0)return;if(e.key==="Escape")tourEnd();else if(e.key==="ArrowRight"){tourEl.querySelector('[data-tour="next"]').click();}else if(e.key==="ArrowLeft"&&tourI>0){tourEl.querySelector('[data-tour="back"]').click();}});
+// ---------- Experience level and split ----------
+const LEVELS=[["new","New to the gym","Less than 6 months. You'll get a ready-made plan, beginner tips and suggested starting weights."],
+  ["some","Some experience","6 months to 2 years. Start from a suggested plan, or from an empty one."],
+  ["exp","Experienced","More than 2 years. You build your own workouts. Ready-made plans are still there if you want one."]];
+function levelHtml(){const cur=store.settings.level||"";
+  return `<div class="card welcome"><p class="stepl">Step 2 of 3</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
+  ${LEVELS.map(([v,t,d])=>`<button type="button" class="toggle radio" data-act="lvl" data-v="${v}" aria-pressed="${cur===v}"><span class="box">✓</span><span class="txt"><strong>${t}</strong><small>${d}</small></span></button>`).join("")}
+  <button class="btn" data-act="lvlgo">Continue</button></div>`;}
+const SPLIT_TPL=[["full3","Full body, 3 days","Mon, Wed, Fri. The best place to start.",["rest","full","rest","full","rest","full","rest"]],
+  ["ppl3","Push, Pull, Legs","3 days: Mon, Wed, Fri.",["rest","push","rest","pull","rest","legs","rest"]],
+  ["ul4","Upper and Lower","4 days: Mon, Tue, Thu, Fri.",["rest","upper","lower","rest","upper","lower","rest"]],
+  ["ulppl","Upper, Lower, Push, Pull, Legs","5 days plus an easy run.",["rest","upper","lower","run","push","pull","legs"]],
+  ["ppl6","Push, Pull, Legs twice","6 days a week.",["rest","push","pull","legs","push","pull","legs"]],
+  ["empty","Start empty","Set every day yourself.",["rest","rest","rest","rest","rest","rest","rest"]]];
+const DAYNAMES=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],DAYORDER=[1,2,3,4,5,6,0],UNITS=[["days","days"],["weeks","weeks"],["months","months"],["years","years"]];
+let splitDraft=null,splitOpen=false;
+function draftInit(){
+  const S=store.settings,lv=S.level||"some",onb=!!onbStage(),sp=S.split||{};
+  const tpl=onb?(lv==="new"?"full3":lv==="some"?"ul4":"empty"):"";
+  splitDraft={tpl,week:onb?SPLIT_TPL.find(t=>t[0]===tpl)[3].slice():weekFor(todayKey()).slice(),fill:S.fill!==undefined?!!S.fill:lv!=="exp",dur:sp.until?"set":"forever",n:sp.n||3,unit:sp.unit||"months"};
+}
+function addPeriod(k,n,unit){const d=parseKey(k);if(unit==="days")d.setDate(d.getDate()+n);else if(unit==="weeks")d.setDate(d.getDate()+7*n);else if(unit==="months")d.setMonth(d.getMonth()+n);else d.setFullYear(d.getFullYear()+n);return keyOf(d);}
+function splitUntil(D){return addDays(addPeriod(todayKey(),D.n,D.unit),-1);}
+function splitHtml(onb){
+  const D=splitDraft,PL=plansFor(todayKey());
+  const opts=cur=>[...Object.keys(PL).filter(id=>!["rest","dyn"].includes(id)).map(id=>[id,PL[id].name]),["dyn","Dynamic: choose on the day"],["rest","Rest"],["__new","+ New custom day…"]]
+    .map(([v,l])=>`<option value="${v}"${v===cur?" selected":""}>${esc(l)}</option>`).join("");
+  const days=D.week.filter(x=>x!=="rest").length;
+  return `<div class="card welcome">${onb?`<p class="stepl">Step 3 of 3</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
+  <p class="note" style="margin:6px 0 12px">Pick a ready-made week, then change any day you like. ${onb?"You can change all of this later.":""}</p>
+  <p class="lbl">Start from</p><div class="tplgrid">${SPLIT_TPL.map(t=>`<button type="button" class="tpl" data-act="spltpl" data-v="${t[0]}" aria-pressed="${D.tpl===t[0]}"><strong>${t[1]}</strong><small>${t[2]}</small></button>`).join("")}</div>
+  <p class="lbl" style="margin-top:14px">Each day <span style="float:right">${days} training day${days===1?"":"s"}</span></p>
+  ${DAYORDER.map(i=>`<label class="wkrow"><span>${DAYNAMES[i]}</span><select class="field" data-spl="day" data-i="${i}" aria-label="${DAYNAMES[i]}">${opts(D.week[i])}</select></label>`).join("")}
+  <p class="note">Dynamic days start empty, and you pick Push, Pull, Legs or any other workout on the day itself.</p>
+  <div class="setrow" style="margin-top:8px;border-top:1px solid var(--line);padding-top:12px"><span class="sl">Fill workouts with suggested exercises<small>${D.fill?"Each workout starts with a ready-made list of exercises you can change.":"Workouts start empty, and you add your own exercises."}</small></span><button type="button" class="switch" role="switch" aria-checked="${D.fill}" data-act="splfill" aria-label="Fill workouts with suggested exercises"><i></i></button></div>
+  <p class="lbl" style="margin-top:12px">How long should this split run?</p>
+  <select class="field" data-spl="dur" aria-label="Split length"><option value="forever"${D.dur==="forever"?" selected":""}>Until I change it</option><option value="set"${D.dur==="set"?" selected":""}>For a set amount of time</option></select>
+  ${D.dur==="set"?`<div class="pair" style="margin-top:8px"><select class="field" data-spl="n" aria-label="How many">${Array.from({length:30},(_,j)=>j+1).map(n=>`<option${n===D.n?" selected":""}>${n}</option>`).join("")}</select><select class="field" data-spl="unit" aria-label="Days, weeks, months or years">${UNITS.map(([v,l])=>`<option value="${v}"${v===D.unit?" selected":""}>${l}</option>`).join("")}</select></div><p class="note">Runs until ${parseKey(splitUntil(D)).toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}. When it ends, the app asks whether to keep it or set up a new one.</p>`:""}
+  <button class="btn" data-act="splsave">${onb?"Save and start":"Save split"}</button>${onb?"":`<button class="btn ghost" data-act="splcancel">Cancel</button>`}</div>`;
+}
+function saveSplit(){
+  const S=store.settings,D=splitDraft,c=S.custom||(S.custom={}),onb=!!onbStage(),t=todayKey();
+  c.weeks=(Array.isArray(c.weeks)?c.weeks:[]).filter(e=>e.from<t);c.weeks.push({from:onb?"2000-01-01":t,week:D.week.slice()});
+  c.plans=c.plans||{};
+  for(const id of Object.keys(PLANS2)){if(["rest","run","dyn"].includes(id))continue;const o=c.plans[id];
+    if(!D.fill){if(!o)c.plans[id]={name:PLANS2[id].name,ex:[],auto:1};}
+    else if(o&&o.auto&&!(o.ex||[]).length)delete c.plans[id];}
+  S.fill=D.fill;
+  S.split=D.dur==="set"?{start:t,n:D.n,unit:D.unit,until:splitUntil(D)}:{start:t,until:null};
+  if(D.fill&&onb)S.presetNote=true;
+  delete S.onb;splitOpen=false;splitDraft=null;
+  const day=store.days[t];if(day&&day.plan){delete day.plan;persist("day-"+t);}
+  persist("settings");render();window.scrollTo(0,0);
+  if(onb&&!S.toured)setTimeout(tourStart,350);else toast("Split saved");
+}
+$("panel").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b||tab!=="train")return;const a=b.dataset.act,S=store.settings;
+  if(a==="lvl"){S.level=b.dataset.v;persist("settings");renderTrain();}
+  else if(a==="lvlgo"){if(!S.level){toast("Pick the option that fits you best");return;}S.onb="split";splitDraft=null;clearTimeout(toastT);toastEl.classList.remove("show");persist("settings");render();window.scrollTo(0,0);}
+  else if(a==="spltpl"){const t=SPLIT_TPL.find(x=>x[0]===b.dataset.v);splitDraft.tpl=t[0];splitDraft.week=t[3].slice();renderTrain();}
+  else if(a==="splfill"){splitDraft.fill=!splitDraft.fill;renderTrain();}
+  else if(a==="splsave")saveSplit();
+  else if(a==="splcancel"){splitOpen=false;splitDraft=null;render();window.scrollTo(0,0);}
+  else if(a==="changesplit"||a==="splitnew"){editPlan=false;splitOpen=true;splitDraft=null;render();window.scrollTo(0,0);}
+  else if(a==="splitkeep"){if(S.split){S.split.until=null;persist("settings");}render();toast("Your split keeps going until you change it");}
+  else if(a==="presetok"){delete S.presetNote;persist("settings");renderTrain();}
+  else if(a==="dynpick"){const d=ensureDay(sel);d.plan=b.dataset.v;persist("day-"+sel);render();}
+});
+$("panel").addEventListener("change",e=>{
+  const t=e.target;if(!t.dataset||!t.dataset.spl||!splitDraft)return;const D=splitDraft,f=t.dataset.spl;
+  if(f==="day"){const i=+t.dataset.i;
+    if(t.value==="__new"){t.value=D.week[i];
+      openSheet("New custom day",fld("Name","ncN","")+`<p class="note">Like "Arms and abs" or "Calisthenics". It starts empty, and you add exercises in Edit workout.</p>`,[{label:"Create",fn:()=>{const n=sv("ncN");if(!n){sheetEl.querySelector("#ncN").focus();return false;}
+        const S=store.settings,c=S.custom||(S.custom={});c.extra=c.extra||{};const id="c"+Date.now().toString(36);
+        const colors=["var(--dayblue)","var(--green)","var(--red)","var(--yellow)","var(--black)","#7C3AED"],k=Object.keys(c.extra).length,col=colors[k%colors.length];
+        c.extra[id]={name:n,color:col,on:col==="var(--yellow)"?"#18222E":"#fff",ex:[]};persist("settings");D.week[i]=id;D.tpl="";renderTrain();}},{label:"Cancel",cls:"btn ghost"}]);return;}
+    D.week[i]=t.value;D.tpl="";renderTrain();}
+  else if(f==="dur"){D.dur=t.value;renderTrain();}
+  else if(f==="n"){D.n=+t.value;renderTrain();}
+  else if(f==="unit"){D.unit=t.value;renderTrain();}
+});
 // ---------- Settings page ----------
 function bothOn(type,fn){sheetEl.addEventListener(type,fn);$("panel").addEventListener(type,fn);}
 function inSettings(e){return (e.currentTarget===sheetEl&&sheetEl._kind==="settings")||(e.currentTarget===$("panel")&&tab==="settings");}
