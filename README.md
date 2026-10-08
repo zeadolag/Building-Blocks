@@ -11,7 +11,7 @@ Everything is stored on your own device (in the browser's local storage). Nothin
 
 ## Open it
 
-https://zeadolag.github.io/building-blocks/
+https://zeadolag.github.io/Building-Blocks/
 
 On iPhone: open it in Safari, tap **Share → Add to Home Screen**.
 On Android: open it in Chrome, tap **⋮ → Add to Home screen** (or **Install app**).
