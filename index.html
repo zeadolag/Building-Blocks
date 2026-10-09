@@ -524,6 +524,29 @@ textarea.field.area{height:auto;min-height:96px;padding:10px;resize:vertical;lin
 .setrowbtn svg{flex:none;color:var(--muted);transform:rotate(-90deg)}
 .setrowbtn:active{background:var(--mutedbg)}
 .backbtn{border:0;background:none;color:var(--blue);font-weight:500;padding:6px 0;font-size:15px}
+.needs{display:inline-block;margin-top:3px;font-size:11.5px;font-weight:500;color:#B45309;background:color-mix(in srgb,#F59E0B 14%,transparent);border-radius:6px;padding:1px 6px;white-space:normal}
+:root[data-theme="dark"] .needs{color:#FBBF24}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .needs{color:#FBBF24}}
+.target .needs{margin-left:4px;font-size:11px}
+.rname .needs{display:inline-block;width:auto}
+.libitem.cant strong{color:var(--muted)}
+.easier{display:inline-block;font-size:10.5px;font-weight:600;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);border-radius:5px;padding:0 5px;margin-left:4px;vertical-align:1px}
+.eqnote{margin:6px 0 4px;font-size:13px}
+.eqgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.eqgrid .toggle.mini-t{width:100%;justify-content:flex-start}
+.eqrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0}
+.eqrow strong{font-weight:500}
+.eqrow small.of{font-size:12px}
+.eqrow .needs{display:block;width:fit-content}
+.eqto{display:block;font-size:14px;margin-top:3px}
+.eqbtns{display:flex;flex-direction:column;gap:6px;flex:none}
+.coach{margin:8px 0;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--blue) 8%,transparent);font-size:14px}
+.coach b{font-weight:600}
+.extags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.extags span{font-size:12px;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.ritem>.swr{border-radius:0;overflow:hidden}
+.ritem .sw.rrow{padding:2px 0}
+.rrow .icob{width:34px;height:34px}
 /* ---- tab island ---- */
 .island{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;gap:2px;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--surface) 80%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40}
 .itab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;border-radius:999px;padding:7px 2px 6px;color:var(--muted);font-size:11px;font-weight:500;line-height:1.1}
@@ -1080,12 +1103,121 @@ const GLOSS={
   "per leg":"Do the reps with one leg, then the same number with the other. That counts as one set.",
   "max":"As many good reps as you can, stopping when your form starts to slip."
 };
+// ---------- Equipment, difficulty and coaching tips ----------
+const EQN={bw:"bodyweight",bar:"a barbell",db:"dumbbells",kb:"a kettlebell",cable:"a cable machine",machine:"gym machines",bench:"a bench",pullup:"a pull-up bar",dip:"dip bars",band:"resistance bands",cardio:"cardio machines",gym:"other gym equipment"};
+const EQKEYS=[["bar","Barbell and plates"],["db","Dumbbells"],["bench","Bench"],["kb","Kettlebell"],["cable","Cable machine"],["machine","Weight machines"],["pullup","Pull-up bar"],["dip","Dip bars"],["band","Resistance bands"],["cardio","Cardio machines"],["gym","Sled, box, ropes, ab wheel"]];
+const EQPRESETS=[["gym","Full gym","Everything a commercial gym has",null],["home","Home with dumbbells","Dumbbells, a bench and bands",["db","bench","band"]],["bw","Bodyweight only","No equipment at all",[]],["own","Pick my own","Choose exactly what you have",null]];
+const TYPEN={bw:"Bodyweight",pullup:"Bodyweight",dip:"Bodyweight",bench:"Bodyweight",bar:"Barbell",db:"Dumbbells",kb:"Kettlebell",cable:"Cable",machine:"Machine",band:"Bands",cardio:"Cardio machine",gym:"Other"};
+const TYPES=["Bodyweight","Machine","Barbell","Dumbbells","Cable","Kettlebell","Bands","Cardio machine","Other"];
+const DIFFN={1:"Beginner",2:"Intermediate",3:"Advanced"};
+// warm-up and stretch items: equipment, difficulty
+const WEQ={"Band pull-aparts or light face pulls, 15":["band"],"Band pull-aparts, 15":["band"],"Scapular pull-ups, 8":["pullup"],"Dead hang, 20–30 s":["pullup"]};
+const WDIFF={"Marching on the spot, 1–2 min":1,"Shoulder rolls, 10 each way":1,"Wall slides, 10":1,"Assisted hang, feet on the floor, 20 s":1,"Wall pushups, 10":1,"Supported squats, holding a door frame, 10":1,"Standing good mornings, 10":1,"Knees to chest stretch":1,"Seated chest opener":1,"Seated side stretch":1,"Dead hang, 20–30 s":3,"Scapular pull-ups, 8":3,"Scapular push-ups, 10":2,"World's greatest stretch":2,"Walking lunges with a twist, 6 per leg":2,"Walking lunges, 6 per leg":2,"High knees and butt kicks, 20 s each":2};
+// coaching tips: what good lifters focus on
+const TIPS={
+  bench:"Squeeze your shoulder blades together and down before you unrack, and keep them there. Lower the bar to your lower chest and drive your feet into the floor as you press.",
+  incdb:"Think about bringing your upper arms towards each other over your chest, not just pushing the dumbbells up. A bench angle of 30° hits the upper chest without turning it into a shoulder press.",
+  dbbench:"Let the dumbbells come down a little wider and deeper than a barbell allows for a better chest stretch, then press up and slightly in.",
+  mcpress:"Set the seat so the handles line up with your mid-chest. Pause briefly with the handles close to your chest instead of bouncing out of the bottom.",
+  fly:"Keep a soft bend in your elbows and think about hugging a big tree. Many people find bringing the wrists together, or even crossing them slightly, at the end squeezes the chest a bit more.",
+  pecdeck:"Lead with your elbows, not your hands, and bring your wrists together at the end to squeeze the chest a bit more. Control the way back. That's where the stretch is.",
+  mfly:"Lead with your elbows and bring your wrists together at the end to squeeze out a bit more. Let the handles go back only as far as your shoulders feel comfortable.",
+  lowfly:"Scoop the handles up and together towards your chin. This angle targets the upper chest.",
+  highfly:"Bring the handles down and together towards your belly button. This angle targets the lower chest.",
+  dbfly:"Lower the dumbbells in a wide arc until you feel a stretch, then squeeze them back up. Use a lighter weight than you think, since the shoulders are under a lot of tension at the bottom.",
+  pushups:"Keep your body in one straight line from head to heels and squeeze your glutes. Elbows at about 45° to your body is easier on the shoulders than flaring them out.",
+  fullpush:"Keep your body in one straight line from head to heels and squeeze your glutes. Elbows at about 45° to your body is easier on the shoulders than flaring them out.",
+  kneepush:"Keep a straight line from your knees to your head. Don't let your hips sag or pike up.",
+  dips:"Lean your chest slightly forward to work the chest more, or stay upright for the triceps. Go down until your shoulders are just below your elbows, no deeper than feels comfortable.",
+  ohp:"Squeeze your glutes and abs so you don't lean back. Move your head back slightly to let the bar pass, then push your head through once it's past your forehead.",
+  dbsp:"Stop just short of locking out at the top to keep tension on the shoulders, and lower the dumbbells to about ear height.",
+  mshoulder:"Keep your back flat against the pad and don't let your lower back arch to push the weight up.",
+  lat:"Lead with your elbows, not your hands, and imagine pushing the dumbbells out to the walls rather than up. Stop at shoulder height and lower slowly.",
+  mlat:"Push out with your elbows against the pads and pause for a moment at the top. Light and strict beats heavy and swinging.",
+  cablelat:"Start the cable behind your body for more tension at the bottom of the movement. Lead with the elbow.",
+  facepull:"Pull the rope towards your forehead and spread your hands apart at the end, as if showing off your biceps. It's great for the rear delts and shoulder health.",
+  revfly:"Keep your arms almost straight and think about pushing the handles out and back, not pulling. Don't shrug.",
+  pulldown:"Pull your elbows down towards your back pockets instead of pulling with your hands. Think of your hands as hooks. Lean back only slightly.",
+  widepd:"Pull your elbows down towards your back pockets instead of pulling with your hands. Think of your hands as hooks.",
+  pullup:"Lower yourself as slowly as you can, aiming for 3–5 seconds. Keep your shoulders pulled down away from your ears the whole way.",
+  negpull:"Jump or step up to the top, then lower yourself as slowly as you can, aiming for 3–5 seconds. That's where the strength for a full pull-up comes from.",
+  fullpull:"Start each rep by pulling your shoulder blades down, then drive your elbows towards your ribs. Aim your chest at the bar, not your chin.",
+  chinup:"Start each rep by pulling your shoulder blades down, then drive your elbows towards your ribs.",
+  csrow:"Keep your chest on the pad and drive your elbows back past your body. Squeeze your shoulder blades together for a second at the end.",
+  cablerow:"Sit tall and pull to your belly button. Let your shoulders reach forward a little at the start for a full stretch, but keep your lower back still.",
+  mrow:"Pull with your elbows and squeeze your shoulder blades together at the end. Don't jerk your body back.",
+  dbrow:"Pull the dumbbell towards your hip, not your chest, to work the lats more. Keep your back flat and parallel to the floor.",
+  row:"Hinge forward to about 45°, keep your back flat, and pull the bar to your lower ribs.",
+  sapd:"Keep your arms almost straight and push the bar down in an arc to your thighs. Feel your lats do it, not your triceps.",
+  sacpd:"Pull your elbow down to your side and slightly back, and let your arm stretch fully overhead at the top.",
+  curl:"Keep your upper arms still and squeeze hard at the top. Lower for about 2 seconds instead of letting the weight drop.",
+  dbcurl:"Keep your elbows at your sides and turn your little finger up slightly at the top for a stronger squeeze.",
+  hammer:"Keep your thumbs pointing up and your elbows at your sides. It works the forearm and the brachialis, which makes your arm look thicker.",
+  bbcurl:"Keep your elbows at your sides. If you have to swing your body to lift it, the weight is too heavy.",
+  cablecurl:"Take a step back so the cable pulls slightly behind you. It keeps tension on the biceps at the bottom.",
+  pushdown:"Keep your elbows pinned to your sides and only move your forearms. Spread the rope apart at the bottom to squeeze the triceps.",
+  ohext:"Keep your elbows pointing forward and close to your head. The stretch at the bottom is what makes this one so effective, so lower all the way.",
+  skull:"Lower the bar towards your forehead or just behind your head, and keep your elbows pointing at the ceiling.",
+  squat:"Brace your core like you're about to be punched, then sit down between your heels. Push your knees out in line with your toes and keep your whole foot on the floor.",
+  goblet:"Hold the weight at your chest, sit down between your heels, and keep your chest up. It's one of the best ways to learn the squat.",
+  legpress:"Lower until your knees are at about 90° or a bit deeper, without your lower back lifting off the pad. Don't lock your knees out hard at the top.",
+  hacksquat:"Keep your back flat on the pad and go as deep as you can control. A lower foot position works the quads more.",
+  rdl:"Push your hips back as if closing a car door with your bum, with a slight bend in your knees. Stop when you feel a strong hamstring stretch. Your back should stay flat the whole time.",
+  deadlift:"Bar over the middle of your foot, back flat, chest up. Push the floor away with your legs instead of yanking with your back.",
+  legext:"Pause for a second at the top and squeeze your quads. Lean back slightly for a bigger stretch on the front of the thigh.",
+  legcurl:"Keep your hips pressed into the pad and curl all the way. Lower slowly, since the lowering part builds the hamstrings.",
+  slegcurl:"Lean your upper body forward slightly. It stretches the hamstrings more and makes the exercise more effective.",
+  hipthrust:"Tuck your chin and keep your ribs down so your glutes do the work, not your lower back. Squeeze hard at the top for a second.",
+  bss:"A longer step works the glutes more and a shorter step works the quads more. Keep most of your weight on the front foot.",
+  lunge:"Take a long enough step that both knees bend to about 90°. Push through your front heel to stand.",
+  calf:"Go all the way down for a full stretch and pause there for a second before pushing up. Bouncing takes the work away from the calves.",
+  scalf:"Pause at the bottom in the stretch for a second, then push up through your big toe.",
+  add:"Control the way back out. The stretch is where most of the work happens.",
+  abd:"Lean forward slightly to hit the glutes more, and pause when your legs are fully apart.",
+  hlr:"Curl your pelvis up towards your ribs instead of just lifting your legs. Avoid swinging.",
+  kneeraise:"Curl your pelvis up towards your ribs instead of just lifting your knees. Avoid swinging.",
+  ccrunch:"Round your spine and pull your ribs towards your hips. The movement comes from your abs, not from bending at the hips.",
+  plank:"Squeeze your glutes and pull your belly button in. A perfect 30 seconds is better than a sagging 2 minutes.",
+  splank:"Stack your feet, keep your hips up in a straight line, and don't let them drift backwards.",
+  backext:"Round your back slightly and focus on your glutes to work them more, or keep a flat back for your lower back.",
+  shrug:"Lift straight up towards your ears and hold for a second. Don't roll your shoulders.",
+  kbswing:"It's a hip hinge, not a squat. Snap your hips forward and let the bell float up. Your arms just guide it.",
+  invrow:"Keep your body straight like a moving plank and pull your chest to the bar. Bend your knees to make it easier.",
+  airsquat:"Sit down between your heels and keep your chest up. Hold onto a door frame if you need help with balance.",
+  bridge:"Push through your heels and squeeze your glutes hard at the top for 2 seconds.",
+  pike:"Make an upside-down V with your body and lower the top of your head towards the floor in front of your hands. This builds towards handstand pushups."
+};
+const GROUPTIP={Chest:"Think about squeezing your chest, not just moving the weight. Keep your shoulder blades back and down.",Back:"Pull with your elbows, not your hands, and imagine your hands are hooks. Squeeze your shoulder blades at the end of each rep.",Shoulders:"Use a weight you can control without swinging. Strict reps work the shoulders better than heavy cheating.",Biceps:"Keep your elbows still and lower the weight slowly. Squeeze at the top.",Triceps:"Keep your elbows still and squeeze the triceps hard at full extension.",Forearms:"Use a full range of motion and control the lowering.",Quads:"Control the way down and keep your knees in line with your toes.",Hamstrings:"Feel the stretch in the back of your legs and control the lowering.","Glutes and hips":"Squeeze your glutes at the hardest point of each rep and pause there for a moment.",Calves:"Pause in the stretch at the bottom and go all the way up. No bouncing.",Core:"Breathe out as you contract and keep the movement slow.",Calisthenics:"Quality reps beat quantity. When you can do the top of the rep range with good form, move to the next step.","Full body and cardio":"Keep a steady pace you can hold, and build up the time gradually."};
+function tipFor(id){return TIPS[id]||GROUPTIP[(LIB[id]||{}).g]||"";}
+function myEquip(){const e=store.settings.equip;return Array.isArray(e)?e:null;}
+function needsOf(req){const have=myEquip();if(!have)return [];return (req||[]).filter(k=>k!=="bw"&&!have.includes(k));}
+function needs(id){return needsOf(EQX[id]);}
+function canDo(id){return !needs(id).length;}
+function needsText(list){return list.length?"Needs "+list.map(k=>EQN[k]).join(" and "):"";}
+function typeOf(id){const r=EQX[id]||["bw"];const k=r.find(x=>x!=="bench")||r[0];return TYPEN[k]||"Other";}
+function diffOf(id){return DIFF[id]||2;}
+function needsBadge(id){const n=needs(id);return n.length?`<span class="needs" title="${needsText(n)}">${needsText(n)}</span>`:"";}
+function levelMax(){const l=store.settings.level;return l==="new"?1:l==="some"?2:3;}
+function bestAlt(id,opt={}){
+  const o=LIB[id];if(!o)return null;const om=new Set(o.m),os=new Set(o.s);let best=null,bs=-1e9;
+  for(const x of Object.values(LIB)){if(x.id===id||!canDo(x.id)||(opt.exclude&&opt.exclude.has(x.id)))continue;
+    if((x.g==="Full body and cardio")!==(o.g==="Full body and cardio"))continue;
+    let sc=(x.g===o.g?20:0)+x.m.filter(m=>om.has(m)).length*6+x.m.filter(m=>os.has(m)).length*2+x.s.filter(m=>om.has(m)).length*2;
+    if(!(x.m.some(m=>om.has(m))||x.g===o.g))continue;
+    const d=diffOf(x.id);sc-=Math.max(0,d-Math.max(levelMax(),diffOf(id)))*8+Math.abs(d-diffOf(id))*1.5;
+    if((x.f==="time")!==(o.f==="time"))sc-=4;
+    if(sc>bs){bs=sc;best=x;}}
+  return best;
+}
+const EQX={"bench":["bar","bench"],"inbench":["bar","bench"],"declbench":["bar","bench"],"hipthrust":["bar","bench"],"skull":["bar","bench"],"cgbench":["bar","bench"],"preacher":["bar","bench"],"sealrow":["bar","bench"],"jmpress":["bar","bench"],"ohp":["bar"],"squat":["bar"],"rdl":["bar"],"landmine":["bar"],"deadlift":["bar"],"rackpull":["bar"],"tbar":["bar"],"row":["bar"],"pendlay":["bar"],"meadows":["bar"],"invrow":["bar"],"bbcurl":["bar"],"revcurl":["bar"],"frontsquat":["bar"],"sldl":["bar"],"goodmorning":["bar"],"sumo":["bar"],"csrow":["machine"],"legcurl":["machine"],"add":["machine"],"calf":["machine"],"mcpress":["machine"],"pulldown":["machine"],"curl":["machine"],"legpress":["machine"],"backext":["machine"],"legext":["machine"],"slegcurl":["machine"],"abd":["machine"],"scalf":["machine"],"pecdeck":["machine"],"mrow":["machine"],"widepd":["machine"],"cgpd":["machine"],"revpd":["machine"],"pullover":["machine"],"apull":["machine"],"mshoulder":["machine"],"mlat":["machine"],"revfly":["machine"],"mpreacher":["machine"],"hacksquat":["machine"],"smithsquat":["machine"],"pendulum":["machine"],"ghr":["machine"],"mhipthrust":["machine"],"donkey":["machine"],"lpcalf":["machine"],"mcrunch":["machine"],"captain":["machine"],"mfly":["machine"],"backext45":["machine"],"mdip":["machine"],"beltsquat":["machine"],"stlegcurl":["machine"],"revhyper":["machine"],"smithinc":["machine","bench"],"smithbench":["machine","bench"],"sapd":["cable"],"fly":["cable"],"pushdown":["cable"],"ohext":["cable"],"sacpd":["cable"],"facepull":["cable"],"ccrunch":["cable"],"chop":["cable"],"lowfly":["cable"],"highfly":["cable"],"cablerow":["cable"],"cablelat":["cable"],"uprow":["cable"],"rdcable":["cable"],"cablecurl":["cable"],"bayes":["cable"],"kickback":["cable"],"sapush":["cable"],"pullthru":["cable"],"gkick":["cable"],"pallof":["cable"],"kprow":["cable"],"cableabd":["cable"],"lat":["db"],"hammer":["db"],"shrug":["db"],"arnold":["db"],"frontraise":["db"],"conc":["db"],"dboh":["db"],"wristcurl":["db"],"revwrist":["db"],"farmer":["db"],"goblet":["db"],"revlunge":["db"],"slrdl":["db"],"sidebend":["db"],"svend":["db"],"luraise":["db"],"cuban":["db"],"zottman":["db"],"dbcurl":["db"],"thruster":["db"],"incdb":["db","bench"],"dbsp":["db","bench"],"bss":["db","bench"],"dbbench":["db","bench"],"dbfly":["db","bench"],"dbrow":["db","bench"],"yraise":["db","bench"],"incurl":["db","bench"],"spider":["db","bench"],"stepup":["db","bench"],"csdbrow":["db","bench"],"lunge":["bw"],"splank":["bw"],"pushups":["bw"],"bwsquat":["bw"],"incpush":["bw"],"declpush":["bw"],"superman":["bw"],"diamond":["bw"],"wallsit":["bw"],"nordic":["bw"],"slhip":["bw"],"bridge":["bw"],"slcalf":["bw"],"tib":["bw"],"plank":["bw"],"crunch":["bw"],"deadbug":["bw"],"hollow":["bw"],"bicycle":["bw"],"russian":["bw"],"mclimb":["bw"],"sissy":["bw"],"wallpush":["bw"],"kneepush":["bw"],"fullpush":["bw"],"archerpush":["bw"],"pppush":["bw"],"onepush":["bw"],"airsquat":["bw"],"splitsq":["bw"],"bwbss":["bw"],"boxpistol":["bw"],"pistol":["bw"],"shrimp":["bw"],"tucklsit":["bw"],"lsit":["bw"],"pike":["bw"],"elevpike":["bw"],"wallhs":["bw"],"hspu":["bw"],"skinplank":["bw"],"burpee":["bw"],"pullup":["pullup"],"hlr":["pullup"],"chinup":["pullup"],"wpull":["pullup"],"hang":["pullup"],"scappull":["pullup"],"negpull":["pullup"],"fullpull":["pullup"],"archerpull":["pullup"],"lpull":["pullup"],"muscleup":["pullup"],"kneeraise":["pullup"],"legraise":["pullup"],"t2b":["pullup"],"tucklever":["pullup"],"bandpull":["pullup","band"],"dips":["dip"],"negdip":["dip"],"pdip":["dip"],"ringdip":["dip"],"benchdip":["bench"],"declcrunch":["bench"],"kbswing":["kb"],"incwalk":["cardio"],"stairs":["cardio"],"elliptical":["cardio"],"cycling":["cardio"],"rower":["cardio"],"bike":["cardio"],"wallball":["gym"],"boxjump":["gym"],"sled":["gym"],"ropes":["gym"],"jumprope":["gym"],"abwheel":["gym"]};
+const DIFF={"csrow":1,"legcurl":1,"add":1,"calf":1,"mcpress":1,"pulldown":1,"curl":1,"legpress":1,"legext":1,"slegcurl":1,"abd":1,"scalf":1,"pecdeck":1,"mrow":1,"widepd":1,"cgpd":1,"revpd":1,"apull":1,"mshoulder":1,"mlat":1,"revfly":1,"mpreacher":1,"mfly":1,"lpcalf":1,"mcrunch":1,"captain":1,"cablecurl":1,"pushdown":1,"facepull":1,"fly":1,"cablelat":1,"cablerow":1,"ccrunch":1,"lat":1,"hammer":1,"dbcurl":1,"frontraise":1,"conc":1,"shrug":1,"goblet":1,"wallpush":1,"kneepush":1,"incpush":1,"airsquat":1,"bwsquat":1,"bridge":1,"plank":1,"crunch":1,"deadbug":1,"splank":1,"wallsit":1,"superman":1,"slcalf":1,"tib":1,"bicycle":1,"mclimb":1,"scappull":1,"incwalk":1,"stairs":1,"elliptical":1,"cycling":1,"rower":1,"bike":1,"hacksquat":1,"smithsquat":1,"beltsquat":1,"mhipthrust":1,"stlegcurl":1,"deadlift":3,"sumo":3,"frontsquat":3,"goodmorning":3,"pendlay":3,"nordic":3,"ghr":3,"pistol":3,"shrimp":3,"archerpush":3,"pppush":3,"onepush":3,"archerpull":3,"lpull":3,"muscleup":3,"ringdip":3,"t2b":3,"lsit":3,"hspu":3,"tucklever":3,"wpull":3,"rackpull":3};
 const LIB={};
 (function(){
   const add=(e,g,m,s)=>{if(!LIB[e[0]])LIB[e[0]]={id:e[0],n:e[1].replace(/, assisted if needed/,""),sets:e[2],t:e[3],f:e[4]||"",d:e[5]?1:0,g:g||GRP[e[0]]||"Other",m:m||[],s:s||[]};};
   for(const P of Object.values(PLANS2))for(const e of P.ex)add(e,GRP[e[0]]);
   for(const x of LIBX)add([x[0],x[1],x[2],x[3],x[4]],x[5],x[6],x[7]);
   for(const P of Object.values(PLANS))for(const e of P.ex)add(e,GRP[e[0]]);
+  for(const x of Object.values(LIB))if(!x.m.length&&INFO[x.id]){x.m=INFO[x.id].m||[];x.s=INFO[x.id].s||[];}
 })();
 function syncCustomLib(){const c=store.settings.customLib||{};for(const [id,x] of Object.entries(c))LIB[id]={id,n:x.n,sets:x.sets,t:x.t,f:"",d:0,g:"Other",m:[],s:[]};}
 function libArr(id){const L0=LIB[id];return L0?[L0.id,L0.n,L0.sets,L0.t,L0.f,L0.d]:[id,id,3,"8–12",""];}
@@ -1110,7 +1242,7 @@ function setWeekDay(k,i,v){const S=store.settings,c=S.custom||(S.custom={});cons
   if(e){e.week=e.week.slice();e.week[i]=v;}else{c.week=weekFor(k).slice();c.week[i]=v;}}
 function ensureEditable(p){
   const c=store.settings.custom||(store.settings.custom={});
-  if(PLANS2[p]){c.plans=c.plans||{};if(!c.plans[p])c.plans[p]={name:PLANS2[p].name,ex:JSON.parse(JSON.stringify(PLANS2[p].ex))};if(!Array.isArray(c.plans[p].ex))c.plans[p].ex=JSON.parse(JSON.stringify(PLANS2[p].ex));return c.plans[p];}
+  if(PLANS2[p]){c.plans=c.plans||{};if(c.plans[p])delete c.plans[p].auto;if(!c.plans[p])c.plans[p]={name:PLANS2[p].name,ex:JSON.parse(JSON.stringify(PLANS2[p].ex))};if(!Array.isArray(c.plans[p].ex))c.plans[p].ex=JSON.parse(JSON.stringify(PLANS2[p].ex));return c.plans[p];}
   c.extra=c.extra||{};return c.extra[p];
 }
 const swbg=(a,b)=>`<div class="swbg" aria-hidden="true"><span class="swe">${a}</span><span class="swd">${b}</span></div>`;
@@ -1131,7 +1263,7 @@ function libResults(){
   all.sort((a,b)=>a.n.localeCompare(b.n));
   if(!all.length)return `<p class="note">No matches. Try another word, or add it as a custom exercise below.</p>`;
   const more=!q&&!libG&&all.length>12?`<p class="note">Showing 12 of ${all.length}. Search or pick a group to see more.</p>`:"";
-  return (q||libG?all.slice(0,30):all.slice(0,12)).map(x=>`<button class="libitem" data-act="addex" data-id="${x.id}"><span><strong>${esc(x.n)}</strong><small>${x.g}${x.m.length?", "+x.m.map(m=>MNAME[m]).join(", "):""}</small></span><span class="plus">+</span></button>`).join("")+more;
+  return (q||libG?all.slice(0,30):all.slice(0,12)).map(x=>`<button class="libitem${canDo(x.id)?"":" cant"}" data-act="addex" data-id="${x.id}"><span><strong>${esc(x.n)}</strong><small>${x.g} · ${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}</small>${needsBadge(x.id)}</span><span class="plus">+</span></button>`).join("")+more;
 }
 function renderEditPlan(k,p,P){
   const PL=plansFor(k),W=weekFor(k),days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],idx=[1,2,3,4,5,6,0];
@@ -1185,7 +1317,7 @@ function renderHistory(){
 const GEN_WARM=["5 min light cardio or a brisk walk","Arm circles and leg swings, 10 each","1–2 light warm-up sets of your first exercise"];
 const GEN_STRETCH=["Stretch each muscle you trained, 30–45 s"];
 function showWelcome(){return (mode==="local"||migrated)&&!store.settings.welcomed;}
-function onbStage(){const S=store.settings,o=S.onb;return S.welcomed&&(o==="level"||o==="split")?o:null;}
+function onbStage(){const S=store.settings,o=S.onb;return S.welcomed&&(o==="level"||o==="equip"||o==="split")?o:null;}
 function afterTargets(){const S=store.settings;if(!S.level&&isLocalMode()){S.onb="level";persist("settings");render();window.scrollTo(0,0);}else{persist("settings");render();if(!S.toured)setTimeout(tourStart,350);}}
 
 const SLOTS=[
@@ -1413,6 +1545,16 @@ const SINFO={
   "Standing side bend":{r:"Back and core",hold:"20–30 s per side",m:["obliques"],s:["lats"],c:["Reach one arm overhead and lean to the opposite side, hips steady."]},
   "Cat-cow":{r:"Back and core",hold:"8–10 slow reps",m:["lowback","abs"],s:["midback"],c:["On all fours, round your back up as you breathe out, then let it dip as you breathe in."]},
   "World's greatest stretch":{r:"Back and core",hold:"5 per side",m:["quads","hams"],s:["obliques","midback"],c:["Step into a deep lunge, both hands down inside the front foot.","Rotate the inside arm up to the ceiling, then back down, and switch sides."]},
+  "Marching on the spot, 1–2 min":{r:"Get warm",m:["quads","calves"],s:["glutes"],c:["Lift your knees to hip height if you can, and swing your arms. Speed up a little towards the end."]},
+  "Shoulder rolls, 10 each way":{r:"Mobility drills",m:["traps"],s:["sdelt"],c:["Lift your shoulders up to your ears, roll them back and down. Then reverse."]},
+  "Wall slides, 10":{r:"Mobility drills",m:["sdelt","traps"],s:["rdelt"],c:["Stand with your back and arms against a wall, elbows bent at 90°.","Slide your arms up as far as you can while keeping them touching the wall, then back down."]},
+  "Assisted hang, feet on the floor, 20 s":{r:"Mobility drills",m:["lats"],s:["forearms"],c:["Hold a bar or sturdy rack at about head height, keep your feet on the floor, and sit back so your arms stretch overhead.","Let your shoulders relax up towards your ears and breathe slowly."]},
+  "Wall pushups, 10":{r:"Mobility drills",m:["chest","triceps"],s:["fdelt"],c:["Hands on the wall at shoulder height, step your feet back, and lower your chest towards the wall."]},
+  "Supported squats, holding a door frame, 10":{r:"Mobility drills",m:["quads","glutes"],s:["adductors"],c:["Hold a door frame or rail, sit back and down as far as is comfortable, and stand back up."]},
+  "Standing good mornings, 10":{r:"Mobility drills",m:["hams"],s:["lowback","glutes"],c:["Hands on your hips, soft knees, push your hips back until you feel your hamstrings, then stand up tall."]},
+  "Knees to chest stretch":{r:"Lower body",hold:"30 s",m:["glutes","lowback"],s:["hams"],c:["Lie on your back and hug both knees towards your chest. Rock gently from side to side if it feels good."]},
+  "Seated chest opener":{r:"Upper body",hold:"30 s",m:["chest","fdelt"],s:[],c:["Sit tall, clasp your hands behind your lower back or hold the chair, and gently lift your chest and pull your shoulders back."]},
+  "Seated side stretch":{r:"Back and core",hold:"20 s per side",m:["obliques","lats"],s:[],c:["Sit tall on a chair, reach one arm over your head and lean gently to the other side."]},
   "Stretch each muscle you trained, 30–45 s":{r:"Upper body",m:[],s:[],c:["Pick one stretch for each muscle you worked today and hold it gently, no bouncing."]}
 };
 function sinfo(n){return SINFO[n]||{r:"Other",m:[],s:[],c:[]};}
@@ -1422,13 +1564,15 @@ function routineHtml(kind,items,done){
   for(const g of regions){
     h+=`<p class="lbl rhead">${esc(g.r)}</p><div class="card routine">`;
     h+=g.list.map(([n,i])=>{const I=sinfo(n),key=kind+i,open=openHow.has(key),has=(I.c.length||I.m.length)&&!/walk|light cardio/i.test(n);
-      return `<div class="ritem"><div class="rrow"><button class="rtick" data-act="${kind==="w"?"warm":"stretch"}" data-i="${i}" aria-pressed="${!!done[i]}" aria-label="Mark ${esc(n)} done">✓</button><span class="rname">${esc(n)}${I.hold?`<small>Hold ${esc(I.hold)}</small>`:""}</span>${holdSecs(I.hold)?`<button type="button" class="holdbtn" data-act="hold" data-n="${esc(n)}" aria-label="Start a ${holdSecs(I.hold)} second timer for ${esc(n)}">▶ ${holdSecs(I.hold)} s</button>`:""}${has?`<button class="icob rhow" data-act="rhow" data-k="${key}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="${open?"Hide":"Show"} how to do ${esc(n)}">${IC.search}</button>`:""}</div>${open?`<div class="howto">${I.m.length?bodyMap(I.m,I.s):""}${I.c.length?`<ol>${I.c.map(c=>`<li>${esc(c)}</li>`).join("")}</ol>`:""}</div>`:""}</div>`;}).join("");
+      const nd=needsOf(WEQ[n]);
+      return `<div class="ritem"><div class="swr" data-sw="routine" data-k="${kind}" data-i="${i}">${swbg("Swap","")}<div class="sw rrow"><button class="rtick" data-act="${kind==="w"?"warm":"stretch"}" data-i="${i}" aria-pressed="${!!done[i]}" aria-label="Mark ${esc(n)} done">✓</button><span class="rname">${esc(n)}${I.hold?`<small>Hold ${esc(I.hold)}</small>`:""}${nd.length?`<small class="needs">${needsText(nd)}</small>`:""}</span>${holdSecs(I.hold)?`<button type="button" class="holdbtn" data-act="hold" data-n="${esc(n)}" aria-label="Start a ${holdSecs(I.hold)} second timer for ${esc(n)}">▶ ${holdSecs(I.hold)} s</button>`:""}${has?`<button class="icob rhow" data-act="rhow" data-k="${key}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="${open?"Hide":"Show"} how to do ${esc(n)}">${IC.search}</button>`:""}${store.settings.swapBtn!==false?`<button type="button" class="icob" data-act="rswap" data-k="${kind}" data-i="${i}" aria-label="Swap ${esc(n)} for something else">${IC.swap}</button>`:""}</div></div>${open?`<div class="howto">${I.m.length?bodyMap(I.m,I.s):""}${I.c.length?`<ol>${I.c.map(c=>`<li>${esc(c)}</li>`).join("")}</ol>`:""}</div>`:""}</div>`;}).join("");
     h+=`</div>`;
   }
   return h;
 }
 // ---------- Exercise helpers: rep style, starting weights, records, keywords ----------
 const IC={
+  swap:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>',
   search:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
   eye:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   pen:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
@@ -1486,7 +1630,7 @@ function lastLine(id,k,sets,target,flag,v2){
 function howtoHtml(id,name,note){
   const I=getInfo(id),open=openHow.has(id);
   let h="";
-  if(open)h+=`<div class="howto">${motionBlock(id)}${I?bodyMap(I.m,I.s)+`<p class="musc"><b>Main:</b> ${I.m.map(x=>MNAME[x]).join(", ")}${I.s.length?`<br><b>Helpers:</b> ${I.s.map(x=>MNAME[x]).join(", ")}`:""}</p>`:""}${I&&I.c.length?`<ol>${I.c.map(c=>`<li>${c}</li>`).join("")}</ol>`:""}${I&&I.x?`<p class="mistake"><b>Avoid:</b> ${I.x}</p>`:""}<a class="demo" href="https://www.youtube.com/results?search_query=${encodeURIComponent(name.replace(/, assisted if needed| to failure/g,"")+" proper form")}" target="_blank" rel="noopener">Watch a demo on YouTube</a></div>`;
+  if(open)h+=`<div class="howto">${motionBlock(id)}${I?bodyMap(I.m,I.s)+`<p class="musc"><b>Main:</b> ${I.m.map(x=>MNAME[x]).join(", ")}${I.s.length?`<br><b>Helpers:</b> ${I.s.map(x=>MNAME[x]).join(", ")}`:""}</p>`:""}${I&&I.c.length?`<ol>${I.c.map(c=>`<li>${c}</li>`).join("")}</ol>`:""}${tipFor(id)?`<p class="coach"><b>Coach tip:</b> ${esc(tipFor(id))}</p>`:""}${I&&I.x?`<p class="mistake"><b>Avoid:</b> ${I.x}</p>`:""}<a class="demo" href="https://www.youtube.com/results?search_query=${encodeURIComponent(name.replace(/, assisted if needed| to failure/g,"")+" proper form")}" target="_blank" rel="noopener">Watch a demo on YouTube</a></div>`;
   return h;
 }
 function motionBlock(id){
@@ -1497,7 +1641,7 @@ function motionBlock(id){
 function headerHtml(e,ctx,tag){
   const [id,name,sets,target,flag,drop]=e;
   const st=repStyle(id),tg=styledTarget(e),open=openHow.has(id),hasNote=!!(store.settings.notes||{})[id];
-  let h=`<div class="swr" data-sw="ex">${swbg("Swap","Remove today")}<header class="sw exhead">${tag?`<span class="sstag">${tag}</span>`:""}<div class="exttl" data-act="exmenu" role="button" tabindex="0" aria-label="Options for ${esc(name)}"><h3>${esc(name)}</h3><span class="target">${sets} × ${esc(tg)}${drop?" + drop":""}${st&&canStyle(e)?` · ${STYLES[st][0]}`:""}</span></div><span class="exicons"><button type="button" class="icob" data-act="howto" aria-expanded="${open}" aria-label="${open?"Hide":"Show"} how to do ${esc(name)}"${open?' aria-pressed="true"':""}>${IC.search}</button><button type="button" class="icob${hasNote?" has":""}" data-act="note" aria-label="${hasNote?"Edit your note":"Add a note"} for ${esc(name)}">${IC.pen}</button></span></header></div>`;
+  let h=`<div class="swr" data-sw="ex">${swbg("Swap","Remove today")}<header class="sw exhead">${tag?`<span class="sstag">${tag}</span>`:""}<div class="exttl" data-act="exmenu" role="button" tabindex="0" aria-label="Options for ${esc(name)}"><h3>${esc(name)}</h3><span class="target">${sets} × ${esc(tg)}${drop?" + drop":""}${st&&canStyle(e)?` · ${STYLES[st][0]}`:""}${needs(id).length?` <span class="needs">${needsText(needs(id))}</span>`:""}</span></div><span class="exicons"><button type="button" class="icob" data-act="howto" aria-expanded="${open}" aria-label="${open?"Hide":"Show"} how to do ${esc(name)}"${open?' aria-pressed="true"':""}>${IC.search}</button><button type="button" class="icob${hasNote?" has":""}" data-act="note" aria-label="${hasNote?"Edit your note":"Add a note"} for ${esc(name)}">${IC.pen}</button></span></header></div>`;
   if(!ctx.planIds.has(id))h+=`<p class="restline">Logged this day, but no longer in this workout.</p>`;
   const note=(store.settings.notes||{})[id];if(note)h+=`<p class="restline"><b>Note:</b> ${esc(note)}</p>`;
   return h;
@@ -1522,7 +1666,7 @@ function singleCard(e,ctx){
   let h=`<article class="card ex" data-ex="${id}">`+headerHtml(e,ctx);
   const rt=restFor(id,p,k),uni=v2&&UNI[id];
   if(rt&&(sets>1||drop))h+=`<button type="button" class="restbtn" data-act="restpick" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to change.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">⏱ ${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
-  h+=lastLine(id,k,sets,target,flag,v2)+howtoHtml(id,name)+(tipsOn()&&v2?`<p class="formtip">Focus on form first. If your form starts to slip, the weight is too heavy, so lower it.</p>`:"");
+  h+=lastLine(id,k,sets,target,flag,v2)+howtoHtml(id,name)+(tipsOn()&&v2?`<p class="formtip">Focus on form first. If your form starts to slip, the weight is too heavy, so lower it. Too hard right now? Tap the name and choose <b>Swap exercise</b> for an easier option.</p>`:"");
   const {rws,rc,types}=rowsInfo(day,e);let num=0,dropNoted=false;
   for(let i=0;i<rc;i++){const r=rws[i]||{w:"",r:"",d:false},isDrop=types[i]==="d";
     h+=setRowHtml(e,i,r,isDrop,isDrop?"↓":String(++num),true);
@@ -1547,11 +1691,14 @@ function supersetCard(group,ctx){
 const secOpen={},exOpen=new Set(),edOpen=new Set();
 function secHead(k,sec,title,summary,auto){const key=k+":"+sec,col=key in secOpen?!secOpen[key]:auto;
   return {col,html:`<h2 class="sec-title secwrap"><button type="button" class="secbtn" data-act="seccol" data-s="${sec}" data-c="${col?1:0}" aria-expanded="${!col}"><span>${title}</span><small>${summary}</small>${IC.chev}</button></h2>`};}
+function routineFor(kind,k,p,P,v2){const L=kind==="w"?warmList(p,P,v2):stretchList(p,P,v2),o=(((store.days[k]||{}).rswap)||{})[kind]||{},xs=((P&&P.ex)||[]).map(e=>String(e[1]).toLowerCase());
+  return L.map((n,i)=>{if(o[i])return o[i];const m=kind==="w"&&n.match(/light warm-up sets of (.+)$/);if(m&&m[1]!=="your first exercise"&&xs.length&&!xs.some(x=>x.includes(m[1].replace(/s$/,""))))return GEN_WARM[2];return n;});}
+function swapHint(what){return tipsOn()?`<p class="note" style="margin:-2px 0 8px">Can't do one of these ${what} yet? ${store.settings.swapBtn!==false?"Tap "+IC.swap+" or swipe it":"Swipe it"} to the right for an easier version.</p>`:"";}
 function secWarm({k,p,P,v2,day},before){
-  const WU=warmList(p,P,v2);if(!WU.length)return "";
+  const WU=routineFor("w",k,p,P,v2);if(!WU.length)return "";
   const done=WU.filter((_,i)=>(day.warm||{})[i]).length,H=secHead(k,"warm",before?"Warm-up, before "+(p==="run"?"the run":"training"):"Warm-up",done>=WU.length?"Done":`${done} of ${WU.length} done`,done>=WU.length);
   if(H.col)return H.html;
-  return H.html+`<p class="note" style="margin:-4px 0 6px">About 5 minutes. Keep it moving, and save the long holds for after.</p>`+routineHtml("w",WU,day.warm||{});
+  return H.html+`<p class="note" style="margin:-4px 0 6px">About 5 minutes. Keep it moving, and save the long holds for after.</p>`+swapHint("warm-ups")+routineHtml("w",WU,day.warm||{});
 }
 function secWork({k,p,P,v2,day}){
   const todayEx=dayExercises(k,p),planIds=new Set(todayEx.map(e=>e[0])),hiddenIds=hiddenExIds(day);let h="";
@@ -1593,10 +1740,10 @@ function secCardio({k,p,day}){
   return h;
 }
 function secStretch({k,p,P,v2,day}){
-  const ST=stretchList(p,P,v2);if(!ST.length)return "";
+  const ST=routineFor("s",k,p,P,v2);if(!ST.length)return "";
   const done=ST.filter((_,i)=>(day.stretch||{})[i]).length,H=secHead(k,"stretch",p==="rest"?"Mobility, 10–15 min":"Stretches, after "+(p==="run"?"the run":"training"),done>=ST.length?"Done":`${done} of ${ST.length} done`,done>=ST.length);
   if(H.col)return H.html;
-  return H.html+`<p class="note" style="margin:-4px 0 6px">${p==="rest"?"Easy and relaxed.":"Hold each gently, no bouncing."}</p>`+routineHtml("s",ST,day.stretch||{});
+  return H.html+`<p class="note" style="margin:-4px 0 6px">${p==="rest"?"Easy and relaxed.":"Hold each gently, no bouncing."}</p>`+swapHint("stretches")+routineHtml("s",ST,day.stretch||{});
 }
 function renderLayoutEdit(k,p,P){
   const {order,hidden}=layoutCfg(),WU=warmList(p,P,true),ST=stretchList(p,P,true);
@@ -1617,10 +1764,12 @@ function renderTrain(){
   if(showWelcome()){h+=welcomeHtml()+`</section>`;$("panel").innerHTML=h;return;}
   const stg=onbStage();
   if(stg==="level"){h+=levelHtml()+`</section>`;$("panel").innerHTML=h;return;}
+  if(stg==="equip"){h+=equipHtml(true)+`</section>`;$("panel").innerHTML=h;return;}
   if(stg==="split"||splitOpen){if(!splitDraft)draftInit();h+=splitHtml(stg==="split")+`</section>`;$("panel").innerHTML=h;return;}
   if(v2)h+=`<div class="trainbar"><button type="button" class="btn ghost sm" data-act="editplan" aria-pressed="${editPlan}">${IC.edit} ${editPlan?"Editing":"Edit"}</button></div>`;
   const sp=store.settings.split;
   if(sp&&sp.until&&todayKey()>sp.until)h+=`<div class="card notice"><strong>Your split ended on ${shortDate(sp.until)}</strong><p class="note" style="margin:4px 0 10px">Keep going with the same week, or set up a new split.</p><div class="pair"><button class="btn ghost" style="margin:0" data-act="splitkeep">Keep it going</button><button class="btn" style="margin:0" data-act="splitnew">New split</button></div></div>`;
+  {const L=v2&&!editPlan?eqIssues():[];if(L.length)h+=`<div class="card notice"><strong>${L.length} exercise${L.length>1?"s":""} in your plan need${L.length>1?"":"s"} equipment you don't have</strong><p class="note" style="margin:4px 0 10px">Swap ${L.length>1?"them":"it"} for something you can do, or keep ${L.length>1?"them":"it"}.</p><button class="btn ghost sm" data-act="eqreview">Review swaps</button></div>`;}
   if(store.settings.presetNote)h+=`<div class="card notice"><strong>This is a suggested plan</strong><p class="note" style="margin:4px 0 10px">It was picked for your experience level. Change any exercise, any day, or the whole split whenever you like with the <b>Edit</b> button above.</p><button class="btn ghost sm" data-act="presetok">Got it</button></div>`;
   h+=`<div class="dayhead"><h2>${esc(P.name)}</h2><p>${p==="rest"?"Recovery day. Aim for 7–10k steps and an easy stretch.":kw(esc(P.rest))}</p>
   <label class="swap">Workout for this day <select data-act="plan">${Object.keys(PL).map(id=>`<option value="${id}"${id===p?" selected":""}>${esc(PL[id].name)}</option>`).join("")}</select></label>
@@ -2290,10 +2439,10 @@ function profileFields(pf){
 let welcomeManual=false;
 function welcomeHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
-  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 3</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
+  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 4</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
     <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
     <button class="btn" data-act="welcomeman">Save and start</button><button class="linkbtn" style="margin-top:10px" data-act="welcomecalc">Work them out from my details instead</button>${restoreLink()}</div>`;
-  return `<div class="card welcome tcalc"><p class="stepl">Step 1 of 3</p><h2 style="font-size:26px">Welcome to Body Builder</h2>
+  return `<div class="card welcome tcalc"><p class="stepl">Step 1 of 4</p><h2 style="font-size:26px">Welcome to Body Builder</h2>
     <p class="note" style="margin:6px 0 12px">First, a few details so the app can work out how much you should eat each day. They stay on your device.</p>
     ${profileFields(pf)}
     <button class="btn" data-act="welcomego">Save and start</button>
@@ -2334,15 +2483,17 @@ sheetEl.addEventListener("click",e=>{
   if(sc){sheetEl._scope=sc.dataset.scope;sheetEl.querySelectorAll("[data-scope]").forEach(x=>x.setAttribute("aria-pressed",String(x===sc)));}
 });
 function libPickList(q,exclude){
-  q=q.trim().toLowerCase();const first=(LIB[exclude]||{}).g;
-  const all=Object.values(LIB).filter(x=>x.id!==exclude&&(!q||x.n.toLowerCase().includes(q)||x.g.toLowerCase().includes(q)||x.m.some(m=>(MNAME[m]||"").includes(q))));
+  q=q.trim().toLowerCase();const o=LIB[exclude]||{m:[],s:[]},first=o.g,om=new Set(o.m),dCur=diffOf(exclude);
+  const all=Object.values(LIB).filter(x=>x.id!==exclude&&(!q||x.n.toLowerCase().includes(q)||x.g.toLowerCase().includes(q)||typeOf(x.id).toLowerCase().includes(q)||x.m.some(m=>(MNAME[m]||"").includes(q))));
   if(!all.length)return `<p class="note">No matches.</p>`;
+  const score=x=>x.m.filter(m=>om.has(m)).length*3+x.s.filter(m=>om.has(m)).length;
   const groups=[first].concat(GROUPS,["Other"]).filter((g,i,a)=>g&&a.indexOf(g)===i);
-  return groups.map(g=>{const xs=all.filter(x=>x.g===g).sort((a,b)=>a.n.localeCompare(b.n));if(!xs.length)return "";
-    return `<p class="libhead">${esc(g)}${g===first?` <small>same muscle group</small>`:""}</p>`+libItems(xs);}).join("");
+  const anyNo=all.some(x=>!canDo(x.id));
+  return (anyNo?`<p class="note eqnote">Exercises marked <span class="needs">Needs …</span> use equipment that isn't in your setup. You can still pick them.</p>`:"")+groups.map(g=>{const xs=all.filter(x=>x.g===g).sort((a,b)=>score(b)-score(a)||(canDo(b.id)-canDo(a.id))||diffOf(a.id)-diffOf(b.id)||a.n.localeCompare(b.n));if(!xs.length)return "";
+    return `<p class="libhead">${esc(g)}${g===first?` <small>same muscle group · closest match first</small>`:""}</p>`+libItems(xs,g===first?dCur:0);}).join("");
 }
-function libItems(xs){
-  return xs.map(x=>`<button type="button" class="libitem" data-pick="${x.id}" aria-pressed="${sheetEl._pick===x.id}"><span><strong>${esc(x.n)}</strong><small>${x.m.length?x.m.map(m=>MNAME[m]).join(", ").replace(/^./,c=>c.toUpperCase()):esc(x.g)}</small></span><span class="chk">✓</span></button>`).join("");
+function libItems(xs,dCur){
+  return xs.map(x=>`<button type="button" class="libitem${canDo(x.id)?"":" cant"}" data-pick="${x.id}" aria-pressed="${sheetEl._pick===x.id}"><span><strong>${esc(x.n)}${dCur&&diffOf(x.id)<dCur?` <span class="easier">Easier</span>`:""}</strong><small>${x.m.length?x.m.map(m=>MNAME[m]).join(", ").replace(/^./,c=>c.toUpperCase()):esc(x.g)} · ${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}</small>${needsBadge(x.id)}</span><span class="chk">✓</span></button>`).join("");
 }
 sheetEl.addEventListener("input",e=>{if(e.target.id==="swQ"){const r=sheetEl.querySelector("#swRes");if(r)r.innerHTML=libPickList(e.target.value,sheetEl._exclude);}});
 
@@ -2371,7 +2522,7 @@ function editEx(id){
         day.swap=day.swap||{};
         if(scope==="plan"){const PE=ensureEditable(p);const ix=PE?PE.ex.findIndex(x=>x[0]===orig):-1;if(ix>=0){const o=PE.ex[ix],L0=libArr(n);PE.ex[ix]=[L0[0],L0[1],o[2],o[3],L0[4],o[5],o[6],o[7]];}delete day.swap[orig];persist("settings");}
         else{if(n===orig)delete day.swap[orig];else day.swap[orig]=n;}
-        persist("day-"+k);render();toast(scope==="plan"?"Swapped in your plan":"Swapped for today",u);}},
+        persist("day-"+k);render();toast((scope==="plan"?"Swapped in your plan":"Swapped for today")+(canDo(n)?"":". Heads up: it "+needsText(needs(n)).toLowerCase()+", which isn't in your equipment"),u);}},
      {label:"Remove for today",cls:"btn danger",fn:()=>skipEx(id)},
      {label:"Cancel",cls:"btn ghost"}]);
 }
@@ -2423,6 +2574,7 @@ function editMeal(slotId,opt){
 function doEdit(wr){
   const kind=wr.dataset.sw,i=+wr.dataset.i;
   if(kind==="set"||kind==="ex")editEx(wr.closest("[data-ex]").dataset.ex);
+  else if(kind==="routine")routineSwap(wr.dataset.k,i);
   else if(kind==="food")editFood(i);
   else if(kind==="buy")editBuy(wr.dataset.day,i);
   else if(kind==="cardio")editCardio(i);
@@ -2462,7 +2614,7 @@ document.addEventListener("pointermove",e=>{
     else if(Math.abs(dy)>12){swS=null;return;}
     else return;
   }
-  swS.dx=Math.max(-150,Math.min(swS.wr.dataset.sw==="set"?0:150,dx));
+  swS.dx=Math.max(swS.wr.dataset.sw==="routine"?0:-150,Math.min(swS.wr.dataset.sw==="set"?0:150,dx));
   swS.fg.style.transform=`translateX(${swS.dx}px)`;
   swS.wr.classList.toggle("l",swS.dx<0);swS.wr.classList.toggle("r",swS.dx>0);swS.wr.classList.toggle("go",Math.abs(swS.dx)>80);
 });
@@ -2699,12 +2851,63 @@ $("panel").addEventListener("click",e=>{
   else if(a==="recedit")editRecipe(+b.dataset.i);
   else if(a==="reccopy"){const r=RECIPES.find(x=>x.id===b.dataset.id);if(!r)return;ensureRecipes().push({id:r.id,n:r.n,k:r.k,p:r.p,s:r.s,ing:r.ing.slice(),steps:r.steps.slice(),note:r.note});persist("settings");renderEat();toast("Saved your own copy. Change anything with Edit");}
 });
+// ---------- Equipment setup and swap suggestions ----------
+function fitRow(e,alt){return [alt.id,alt.n,e[2],alt.f?alt.t:e[3],alt.f,alt.f?0:(e[5]||0),e[6]===undefined?null:e[6],e[7]===undefined?null:e[7]];}
+function fitEx(list){const used=new Set(list.filter(e=>canDo(e[0])).map(e=>e[0]));const out=[];
+  for(const e of list){if(canDo(e[0])){out.push(e);continue;}const alt=bestAlt(e[0],{exclude:used});if(!alt)continue;used.add(alt.id);out.push(fitRow(e,alt));}
+  return out;}
+function equipHtml(onb){
+  const S=store.settings,cur=S.equipPreset||(myEquip()?"own":"gym"),have=myEquip()||[];
+  return `<div class="card${onb?" welcome":""}">${onb?`<p class="stepl">Step 3 of 4</p><h2 style="font-size:24px">What equipment do you have?</h2><p class="note" style="margin:6px 0 12px">Your plan only uses exercises you can actually do. You can change this any time in Settings → Training.</p>`:`<p class="note" style="margin:0 0 10px">Exercises that need anything you don't have are marked, and the app suggests swaps. You can still pick them.</p>`}
+  <div class="tplgrid">${EQPRESETS.map(([v,t,d])=>`<button type="button" class="tpl" data-act="eqp" data-v="${v}" aria-pressed="${cur===v}"><strong>${t}</strong><small>${d}</small></button>`).join("")}</div>
+  ${cur==="own"?`<p class="lbl" style="margin-top:12px">Tick what you have</p><div class="eqgrid">${EQKEYS.map(([k,l])=>`<button type="button" class="toggle mini-t" data-act="eqk" data-v="${k}" aria-pressed="${have.includes(k)}"><span class="box">✓</span><span class="txt"><strong>${l}</strong></span></button>`).join("")}</div>`:""}
+  <p class="note">Bodyweight exercises are always included.</p>${onb?`<button class="btn" data-act="eqgo">Continue</button>`:""}</div>`;
+}
+function eqClick(b){const a=b.dataset.act,S=store.settings;
+  if(a==="eqp"){const P=EQPRESETS.find(x=>x[0]===b.dataset.v);S.equipPreset=P[0];
+    if(P[0]==="gym")delete S.equip;else if(P[0]==="own"){if(!Array.isArray(S.equip))S.equip=EQKEYS.map(x=>x[0]);}else S.equip=P[3].slice();}
+  else if(a==="eqk"){const k=b.dataset.v;S.equip=Array.isArray(S.equip)?S.equip:EQKEYS.map(x=>x[0]);S.equip=S.equip.includes(k)?S.equip.filter(x=>x!==k):S.equip.concat([k]);}
+  else return false;
+  persist("settings");return true;}
+function eqIssues(){
+  if(!myEquip())return [];const k=todayKey(),PL=plansFor(k),keep=new Set(store.settings.eqKeep||[]),out=[],seen=new Set();
+  for(const p of new Set(weekFor(k))){const P=PL[p];if(!P)continue;const ids=new Set(P.ex.map(x=>x[0]));
+    for(const e of P.ex){const key=p+":"+e[0];if(canDo(e[0])||keep.has(key)||seen.has(key))continue;seen.add(key);const alt=bestAlt(e[0],{exclude:ids});if(alt)ids.add(alt.id);out.push({p,pn:P.name,e,alt});}}
+  return out;}
+function eqReviewBody(){const L=eqIssues();if(!L.length)return `<p class="note" style="margin-top:0">All sorted. Everything in your plan works with your equipment, or you chose to keep it.</p>`;
+  return `<p class="note" style="margin-top:0">Suggested swaps for exercises that need equipment you don't have. Keep any you can still do somewhere.</p>`+L.map((x,i)=>`<div class="eqrow"><div><strong>${esc(x.e[1])}</strong> <small class="of">${esc(x.pn)}</small><small class="needs">${needsText(needs(x.e[0]))}</small>${x.alt?`<span class="eqto">→ ${esc(x.alt.n)}</span>`:`<span class="eqto">No match without that equipment. Remove it, or keep it.</span>`}</div><div class="eqbtns">${x.alt?`<button type="button" class="btn sm" data-eqs="swap:${i}">Swap</button>`:`<button type="button" class="btn sm" data-eqs="rm:${i}">Remove</button>`}<button type="button" class="btn ghost sm" data-eqs="keep:${i}">Keep</button></div></div>`).join("");}
+function eqApply(x){const PE=ensureEditable(x.p);if(!PE)return;const ix=PE.ex.findIndex(r=>r[0]===x.e[0]);if(ix>=0&&x.alt)PE.ex[ix]=fitRow(PE.ex[ix],x.alt);}
+function openEqReview(){const L=eqIssues();openSheet("Swaps for your equipment",eqReviewBody(),[{label:"Swap all suggested",fn:()=>{const u=snap(["settings"]);eqIssues().forEach(x=>x.alt&&eqApply(x));persist("settings");render();toast("Plan updated for your equipment",u);}},{label:"Done",cls:"btn ghost"}]);sheetEl._kind="eqreview";}
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="eqreview")return;const b=e.target.closest("[data-eqs]");if(!b)return;const [a,i]=b.dataset.eqs.split(":"),x=eqIssues()[+i],S=store.settings;if(!x)return;
+  if(a==="swap")eqApply(x);else if(a==="rm"){const PE=ensureEditable(x.p);if(PE)PE.ex=PE.ex.filter(r=>r[0]!==x.e[0]);}else S.eqKeep=(S.eqKeep||[]).concat([x.p+":"+x.e[0]]);persist("settings");sheetEl.querySelector(".sheet-b").innerHTML=eqReviewBody();render();});
+// warm-up and stretch swaps
+function routineSwap(kind,i){
+  const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],list=routineFor(kind,k,p,P,k>=NEWPLAN),cur=list[i];if(!cur)return;
+  const reg=sinfo(cur).r,opts=Object.keys(SINFO).filter(n=>n!==cur&&sinfo(n).r===reg&&!/^Stretch each muscle|^Walk to the gym/.test(n))
+    .sort((a,b)=>(needsOf(WEQ[a]).length-needsOf(WEQ[b]).length)||((WDIFF[a]||1)-(WDIFF[b]||1))||a.localeCompare(b));
+  const anyNo=opts.some(n=>needsOf(WEQ[n]).length);
+  sheetEl._pick=null;
+  openSheet("Swap "+cur,`<p class="note" style="margin-top:0">Pick something to do instead. Easiest options are at the top.${anyNo?` Items marked <span class="needs">Needs …</span> use equipment that isn't in your setup, but you can still pick them.`:""}</p>
+    <div class="swres">${opts.map(n=>{const nd=needsOf(WEQ[n]);return `<button type="button" class="libitem${nd.length?" cant":""}" data-pick="${esc(n)}" aria-pressed="false"><span><strong>${esc(n)}${(WDIFF[n]||1)<(WDIFF[cur]||1)?` <span class="easier">Easier</span>`:""}</strong><small>${sinfo(n).hold?"Hold "+esc(sinfo(n).hold):esc(reg)}</small>${nd.length?`<span class="needs">${needsText(nd)}</span>`:""}</span><span class="chk">✓</span></button>`;}).join("")}</div>
+    <div class="seg" style="margin:12px 0 0"><button type="button" data-scope="today" aria-pressed="true">Just today</button><button type="button" data-scope="plan" aria-pressed="false">Every ${esc(P.name)}</button></div>`,
+    [{label:"Swap",fn:()=>{const n=sheetEl._pick;if(!n)return false;const u=snap(["day-"+k,"settings"]),day=ensureDay(k);
+      if(sheetEl._scope==="plan"){ensureRoutine(kind,p,P)[i]=n;if(day.rswap&&day.rswap[kind])delete day.rswap[kind][i];persist("settings");}
+      else{day.rswap=day.rswap||{};day.rswap[kind]=day.rswap[kind]||{};day.rswap[kind][i]=n;}
+      persist("day-"+k);renderTrain();toast((sheetEl._scope==="plan"?"Swapped every "+P.name:"Swapped for today")+(needsOf(WEQ[n]).length?". Heads up: it "+needsText(needsOf(WEQ[n])).toLowerCase():""),u);}},
+     {label:"Cancel",cls:"btn ghost"}]);
+}
+$("panel").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
+  if((a==="eqp"||a==="eqk")&&(tab==="train"||tab==="settings")){if(eqClick(b)){if(tab==="settings")renderSettings();else renderTrain();}}
+  else if(a==="eqgo"&&tab==="train"){const S=store.settings;if(S.equipPreset==="own"&&!(S.equip||[]).length)toast("No equipment ticked, so you'll get bodyweight exercises");S.onb="split";splitDraft=null;persist("settings");render();window.scrollTo(0,0);}
+  else if(a==="eqreview")openEqReview();
+  else if(a==="rswap"&&tab==="train")routineSwap(b.dataset.k,+b.dataset.i);
+});
 // ---------- Experience level and split ----------
 const LEVELS=[["new","New to the gym","Less than 6 months. You'll get a ready-made plan, beginner tips and suggested starting weights."],
   ["some","Some experience","6 months to 2 years. Start from a suggested plan, or from an empty one."],
   ["exp","Experienced","More than 2 years. You build your own workouts. Ready-made plans are still there if you want one."]];
 function levelHtml(){const cur=store.settings.level||"";
-  return `<div class="card welcome"><p class="stepl">Step 2 of 3</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
+  return `<div class="card welcome"><p class="stepl">Step 2 of 4</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
   ${LEVELS.map(([v,t,d])=>`<button type="button" class="toggle radio" data-act="lvl" data-v="${v}" aria-pressed="${cur===v}"><span class="box">✓</span><span class="txt"><strong>${t}</strong><small>${d}</small></span></button>`).join("")}
   <button class="btn" data-act="lvlgo">Continue</button></div>`;}
 const SPLIT_TPL=[["full3","Full body, 3 days","Mon, Wed, Fri. The best place to start.",["rest","full","rest","full","rest","full","rest"]],
@@ -2727,7 +2930,7 @@ function splitHtml(onb){
   const opts=cur=>[...Object.keys(PL).filter(id=>!["rest","dyn"].includes(id)).map(id=>[id,PL[id].name]),["dyn","Dynamic: choose on the day"],["rest","Rest"],["__new","+ New custom day…"]]
     .map(([v,l])=>`<option value="${v}"${v===cur?" selected":""}>${esc(l)}</option>`).join("");
   const days=D.week.filter(x=>x!=="rest").length;
-  return `<div class="card welcome">${onb?`<p class="stepl">Step 3 of 3</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
+  return `<div class="card welcome">${onb?`<p class="stepl">Step 4 of 4</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
   <p class="note" style="margin:6px 0 12px">Pick a ready-made week, then change any day you like. ${onb?"You can change all of this later.":""}</p>
   <p class="lbl">Start from</p><div class="tplgrid">${SPLIT_TPL.map(t=>`<button type="button" class="tpl" data-act="spltpl" data-v="${t[0]}" aria-pressed="${D.tpl===t[0]}"><strong>${t[1]}</strong><small>${t[2]}</small></button>`).join("")}</div>
   <p class="lbl" style="margin-top:14px">Each day <span style="float:right">${days} training day${days===1?"":"s"}</span></p>
@@ -2744,8 +2947,10 @@ function saveSplit(){
   c.weeks=(Array.isArray(c.weeks)?c.weeks:[]).filter(e=>e.from<t);c.weeks.push({from:onb?"2000-01-01":t,week:D.week.slice()});
   c.plans=c.plans||{};
   for(const id of Object.keys(PLANS2)){if(["rest","run","dyn"].includes(id))continue;const o=c.plans[id];
-    if(!D.fill){if(!o)c.plans[id]={name:PLANS2[id].name,ex:[],auto:1};}
-    else if(o&&o.auto&&!(o.ex||[]).length)delete c.plans[id];}
+    if(o&&!o.auto)continue;
+    if(!D.fill){c.plans[id]={name:PLANS2[id].name,ex:[],auto:1};continue;}
+    const fitted=fitEx(PLANS2[id].ex);
+    if(JSON.stringify(fitted)!==JSON.stringify(PLANS2[id].ex))c.plans[id]={name:PLANS2[id].name,ex:fitted,auto:2};else if(o)delete c.plans[id];}
   S.fill=D.fill;
   S.split=D.dur==="set"?{start:t,n:D.n,unit:D.unit,until:splitUntil(D)}:{start:t,until:null};
   if(D.fill&&onb)S.presetNote=true;
@@ -2757,7 +2962,7 @@ function saveSplit(){
 $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b||tab!=="train")return;const a=b.dataset.act,S=store.settings;
   if(a==="lvl"){S.level=b.dataset.v;persist("settings");renderTrain();}
-  else if(a==="lvlgo"){if(!S.level){toast("Pick the option that fits you best");return;}S.onb="split";splitDraft=null;clearTimeout(toastT);toastEl.classList.remove("show");persist("settings");render();window.scrollTo(0,0);}
+  else if(a==="lvlgo"){if(!S.level){toast("Pick the option that fits you best");return;}S.onb="equip";splitDraft=null;clearTimeout(toastT);toastEl.classList.remove("show");persist("settings");render();window.scrollTo(0,0);}
   else if(a==="spltpl"){const t=SPLIT_TPL.find(x=>x[0]===b.dataset.v);splitDraft.tpl=t[0];splitDraft.week=t[3].slice();renderTrain();}
   else if(a==="splfill"){splitDraft.fill=!splitDraft.fill;renderTrain();}
   else if(a==="splsave")saveSplit();
@@ -2815,13 +3020,15 @@ function trainingSettingsHtml(){const S=store.settings,sw=(key,lab,sub)=>{const 
   return `<p class="lbl" style="margin-top:0">Gym experience</p><div class="seg seg3" role="group" aria-label="Gym experience">${[["new","New"],["some","Some"],["exp","Experienced"]].map(([v,l])=>`<button type="button" data-trset="level:${v}" aria-pressed="${S.level===v}">${l}</button>`).join("")}</div>
   <p class="lbl">Default rep style</p><div class="seg seg4" role="group" aria-label="Default rep style">${[["","As planned"],["light","Light"],["avg","Medium"],["heavy","Heavy"]].map(([v,l])=>`<button type="button" data-trset="repDefault:${v}" aria-pressed="${(S.repDefault||"")===v}">${l}</button>`).join("")}</div>
   <p class="note" style="margin:-4px 0 10px">Heavy is 4–6 reps, Medium 8–12, Light 12–20. Change it for one exercise by tapping its name on the Train tab.</p>
-  <div>${sw("tips","Beginner tips and starting weights","Shows suggested starting weights and a reminder to focus on form. Only for New and Some experience.")}${sw("keywords","Explain keywords","Words like drop set and superset get underlined. Tap one to see what it means.")}</div>`;}
+  <p class="lbl" style="margin-top:14px">Your equipment</p>${equipHtml(false).replace(/^<div class="card">/,"<div>")}
+  <div>${sw("swapBtn","Swap buttons on warm-ups and stretches","Hide them for a cleaner look. You can still swipe an item to the right to swap it.")}${sw("tips","Beginner tips and starting weights","Shows suggested starting weights and a reminder to focus on form. Only for New and Some experience.")}${sw("keywords","Explain keywords","Words like drop set and superset get underlined. Tap one to see what it means.")}</div>`;}
 $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-trset]");if(!b)return;const [k,v]=b.dataset.trset.split(":"),S=store.settings;
   if(k==="level")S.level=v;else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="2.7";
+const APP_VERSION="2.8";
 const CHANGELOG=[
+  {v:"2.8",d:"9 October 2026",t:"Equipment, swaps and exercise library",items:["Setup asks what equipment you have (full gym, home with dumbbells, bodyweight only or your own list) and fills your plan with exercises you can do","Change your equipment in Settings → Training. The app then suggests swaps, and you choose Swap or Keep for each","Exercises and warm-ups that need equipment you don't have are marked, but you can still pick them","Swap lists show the closest match first: same main muscles, then easier options, each marked with type and difficulty","Swap warm-ups and stretches for easier ones with the swap button or by swiping right, just for today or every time. A switch in Settings → Training hides the swap buttons","New easier warm-ups and stretches, like an assisted hang with your feet on the floor","Exercise library in Help: search all exercises, filter by type (bodyweight, machine, barbell, dumbbells, cable and more) and muscle group","Coach tips on exercises, like bringing your wrists together at the end of a chest fly"]},
   {v:"2.7",d:"9 October 2026",t:"Install as an app",items:["New Settings page with steps to install Body Builder on iPhone, Android and computers","Android phones get an Install button that opens the phone's own install prompt","Explains offline use, and adds a Share the link button for friends"]},
   {v:"2.6",d:"9 October 2026",t:"Less scrolling",items:["Settings is now a short menu. Each section opens on its own page, with Change log always last","Warm-up and stretches fold away once everything is ticked, and Cardio stays folded until you use it. Tap a section title to open or close it","Exercises fold into one line once every set is done. Tap to open them again","On the Edit page, layout, warm-up and stretches are folded until you open them"]},
   {v:"2.5",d:"9 October 2026",t:"Brick logo is back",items:["Back to the logo with two capital B's built from toy bricks, red in front of blue","The logo in the app has no background","How-to buttons are now a magnifying glass everywhere, including warm-ups and stretches","No more how-to for walking","Food calculator values checked against USDA data and supermarket labels. Fixed chicken thigh, lean beef mince and zaziki, and added regular cottage cheese next to the light one"]},
@@ -2865,6 +3072,37 @@ $("panel").addEventListener("click",async e=>{if(tab!=="settings")return;const b
   else if(b.dataset.act==="sharelink"){const data={title:"Body Builder",text:"Track your workouts, food and progress",url:SITE_URL};
     try{if(navigator.share){await navigator.share(data);return;}}catch(err){return;}
     try{await navigator.clipboard.writeText(SITE_URL);toast("Link copied");}catch(err){toast(SITE_URL);}}});
+// ---------- Exercise library ----------
+let libS="",libT="",libGp="",libMine=false;
+function libraryList(){
+  const q=libS.trim().toLowerCase();
+  const xs=Object.values(LIB).filter(x=>(!libT||typeOf(x.id)===libT)&&(!libGp||x.g===libGp)&&(!libMine||canDo(x.id))&&(!q||x.n.toLowerCase().includes(q)||x.m.some(m=>(MNAME[m]||"").includes(q))||x.g.toLowerCase().includes(q)))
+    .sort((a,b)=>GROUPS.indexOf(a.g)-GROUPS.indexOf(b.g)||diffOf(a.id)-diffOf(b.id)||a.n.localeCompare(b.n));
+  if(!xs.length)return `<p class="empty">No exercises match.</p>`;
+  let h=`<p class="note" style="margin:0 0 6px">${xs.length} exercise${xs.length===1?"":"s"}</p>`,g="";
+  for(const x of xs){if(x.g!==g){g=x.g;h+=`<p class="libhead">${esc(g)}</p>`;}
+    h+=`<button type="button" class="libitem${canDo(x.id)?"":" cant"}" data-libx="${x.id}"><span><strong>${esc(x.n)}</strong><small>${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}${x.m.length?" · "+x.m.map(m=>MNAME[m]).join(", ").replace(/^./,c=>c.toUpperCase()):""}</small>${needsBadge(x.id)}</span>${IC.chev}</button>`;}
+  return h;
+}
+function libraryHtml(){
+  return `<input class="field" id="libS" placeholder="Search by name or muscle, like chest" value="${esc(libS)}" aria-label="Search exercises">
+  <p class="lbl" style="margin-top:10px">Type</p><div class="chips">${["All"].concat(TYPES).map(t=>`<button type="button" class="chip${(t==="All"?!libT:libT===t)?" on":""}" data-ltype="${t==="All"?"":t}">${t}</button>`).join("")}</div>
+  <select class="field" data-lgrp aria-label="Muscle group"><option value="">All muscle groups</option>${GROUPS.map(g=>`<option${g===libGp?" selected":""}>${g}</option>`).join("")}</select>
+  ${myEquip()?`<div class="setrow" style="margin-top:8px"><span class="sl">Only what I can do with my equipment</span><button type="button" class="switch" role="switch" aria-checked="${libMine}" data-lmine="1" aria-label="Only show exercises I can do"><i></i></button></div>`:""}
+  <div class="card" style="padding:4px 14px;margin-top:10px"><div id="libList">${libraryList()}</div></div>`;
+}
+function exInfo(id){const x=LIB[id];if(!x)return;const I=getInfo(id),nd=needs(id),tip=tipFor(id);
+  openSheet(x.n,`<div class="extags"><span>${typeOf(id)}</span><span>${DIFFN[diffOf(id)]}</span><span>${esc(x.g)}</span></div>${nd.length?`<p class="needs" style="display:inline-block">${needsText(nd)}. You can still add it to a workout.</p>`:""}
+  ${motionBlock(id)}${I&&I.m.length?bodyMap(I.m,I.s)+`<p class="musc"><b>Main:</b> ${I.m.map(m=>MNAME[m]).join(", ")}${I.s.length?`<br><b>Helpers:</b> ${I.s.map(m=>MNAME[m]).join(", ")}`:""}</p>`:""}
+  ${I&&I.c&&I.c.length?`<ol>${I.c.map(c=>`<li>${c}</li>`).join("")}</ol>`:""}${tip?`<p class="coach"><b>Coach tip:</b> ${esc(tip)}</p>`:""}${I&&I.x?`<p class="mistake"><b>Avoid:</b> ${I.x}</p>`:""}
+  <p class="note">Usually ${x.sets} sets of ${esc(x.t)}.</p><a class="demo" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.n+" proper form")}" target="_blank" rel="noopener">Watch a demo on YouTube</a>`,[{label:"Close",cls:"btn ghost"}]);
+  if(typeof runMotion==="function")runMotion();}
+$("panel").addEventListener("click",e=>{if(tab!=="settings"||setPage!=="library")return;
+  const t=e.target.closest("[data-ltype]");if(t){libT=t.dataset.ltype;renderSettings();return;}
+  const m=e.target.closest("[data-lmine]");if(m){libMine=!libMine;renderSettings();return;}
+  const x=e.target.closest("[data-libx]");if(x)exInfo(x.dataset.libx);});
+$("panel").addEventListener("input",e=>{if(tab==="settings"&&e.target.id==="libS"){libS=e.target.value;const l=$("libList");if(l)l.innerHTML=libraryList();}});
+$("panel").addEventListener("change",e=>{if(tab==="settings"&&e.target.dataset&&e.target.dataset.lgrp!==undefined){libGp=e.target.value;renderSettings();}});
 let setPage=null;
 function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcfg(),lv={new:"New",some:"Some experience",exp:"Experienced"}[S.level]||"Not set";
   return [
@@ -2875,12 +3113,13 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
     ...(isLocalMode()?[["backup","Backup","Save or restore all your data",()=>`<div class="card">${backupHtml()}</div>`]]:[]),
     ["install","Install as an app",isLocalMode()&&isInstalled()?"Installed":"Home screen, offline use and sharing",()=>installHtml()],
-    ["help","Help","How to use the app, and training basics",()=>guideHtml()],
+    ["help","Help","Exercise library, how to use the app, training basics",()=>`<button type="button" class="setrowbtn card" style="border:1px solid var(--line);margin-bottom:12px" data-sp="library"><span><strong>Exercise library</strong><small>Look up any of the ${Object.keys(LIB).length} exercises by type, muscle and difficulty</small></span>${IC.chev}</button>`+guideHtml()],
     ["changelog","Change log",`Version ${APP_VERSION}`,()=>changelogHtml()]
   ];}
 function renderSettings(){
   const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
-  if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
+  if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="help">‹ Help</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
+  else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
   else{h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 12px">Body Builder, version ${APP_VERSION}</p><div class="card setnav">${P.map(x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`).join("")}</div>
   <p class="note">${isLocalMode()?"Your data is saved on this device only. Download a backup now and then, and before you clear your browser data.":"Changes save to your account and show up on all your devices."}</p>`;}
   $("panel").innerHTML=h+`</section>`;
