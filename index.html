@@ -2146,12 +2146,12 @@ $("panel").addEventListener("change",e=>{
 const ICATS=["Meat and fish","Dairy and eggs","Carbs","Legumes","Vegetables","Fruit","Fats and nuts","Other"];
 // [category, name, kcal, protein, carbs, fat] per 100 g
 const INGR=[
-  ["Meat and fish","Chicken breast, raw",110,23,0,1.2],["Meat and fish","Chicken thigh, skinless, raw",150,18,0,8.5],["Meat and fish","Turkey breast, raw",105,24,0,1],
-  ["Meat and fish","Beef mince 5% fat, raw",125,21,0,5],["Meat and fish","Beef mince 10% fat, raw",170,20,0,10],["Meat and fish","Beef mince 20% fat, raw",250,17,0,20],
+  ["Meat and fish","Chicken breast, raw",110,23,0,1.2],["Meat and fish","Chicken thigh, skinless, raw",121,19.7,0,4.1],["Meat and fish","Turkey breast, raw",105,24,0,1],
+  ["Meat and fish","Beef mince 5% fat, raw",129,21,0,5],["Meat and fish","Beef mince 10% fat, raw",170,20,0,10],["Meat and fish","Beef mince 20% fat, raw",250,17,0,20],
   ["Meat and fish","Beef steak (rump), raw",140,22,0,5.5],["Meat and fish","Lamb mince, raw",280,17,0,23],["Meat and fish","Salmon, raw",205,20,0,13],
   ["Meat and fish","Tuna in water, drained",110,25,0,1],["Meat and fish","Cod, raw",82,18,0,0.7],["Meat and fish","Shrimp, raw",85,20,0,0.5],
   ["Dairy and eggs","Egg, whole",143,12.6,0.7,9.5],["Dairy and eggs","Egg whites",52,11,0.7,0.2],["Dairy and eggs","Quark, Magerstufe",67,12.3,4.1,0.2],
-  ["Dairy and eggs","Skyr",63,11,4,0.2],["Dairy and eggs","Cottage cheese",71,12,2.6,1.5],["Dairy and eggs","Greek yogurt 2%",73,9.5,4,2],
+  ["Dairy and eggs","Skyr",63,11,4,0.2],["Dairy and eggs","Cottage cheese (Hüttenkäse)",87,12.3,1.5,3.2],["Dairy and eggs","Cottage cheese, light",71,12,2.6,1.5],["Dairy and eggs","Greek yogurt 2%",73,9.5,4,2],
   ["Dairy and eggs","High protein yogurt",65,10,5.4,0.4],["Dairy and eggs","Protein milk",51,7.5,5,0.1],["Dairy and eggs","Milk 1.5%",47,3.4,4.9,1.5],
   ["Dairy and eggs","Whole milk 3.5%",64,3.3,4.8,3.5],["Dairy and eggs","Light mozzarella",165,19,1,9],["Dairy and eggs","Halloumi",320,22,2,25],["Dairy and eggs","Parmesan",400,32,0,29],
   ["Carbs","White rice, dry",350,7,78,0.6],["Carbs","Rice, cooked",130,2.7,28,0.3],["Carbs","Pasta, dry",355,12.5,71,1.5],["Carbs","Pasta, cooked",150,5.5,30,0.9],
@@ -2166,7 +2166,7 @@ const INGR=[
   ["Fats and nuts","Olive oil",884,0,0,100],["Fats and nuts","Butter",740,0.7,0.6,82],["Fats and nuts","Light butter",360,1,1,39],["Fats and nuts","Peanuts",620,24,10,50],
   ["Fats and nuts","Almonds",580,21,6,50],["Fats and nuts","Pecans",690,9,4,72],["Fats and nuts","Avocado",160,2,2,15],["Fats and nuts","Peanut butter",600,25,12,50],
   ["Fats and nuts","Cacao nibs",603,13,10,53],["Fats and nuts","Tahini",600,17,10,54],
-  ["Other","Whey protein powder",380,78,6,6],["Other","Date syrup",300,1.3,71,0.4],["Other","Honey",304,0.3,82,0],["Other","Zaziki",116,3.6,9.1,7.2],["Other","Ketchup",100,1,23,0.1]
+  ["Other","Whey protein powder",380,78,6,6],["Other","Date syrup",300,1.3,71,0.4],["Other","Honey",304,0.3,82,0],["Other","Zaziki",127,6.9,3.7,9.4],["Other","Ketchup",100,1,23,0.1]
 ];
 function allIngr(){return INGR.map(x=>({c:x[0],n:x[1],k:x[2],p:x[3],cb:x[4],f:x[5]})).concat((store.settings.ingredients||[]).map(x=>({c:"Mine",n:x.n,k:+x.k||0,p:+x.p||0,cb:+x.cb||0,f:+x.f||0,mine:1})));}
 let fcCat="",fcQ="",fcPick=null,mb=[];
@@ -2772,7 +2772,7 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
 const APP_VERSION="2.5";
 const CHANGELOG=[
-  {v:"2.5",d:"9 October 2026",t:"Brick logo is back",items:["Back to the logo with two capital B's built from toy bricks, red in front of blue","The logo in the app has no background","How-to buttons are now a magnifying glass everywhere, including warm-ups and stretches","No more how-to for walking"]},
+  {v:"2.5",d:"9 October 2026",t:"Brick logo is back",items:["Back to the logo with two capital B's built from toy bricks, red in front of blue","The logo in the app has no background","How-to buttons are now a magnifying glass everywhere, including warm-ups and stretches","No more how-to for walking","Food calculator values checked against USDA data and supermarket labels. Fixed chicken thigh, lean beef mince and zaziki, and added regular cottage cheese next to the light one"]},
   {v:"2.4",d:"9 October 2026",t:"Body tab, recipes and help",items:["Progress chart with each weigh-in and a 7-day average. Tap it to see the numbers","Calories burned today and since you started, shown as a range, compared with body fat and food","Your real maintenance, worked out from your weight trend and the food you log","Sets per muscle this week, with the 10–20 set range marked","Strength chart showing your estimated one-rep max over time","Measurements, progress photos (website only, saved on your phone) and dated notes","Steps field removed from the Body tab","Recipes with ingredients and steps, and Log 1 serving today. Creamy garlic herb Cajun chicken is built in","Help rewritten as 21 chapters: using the app and training basics","New logo: a barbell with two capital B's as the plates","This change log"]},
   {v:"2.3",d:"9 October 2026",t:"Train tab rework",items:["Edit button under the week: reorder or hide page sections, your own warm-ups and stretches, exercises and schedule","Tap an exercise's name for its menu. The magnifying glass shows how to do it and the pen adds a note","⌄ on every set shows what you did last time and your best","Rep styles per exercise: Light, Medium or Heavy, with matching reps and rest","Suggested starting weights and a form reminder for New and Some experience","Swap list grouped by muscle, same muscle group first, with nothing cut off","57 more exercises, including calisthenics with Move up progressions","Tap-to-explain keywords like drop set and superset","New record alerts, a workout summary and a plate calculator"]},
   {v:"2.2",d:"9 October 2026",t:"New setup and splits",items:["Setup asks about your gym experience: New, Some or Experienced","Weekly split screen with templates, any day changeable, custom days and Dynamic days you pick on the day","Choose whether workouts start with suggested exercises or empty","Choose how long a split runs. The app asks what to do when it ends","Beginners see a note that their plan is a suggestion they can change","Changing your split no longer changes past days","Shorter tour: 5 slides, one per section"]},
