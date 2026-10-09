@@ -494,6 +494,36 @@ textarea.field.area{height:auto;min-height:96px;padding:10px;resize:vertical;lin
 .guide .vtag{width:auto;min-width:30px;padding:0 6px;font-variant-numeric:tabular-nums}
 .cld{display:block;font-weight:400;font-size:12px;color:var(--muted);margin:2px 0 0 46px}
 .clog summary>span{display:block}
+.secwrap{margin:22px 0 8px}
+.secbtn{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:2px 0;text-align:left;font:inherit;color:inherit}
+.secbtn span{font-size:18px;font-weight:600;letter-spacing:-.02em}
+.secbtn small{margin-left:auto;font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
+.secbtn svg{flex:none;color:var(--muted);transition:transform .15s}
+.secbtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.exdone{padding:0}
+.exdonebtn{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:12px 14px;text-align:left}
+.exdonebtn .dchk{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--c);color:var(--on);font-size:14px}
+.exdt{flex:1;min-width:0}
+.exdt strong{display:block;font-weight:500}
+.exdt small{display:block;color:var(--muted);font-size:13px}
+.exdonebtn svg{flex:none;color:var(--muted)}
+.edfold{padding:0}
+.edhd{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:12px 14px}
+.edhd span{flex:1;min-width:0}
+.edhd strong{display:block;font-weight:500}
+.edhd small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.edhd svg{flex:none;color:var(--muted);transition:transform .15s}
+.edhd[aria-expanded="true"] svg{transform:rotate(180deg)}
+.edbody{padding:0 14px 14px;border-top:1px solid var(--line);padding-top:10px}
+.setnav{padding:0;overflow:hidden}
+.setrowbtn{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:13px 14px;min-height:56px}
+.setrowbtn:first-child{border-top:0}
+.setrowbtn span{flex:1;min-width:0}
+.setrowbtn strong{display:block;font-weight:500}
+.setrowbtn small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setrowbtn svg{flex:none;color:var(--muted);transform:rotate(-90deg)}
+.setrowbtn:active{background:var(--mutedbg)}
+.backbtn{border:0;background:none;color:var(--blue);font-weight:500;padding:6px 0;font-size:15px}
 /* ---- tab island ---- */
 .island{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;gap:2px;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--surface) 80%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40}
 .itab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;border-radius:999px;padding:7px 2px 6px;color:var(--muted);font-size:11px;font-weight:500;line-height:1.1}
@@ -1334,7 +1364,7 @@ const TABDEF={
 const TAB_ORDER=["train","eat","body","spend","hist","settings"],TAB_LOCKED=["train","eat","settings"];
 function tabCfg(){const c=store.settings.tabs||{};const order=(Array.isArray(c.order)?c.order:[]).filter((t,i,a)=>TABDEF[t]&&a.indexOf(t)===i);for(const t of TAB_ORDER)if(!order.includes(t))order.push(t);
   const hidden=(Array.isArray(c.hidden)?c.hidden:[]).filter(t=>TABDEF[t]&&!TAB_LOCKED.includes(t));return {order,hidden};}
-function openTab(t){if(!TABDEF[t])return;tab=t;render();window.scrollTo(0,0);}
+function openTab(t){if(!TABDEF[t])return;if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);}
 function renderTabs(){const {order,hidden}=tabCfg();
   $("island").innerHTML=order.filter(t=>!hidden.includes(t)).map(t=>`<button type="button" class="itab" data-tab="${t}" aria-current="${t===tab?"page":"false"}">${TABDEF[t][1]}<span>${TABDEF[t][0]}</span></button>`).join("");}
 function hiddenTabNote(){const {hidden}=tabCfg();if(!hidden.includes(tab))return "";
@@ -1485,6 +1515,10 @@ function lastDrop(e,i){const [id,,,,flag]=e,k=sel,L=lastSetAt(id,k,i),b=bestFor(
 function rowsInfo(day,e){const id=e[0],rws=(day.sets&&day.sets[id])||[],rc=rowCount(day,e),types=[];for(let i=0;i<rc;i++)types.push(rowType(e,rws[i],i));return {rws,rc,types};}
 function singleCard(e,ctx){
   const [id,name,sets,target,flag,drop]=e,{k,p,day,v2}=ctx;
+  {const R=rowsInfo(day,e),all=R.rc>0&&Array.from({length:R.rc},(_,i)=>R.rws[i]&&R.rws[i].d).every(Boolean);
+   if(all&&!exOpen.has(k+":"+id)){const N=v=>parseFloat(String(v||"").replace(",","."))||0,top=R.rws.filter(r=>r&&r.d&&N(r.r)>0).sort((a,c)=>N(c.w)-N(a.w)||N(c.r)-N(a.r))[0];
+     return `<article class="card ex exdone" data-ex="${id}"><button type="button" class="exdonebtn" data-act="exexp" aria-label="${esc(name)}, all sets done. Tap to open"><span class="dchk">✓</span><span class="exdt"><strong>${esc(name)}</strong><small>${R.rc} ${R.rc===1?"set":"sets"} done${top?" · best "+setText(top,flag):""}</small></span>${IC.chev}</button></article>`;}
+   ctx._all=all;}
   let h=`<article class="card ex" data-ex="${id}">`+headerHtml(e,ctx);
   const rt=restFor(id,p,k),uni=v2&&UNI[id];
   if(rt&&(sets>1||drop))h+=`<button type="button" class="restbtn" data-act="restpick" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to change.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">⏱ ${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
@@ -1493,7 +1527,7 @@ function singleCard(e,ctx){
   for(let i=0;i<rc;i++){const r=rws[i]||{w:"",r:"",d:false},isDrop=types[i]==="d";
     h+=setRowHtml(e,i,r,isDrop,isDrop?"↓":String(++num),true);
     if(isDrop&&!dropNoted&&types[i+1]!=="d"){dropNoted=true;h+=kw(`<p class="restline" style="margin:6px 0 0 4px">↑ Drop set: go straight into it with no rest. Cut the weight about 25–30% and go to failure.</p>`);}}
-  return h+`<div class="addrow"><button class="addset" data-act="addset">+ Set</button><button class="addset" data-act="adddrop">+ Drop set</button></div></article>`;
+  return h+`<div class="addrow"><button class="addset" data-act="addset">+ Set</button><button class="addset" data-act="adddrop">+ Drop set</button>${ctx._all?`<button class="addset" style="margin-left:auto;color:var(--muted)" data-act="excol">Fold away</button>`:""}</div></article>`;
 }
 function supersetCard(group,ctx){
   const {k,p,day,v2}=ctx,L="ABCDEF";
@@ -1510,9 +1544,14 @@ function supersetCard(group,ctx){
   }
   return h+`<div class="addrow"><button class="addset" data-act="addround" data-ids="${group.map(e=>e[0]).join(",")}">+ Round</button></div></article>`;
 }
+const secOpen={},exOpen=new Set(),edOpen=new Set();
+function secHead(k,sec,title,summary,auto){const key=k+":"+sec,col=key in secOpen?!secOpen[key]:auto;
+  return {col,html:`<h2 class="sec-title secwrap"><button type="button" class="secbtn" data-act="seccol" data-s="${sec}" data-c="${col?1:0}" aria-expanded="${!col}"><span>${title}</span><small>${summary}</small>${IC.chev}</button></h2>`};}
 function secWarm({k,p,P,v2,day},before){
   const WU=warmList(p,P,v2);if(!WU.length)return "";
-  return `<h2 class="sec-title">${before?"Warm-up, before "+(p==="run"?"the run":"training"):"Warm-up"}</h2><p class="note" style="margin:-4px 0 6px">About 5 minutes. Keep it moving, and save the long holds for after.</p>`+routineHtml("w",WU,day.warm||{});
+  const done=WU.filter((_,i)=>(day.warm||{})[i]).length,H=secHead(k,"warm",before?"Warm-up, before "+(p==="run"?"the run":"training"):"Warm-up",done>=WU.length?"Done":`${done} of ${WU.length} done`,done>=WU.length);
+  if(H.col)return H.html;
+  return H.html+`<p class="note" style="margin:-4px 0 6px">About 5 minutes. Keep it moving, and save the long holds for after.</p>`+routineHtml("w",WU,day.warm||{});
 }
 function secWork({k,p,P,v2,day}){
   const todayEx=dayExercises(k,p),planIds=new Set(todayEx.map(e=>e[0])),hiddenIds=hiddenExIds(day);let h="";
@@ -1543,7 +1582,9 @@ function secCardio({k,p,day}){
   const cl=day.cardioLog||[];
   const mon=addDays(k,-((parseKey(k).getDay()+6)%7));let wkMin=0;
   for(let i=0;i<7;i++){const dd=store.days[addDays(mon,i)];for(const c of (dd&&dd.cardioLog)||[])wkMin+=Number(c.m)||0;}
-  let h=`<h2 class="sec-title">Cardio</h2><div class="card">`;
+  const todayMin=cl.reduce((a,c)=>a+(Number(c.m)||0),0),H=secHead(k,"cardio","Cardio",todayMin?`${fmt(todayMin)} min today`:`${fmt(wkMin)} min this week`,!cl.length&&p!=="run");
+  if(H.col)return H.html;
+  let h=H.html+`<div class="card">`;
   if(cl.length)h+=cl.map((c,i)=>`<div class="swr li" data-sw="cardio" data-i="${i}">${swbg("Edit","Delete")}<div class="sw extra"><button class="entry" data-act="editentry">${esc(c.t)}</button><span style="display:flex;align-items:center;gap:6px"><b>${fmt(Number(c.m)||0)} min</b><button class="rm" data-act="rmcardio" data-i="${i}" aria-label="Remove ${esc(c.t)}">×</button></span></div></div>`).join("")+`<div style="height:10px"></div>`;
   h+=`<div class="chips">${store.settings.gymWalk?`<button class="chip" data-act="gymwalk">Walk to and from the gym<small>${fmt(store.settings.gymWalk)} min</small></button>`:""}${p==="run"?`<button class="chip" data-act="easyrun">Easy run<small>25 min</small></button>`:""}</div>
   <div class="buy"><select class="field" id="cT" aria-label="Cardio type">${["Walk","Run","Incline walk","Bike","Other"].map(x=>`<option${p==="run"&&x==="Run"?" selected":""}>${x}</option>`).join("")}</select><input class="field" id="cM" inputmode="numeric" placeholder="minutes" aria-label="Minutes"></div>
@@ -1551,21 +1592,24 @@ function secCardio({k,p,day}){
   <p class="note">This week: ${fmt(wkMin)} min</p></div>`;
   return h;
 }
-function secStretch({p,P,v2,day}){
+function secStretch({k,p,P,v2,day}){
   const ST=stretchList(p,P,v2);if(!ST.length)return "";
-  return `<h2 class="sec-title">${p==="rest"?"Mobility, 10–15 min":"Stretches, after "+(p==="run"?"the run":"training")}</h2><p class="note" style="margin:-4px 0 6px">${p==="rest"?"Easy and relaxed.":"Hold each gently, no bouncing."}</p>`+routineHtml("s",ST,day.stretch||{});
+  const done=ST.filter((_,i)=>(day.stretch||{})[i]).length,H=secHead(k,"stretch",p==="rest"?"Mobility, 10–15 min":"Stretches, after "+(p==="run"?"the run":"training"),done>=ST.length?"Done":`${done} of ${ST.length} done`,done>=ST.length);
+  if(H.col)return H.html;
+  return H.html+`<p class="note" style="margin:-4px 0 6px">${p==="rest"?"Easy and relaxed.":"Hold each gently, no bouncing."}</p>`+routineHtml("s",ST,day.stretch||{});
 }
 function renderLayoutEdit(k,p,P){
   const {order,hidden}=layoutCfg(),WU=warmList(p,P,true),ST=stretchList(p,P,true);
   const list=(kind,items)=>items.map((n,i)=>`<div class="tabrow"><span class="tabname">${esc(n)}</span><button type="button" class="mini" data-act="rtup" data-k="${kind}" data-i="${i}"${i===0?" disabled":""} aria-label="Move ${esc(n)} up">↑</button><button type="button" class="mini" data-act="rtrm" data-k="${kind}" data-i="${i}" aria-label="Remove ${esc(n)}">×</button></div>`).join("")||`<p class="note" style="margin:0">Nothing here yet.</p>`;
-  return `<div class="card"><p class="lbl" style="margin:0 0 4px">Page layout</p><p class="note" style="margin:0 0 6px">Change the order of the sections on your Train page, or hide the ones you don't use. This applies to every day.</p>
-  ${order.map((x,i)=>`<div class="tabrow"><span class="tabname">${SECS[x]}${hidden.includes(x)?"<small>Hidden</small>":""}</span>${x==="work"?"":`<button type="button" class="switch" role="switch" aria-checked="${!hidden.includes(x)}" data-act="laysw" data-v="${x}" aria-label="Show ${SECS[x]}"><i></i></button>`}<button type="button" class="mini" data-act="layup" data-v="${x}"${i===0?" disabled":""} aria-label="Move ${SECS[x]} up">↑</button><button type="button" class="mini" data-act="laydown" data-v="${x}"${i===order.length-1?" disabled":""} aria-label="Move ${SECS[x]} down">↓</button></div>`).join("")}</div>
-  <div class="card"><p class="lbl" style="margin:0 0 4px">Warm-up for ${esc(P.name)}</p>${list("w",WU)}
+  const fold=(id,title,sub,body)=>{const open=edOpen.has(id);return `<div class="card edfold"><button type="button" class="edhd" data-act="edsec" data-s="${id}" aria-expanded="${open}"><span><strong>${title}</strong><small>${sub}</small></span>${IC.chev}</button>${open?`<div class="edbody">${body}</div>`:""}</div>`;};
+  return fold("layout","Page layout",order.filter(x=>!hidden.includes(x)).map(x=>SECS[x]).join(" · "),`<p class="note" style="margin:0 0 6px">Change the order of the sections on your Train page, or hide the ones you don't use. This applies to every day.</p>
+  ${order.map((x,i)=>`<div class="tabrow"><span class="tabname">${SECS[x]}${hidden.includes(x)?"<small>Hidden</small>":""}</span>${x==="work"?"":`<button type="button" class="switch" role="switch" aria-checked="${!hidden.includes(x)}" data-act="laysw" data-v="${x}" aria-label="Show ${SECS[x]}"><i></i></button>`}<button type="button" class="mini" data-act="layup" data-v="${x}"${i===0?" disabled":""} aria-label="Move ${SECS[x]} up">↑</button><button type="button" class="mini" data-act="laydown" data-v="${x}"${i===order.length-1?" disabled":""} aria-label="Move ${SECS[x]} down">↓</button></div>`).join("")}`)+
+  fold("warm","Warm-up for "+esc(P.name),WU.length+" item"+(WU.length===1?"":"s"),`${list("w",WU)}
   <div class="buy" style="margin-top:8px"><input class="field" id="rtW" placeholder="Add a warm-up, like Jump rope, 2 min" aria-label="New warm-up item"><button type="button" class="btn" style="margin:0" data-act="rtadd" data-k="w">Add</button></div>
-  ${(custom().warm||{})[p]?`<button class="linkbtn" data-act="rtreset" data-k="w">Back to the suggested warm-up</button>`:""}</div>
-  <div class="card"><p class="lbl" style="margin:0 0 4px">Stretches for ${esc(P.name)}</p>${list("s",ST)}
+  ${(custom().warm||{})[p]?`<button class="linkbtn" data-act="rtreset" data-k="w">Back to the suggested warm-up</button>`:""}`)+
+  fold("stretch","Stretches for "+esc(P.name),ST.length+" item"+(ST.length===1?"":"s"),`${list("s",ST)}
   <div class="buy" style="margin-top:8px"><input class="field" id="rtS" placeholder="Add a stretch" aria-label="New stretch"><button type="button" class="btn" style="margin:0" data-act="rtadd" data-k="s">Add</button></div>
-  ${(custom().stretch||{})[p]?`<button class="linkbtn" data-act="rtreset" data-k="s">Back to the suggested stretches</button>`:""}</div>`;
+  ${(custom().stretch||{})[p]?`<button class="linkbtn" data-act="rtreset" data-k="s">Back to the suggested stretches</button>`:""}`);
 }
 function renderTrain(){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],day=store.days[k]||{},v2=k>=NEWPLAN;
@@ -1990,7 +2034,7 @@ $("panel").addEventListener("click",e=>{
   if(act==="tick"||act==="addset"||act==="adddrop"||act==="settype"){
     const exEl=b.closest("[data-ex]"),id=exEl.dataset.ex,ex=exLookup(k,id);
     const day=ensureDay(k);
-    if(act==="tick"){const i=+b.dataset.i,rows=rowsFor(day,id,Math.max(rowCount(day,ex),i+1));rows[i].d=!rows[i].d;b.setAttribute("aria-pressed",String(rows[i].d));b.closest(".set").classList.toggle("is-done",rows[i].d);persist(docId);renderWeek();if(rows[i].d)afterTick(k,id,i,b);}
+    if(act==="tick"){const i=+b.dataset.i,rows=rowsFor(day,id,Math.max(rowCount(day,ex),i+1));rows[i].d=!rows[i].d;b.setAttribute("aria-pressed",String(rows[i].d));b.closest(".set").classList.toggle("is-done",rows[i].d);persist(docId);renderWeek();if(rows[i].d){afterTick(k,id,i,b);if(!b.closest(".ss")&&rows.length>=rowCount(day,ex)&&rows.slice(0,rowCount(day,ex)).every(r=>r.d)){exOpen.delete(k+":"+id);setTimeout(()=>{if(tab==="train"&&sel===k)renderTrain();},600);}}}
     else if(act==="settype"){const rows=materialize(day,ex),i=+b.dataset.i;if(!rows[i])return;rows[i].t=rows[i].t==="d"?"n":"d";persist(docId);renderTrain();}
     else{const rows=materialize(day,ex);rows.push({w:"",r:"",d:false,t:act==="adddrop"?"d":"n"});persist(docId);render();}
   }else if(act==="gymwalk"||act==="addcardio"){
@@ -2002,7 +2046,9 @@ $("panel").addEventListener("click",e=>{
   }else if(act==="hold"){rtAudioUnlock();rtStart(holdSecs(sinfo(b.dataset.n).hold),b.dataset.n,"Hold, breathe slowly","hold");
   }else if(act==="howto"){const id=b.closest("[data-ex]").dataset.ex;if(openHow.has(id))openHow.delete(id);else openHow.add(id);renderTrain();
   }else if(act==="warm"){const day=ensureDay(k),i=+b.dataset.i;day.warm=day.warm||{};day.warm[i]=!day.warm[i];if(!day.warm[i])delete day.warm[i];persist(docId);b.setAttribute("aria-pressed",String(!!day.warm[i]));
+    {const P=plansFor(k)[planOf(k)],L=warmList(planOf(k),P,k>=NEWPLAN);if(L.every((_,j)=>day.warm[j])){delete secOpen[k+":warm"];setTimeout(()=>{if(tab==="train")renderTrain();},500);}}
   }else if(act==="stretch"){const day=ensureDay(k),i=+b.dataset.i;day.stretch=day.stretch||{};day.stretch[i]=!day.stretch[i];if(!day.stretch[i])delete day.stretch[i];persist(docId);b.setAttribute("aria-pressed",String(!!day.stretch[i]));
+    {const P=plansFor(k)[planOf(k)],L=stretchList(planOf(k),P,k>=NEWPLAN);if(L.every((_,j)=>day.stretch[j])){delete secOpen[k+":stretch"];setTimeout(()=>{if(tab==="train")renderTrain();},500);}}
   }else if(act==="rmcardio"){const day=ensureDay(k);(day.cardioLog||[]).splice(+b.dataset.i,1);persist(docId);renderTrain();}
   else if(act==="pick"){const day=ensureDay(k);day.meals=day.meals||{};const sl=SLOTS.find(x=>x.id===b.dataset.slot),cur=chosen(sl,day);if(cur&&cur.id===b.dataset.opt)delete day.meals[sl.id];else day.meals[sl.id]=b.dataset.opt;persist(docId);renderEat();}
   else if(act==="rice"){const day=ensureDay(k);day.meals=day.meals||{};day.meals.rice=!day.meals.rice;if(!day.meals.rice)delete day.meals.rice;persist(docId);renderEat();}
@@ -2622,6 +2668,10 @@ sheetEl.addEventListener("click",e=>{
 $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b||tab!=="train")return;const a=b.dataset.act,S=store.settings;
   if(a==="exmenu"){exMenu(b.closest("[data-ex]").dataset.ex);}
+  else if(a==="seccol"){secOpen[sel+":"+b.dataset.s]=b.dataset.c==="1";renderTrain();}
+  else if(a==="exexp"){exOpen.add(sel+":"+b.closest("[data-ex]").dataset.ex);renderTrain();}
+  else if(a==="excol"){exOpen.delete(sel+":"+b.closest("[data-ex]").dataset.ex);renderTrain();}
+  else if(a==="edsec"){const id=b.dataset.s;if(edOpen.has(id))edOpen.delete(id);else edOpen.add(id);renderTrain();}
   else if(a==="note"){noteSheet(b.closest("[data-ex]").dataset.ex);}
   else if(a==="kw"){e.stopPropagation();const t=b.dataset.kw;openSheet(t.charAt(0).toUpperCase()+t.slice(1),`<p style="margin:0">${esc(GLOSS[t]||"")}</p><p class="note">You can turn these explanations off in Settings → Training.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
   else if(a==="lastset"){const id=b.closest("[data-ex]").dataset.ex,key=id+":"+b.dataset.i;if(openLast.has(key))openLast.delete(key);else openLast.add(key);renderTrain();}
@@ -2770,8 +2820,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
   if(k==="level")S.level=v;else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="2.5";
+const APP_VERSION="2.6";
 const CHANGELOG=[
+  {v:"2.6",d:"9 October 2026",t:"Less scrolling",items:["Settings is now a short menu. Each section opens on its own page, with Change log always last","Warm-up and stretches fold away once everything is ticked, and Cardio stays folded until you use it. Tap a section title to open or close it","Exercises fold into one line once every set is done. Tap to open them again","On the Edit page, layout, warm-up and stretches are folded until you open them"]},
   {v:"2.5",d:"9 October 2026",t:"Brick logo is back",items:["Back to the logo with two capital B's built from toy bricks, red in front of blue","The logo in the app has no background","How-to buttons are now a magnifying glass everywhere, including warm-ups and stretches","No more how-to for walking","Food calculator values checked against USDA data and supermarket labels. Fixed chicken thigh, lean beef mince and zaziki, and added regular cottage cheese next to the light one"]},
   {v:"2.4",d:"9 October 2026",t:"Body tab, recipes and help",items:["Progress chart with each weigh-in and a 7-day average. Tap it to see the numbers","Calories burned today and since you started, shown as a range, compared with body fat and food","Your real maintenance, worked out from your weight trend and the food you log","Sets per muscle this week, with the 10–20 set range marked","Strength chart showing your estimated one-rep max over time","Measurements, progress photos (website only, saved on your phone) and dated notes","Steps field removed from the Body tab","Recipes with ingredients and steps, and Log 1 serving today. Creamy garlic herb Cajun chicken is built in","Help rewritten as 21 chapters: using the app and training basics","New logo: a barbell with two capital B's as the plates","This change log"]},
   {v:"2.3",d:"9 October 2026",t:"Train tab rework",items:["Edit button under the week: reorder or hide page sections, your own warm-ups and stretches, exercises and schedule","Tap an exercise's name for its menu. The magnifying glass shows how to do it and the pen adds a note","⌄ on every set shows what you did last time and your best","Rep styles per exercise: Light, Medium or Heavy, with matching reps and rest","Suggested starting weights and a form reminder for New and Some experience","Swap list grouped by muscle, same muscle group first, with nothing cut off","57 more exercises, including calisthenics with Move up progressions","Tap-to-explain keywords like drop set and superset","New record alerts, a workout summary and a plate calculator"]},
@@ -2784,18 +2835,26 @@ const CHANGELOG=[
   {v:"1.0",d:"Early October 2026",t:"First version",items:["Workouts with sets, reps and drop sets","Meals, calories and protein","Body weight and weekly trend","Spending","Swipe to edit or delete, with undo"]}
 ];
 function changelogHtml(){return `<div class="guide clog">${CHANGELOG.map((c,i)=>`<details${i===0?" open":""}><summary><span><span class="chn vtag">${c.v}</span>${esc(c.t)}<small class="cld">${esc(c.d)}</small></span></summary><div class="gb"><ul>${c.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></details>`).join("")}</div>`;}
+let setPage=null;
+function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcfg(),lv={new:"New",some:"Some experience",exp:"Experienced"}[S.level]||"Not set";
+  return [
+    ["appearance","Appearance",`${{system:"System",light:"Light",dark:"Dark"}[T.mode||"system"]} theme`,()=>`<div class="card">${settingsBody()}</div>`],
+    ["tabs","Tab bar",hidden.length?`${hidden.length} hidden: ${hidden.map(t=>TABDEF[t][0]).join(", ")}`:"All tabs shown",()=>`<div class="card">${tabsSettingsHtml()}</div>`],
+    ["training","Training",`${lv} · rep style ${(STYLES[S.repDefault]||["as planned"])[0].toLowerCase()}`,()=>`<div class="card">${trainingSettingsHtml()}</div>`],
+    ["units","Units and currency",`${U()} · ${curCode()}`,()=>`<div class="card">${unitsHtml()}</div>`],
+    ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
+    ...(isLocalMode()?[["backup","Backup","Save or restore all your data",()=>`<div class="card">${backupHtml()}</div>`]]:[]),
+    ["help","Help","How to use the app, and training basics",()=>guideHtml()],
+    ["changelog","Change log",`Version ${APP_VERSION}`,()=>changelogHtml()]
+  ];}
 function renderSettings(){
-  let h=`<section><h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 4px">Body Builder, version ${APP_VERSION}</p>
-  <h2 class="sec-title">Appearance</h2><div class="card">${settingsBody()}</div>
-  <h2 class="sec-title">Tab bar</h2><div class="card">${tabsSettingsHtml()}</div>
-  <h2 class="sec-title">Training</h2><div class="card">${trainingSettingsHtml()}</div>
-  <h2 class="sec-title">Units and currency</h2><div class="card">${unitsHtml()}</div>
-  <h2 class="sec-title">Rest timer</h2><div class="card">${timerSettingsHtml()}</div>`;
-  if(isLocalMode())h+=`<h2 class="sec-title">Backup</h2><div class="card">${backupHtml()}</div>`;
-  h+=`<h2 class="sec-title">Change log</h2>${changelogHtml()}<h2 class="sec-title" id="helpsec">Help</h2>${guideHtml()}
-  <p class="note">${isLocalMode()?"Your data is saved on this device only. Download a backup now and then, and before you clear your browser data.":"Changes save to your account and show up on all your devices."}</p></section>`;
-  $("panel").innerHTML=h;
+  const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
+  if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
+  else{h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 12px">Body Builder, version ${APP_VERSION}</p><div class="card setnav">${P.map(x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`).join("")}</div>
+  <p class="note">${isLocalMode()?"Your data is saved on this device only. Download a backup now and then, and before you clear your browser data.":"Changes save to your account and show up on all your devices."}</p>`;}
+  $("panel").innerHTML=h+`</section>`;
 }
+$("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-sp]");if(!b)return;setPage=b.dataset.sp||null;renderSettings();window.scrollTo(0,0);});
 $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-tabset]");
   if(b){const [a,t]=b.dataset.tabset.split(":"),S=store.settings,c=tabCfg();S.tabs={order:c.order.slice(),hidden:c.hidden.slice()};const T=S.tabs,nm=TABDEF[t][0];
@@ -2840,7 +2899,7 @@ function guideHtml(){
   h+=ch("Tracking your weight properly",`<p>Your weight can swing 1–2 kg from day to day because of water, salt, carbs and digestion. Weigh in every morning after the bathroom, before eating, and judge progress by the <b>weekly average</b>. Measurements and photos help too, because you can lose fat and gain muscle at the same weight.</p>`);
   return h+`</div>`;
 }
-function openGuide(){openTab("settings");setTimeout(()=>{const h=$("helpsec");if(h)h.scrollIntoView();},30);}
+function openGuide(){openTab("settings");setPage="help";renderSettings();}
 bothOn("click",e=>{if((sheetEl._kind==="guide"||inSettings(e))&&e.target.closest("[data-gtour]")){closeSheet();setTimeout(tourStart,150);}});
 
 // ---------- Backup (website version) ----------
