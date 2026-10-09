@@ -93,6 +93,12 @@ body.tab-settings .top,body.tab-settings .week{display:none}
 .field::placeholder{color:var(--muted)}
 .field:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 35%,transparent)}
 select.field{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.pair>*{min-width:0}
+input[type="date"].field{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;width:100%;line-height:38px;text-align:left;color:var(--ink);background-color:var(--field)}
+input[type="date"].field::-webkit-date-and-time-value{text-align:left;margin:0;min-height:1.4em}
+input[type="date"].field::-webkit-calendar-picker-indicator{opacity:.6}
+:root[data-theme="dark"] input[type="date"].field::-webkit-calendar-picker-indicator{filter:invert(1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input[type="date"].field::-webkit-calendar-picker-indicator{filter:invert(1)}}
 textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertical;line-height:1.45}
 .lbl{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:4px}
 .note{color:var(--muted);font-size:14px;margin:8px 0 0}
@@ -164,6 +170,9 @@ textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertica
 .icob[aria-pressed="true"],.icob.has{color:var(--ink);border-color:var(--ink)}
 .iconbtn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0;color:var(--ink)}
 .rm{border:0;background:none;color:var(--muted);width:34px;height:34px;font-size:18px}
+.tgt{border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left;cursor:help;text-decoration:underline dotted color-mix(in srgb,var(--blue) 60%,transparent);text-underline-offset:3px;text-decoration-thickness:1.5px}
+.tgt .big,.tgt .of{display:block}
+.tgrid .tgt{text-decoration:none;display:block}.tgrid .tgt .of{text-decoration:underline dotted color-mix(in srgb,var(--blue) 60%,transparent);text-underline-offset:3px}
 .kw{border:0;background:none;padding:0;font:inherit;font-weight:500;color:var(--blue);cursor:help}
 /* progress bars */
 .meters{display:grid;gap:14px}
@@ -228,7 +237,10 @@ textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertica
 .hint::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:7px;vertical-align:1px}
 .formtip{margin:6px 0;font-size:13px;color:var(--muted);padding-left:10px;border-left:2px solid var(--line)}
 .restbtn{border:0;background:none;padding:2px 0;margin:6px 0 0;font-size:13px;color:var(--muted);text-align:left;display:inline-flex;align-items:center;gap:6px}
-.restbtn .chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;padding:1px 8px;font-weight:500;font-size:12px;white-space:nowrap;box-shadow:none}
+.restbtn{position:relative;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.restbtn .chip{position:relative;overflow:hidden;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;padding:1px 8px;font-weight:500;font-size:12px;white-space:nowrap;box-shadow:none}
+.restbtn .chip::before{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--blue) 25%,transparent);transform:scaleX(0);transform-origin:left}
+.restbtn.holding .chip::before{transform:scaleX(1);transition:transform .48s linear}
 .howto{background:var(--mutedbg);border-radius:10px;padding:12px;margin:8px 0 4px}
 .howto .musc,.howto .mistake{margin:0 0 8px;font-size:14px}
 .howto ol{margin:0 0 8px;padding-left:20px;font-size:14px}
@@ -406,6 +418,29 @@ details.mine summary{cursor:pointer;color:var(--blue);font-weight:500}
 .histday:first-child{border-top:0}
 .histday .hd{font-weight:500}
 .histday .hb{color:var(--muted)}
+.servrow{display:grid;gap:4px;margin-top:8px}
+.portion .field:disabled{opacity:.5}
+.egrid{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:row dense;gap:10px;margin-top:4px}
+.etile{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-height:118px;display:flex;flex-direction:column}
+.etile.done{border-color:color-mix(in srgb,var(--green) 35%,var(--line))}
+.etile.open{grid-column:1/-1;min-height:0;box-shadow:var(--shadow-sm)}
+.ethd{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;border:0;background:none;text-align:left;padding:12px 14px;border-radius:14px;min-width:0}
+.ethd:active{background:var(--mutedbg)}
+.etile.open .ethd{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+.etic{margin-bottom:auto;padding-bottom:10px;--c:var(--green)}
+.etile.open .etic{margin:0;padding:0}
+.etic .pring{--s:30px}.etic .pring::before{background:var(--surface)}
+.ethd strong{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.ethd small{font-size:12.5px;color:var(--muted);line-height:1.3;display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.etile.open .ethd small{width:auto;margin-left:auto}
+.etplus{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink);padding:0;box-shadow:var(--shadow)}
+.etplus:active{background:var(--mutedbg)}
+.etile.open .etplus{top:12px}
+.etile.open .ethd{padding-right:56px}
+.etbody{padding:0 12px 12px}
+.etbody>.card:last-child,.etbody>details:last-child{margin-bottom:0}
+.freeday strong{font-size:18px;font-weight:600}
+.cheatnote{margin:0 0 4px;font-size:13px;color:var(--amber);font-weight:500}
 .supp .rrow{gap:8px}
 .supp .stime{display:block;font-size:12px;color:var(--muted)}
 .suppnote{margin:4px 0 2px 32px;font-size:13px;color:var(--muted)}
@@ -1419,8 +1454,9 @@ function renderHistory(){
     const p=planOf(k),P=plansFor(k)[p],pr=progress(k,p),et=eatTotals(day);
     const sets=Object.values(day.sets||{}).reduce((a,r)=>a+r.filter(x=>x.d).length,0);
     const buys=(day.buys||[]).reduce((a,b)=>a+num(b.e),0),cm=(day.cardioLog||[]).reduce((a,c)=>a+(Number(c.m)||0),0);
-    if(!(sets||et.k||day.steps||day.weight||buys||cm||(day.planLog||[]).length))continue;
-    if(et.k){kcalSum+=et.k;protSum+=et.p;kcalN++;}if(sets)workouts++;spent+=buys;if(Number(day.weight)>0)weights.push({k,w:Number(day.weight)});
+    if(!(sets||et.k||day.steps||day.weight||buys||cm||(day.planLog||[]).length||day.cheat))continue;
+    const ch=day.cheat&&day.cheat.type;if(ch)bits.push(`<span class="of">${ch==="free"?"Free day":"Cheat meal, over target"}</span>`);
+    if(et.k&&!ch){kcalSum+=et.k;protSum+=et.p;kcalN++;}if(sets)workouts++;spent+=buys;if(Number(day.weight)>0)weights.push({k,w:Number(day.weight)});
     const bits=[];
     for(const L of day.planLog||[]){const PL0=plansFor(k);bits.push(`<span class="of">Changed ${esc((PL0[L.from]||{name:L.from}).name)} to ${esc((PL0[L.to]||{name:L.to}).name)}${L.how==="shift"?", shifted the rest of the week":L.how==="week"?", every week from then on":", that day only"}</span>`);}
     if(sets)bits.push(`${esc(P?P.name:"Workout")}, ${sets} sets${p!=="rest"&&p!=="run"?" ("+Math.round(pr*100)+"%)":""}`);
@@ -1702,6 +1738,7 @@ function routineHtml(kind,items,done){
 }
 // ---------- Exercise helpers: rep style, starting weights, records, keywords ----------
 const IC={
+  plusbig:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   swap:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>',
   search:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
   eye:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -1798,7 +1835,7 @@ function singleCard(e,ctx){
      return `<article class="card ex exfold${all?" isdone":""}" data-ex="${id}"><button type="button" class="exrow" data-act="exexp" aria-expanded="false" aria-label="${esc(name)}, ${all?"all sets done":dn+" of "+R.rc+" sets done"}. Tap to open">${ring(R.rc?dn/R.rc:0,all)}<span class="exdt"><strong>${esc(name)}</strong><small>${sub}</small></span>${needs(id).length?`<span class="needs sm">${needsText(needs(id))}</span>`:""}${IC.chev}</button></article>`;}}
   let h=`<article class="card ex isopen" data-ex="${id}">`+headerHtml(e,ctx);
   const rt=restFor(id,p,k),uni=v2&&UNI[id];
-  if(rt&&(sets>1||drop))h+=`<button type="button" class="restbtn" data-act="restpick" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to change.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">⏱ ${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
+  if(rt&&(sets>1||drop))h+=`<button type="button" class="restbtn" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">▶ ${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
   h+=lastLine(id,k,sets,target,flag,v2)+howtoHtml(id,name)+(tipsOn()&&v2?`<p class="formtip">Focus on form first. If your form starts to slip, the weight is too heavy, so lower it. Too hard right now? Tap the name and choose <b>Swap exercise</b> for an easier option.</p>`:"");
   const {rws,rc,types}=rowsInfo(day,e);let num=0,dropNoted=false;
   for(let i=0;i<rc;i++){const r=rws[i]||{w:"",r:"",d:false},isDrop=types[i]==="d";
@@ -1812,7 +1849,7 @@ function supersetCard(group,ctx){
    const open=key in exState?exState[key]:ctx.cur===gk,all=tot>0&&dn>=tot;
    if(!open)return `<article class="card ex exfold ss${all?" isdone":""}" data-g="${esc(gk)}"><button type="button" class="exrow" data-act="exexp" aria-expanded="false" aria-label="Superset: ${esc(group.map(e=>e[1]).join(" and "))}. Tap to open">${ring(tot?dn/tot:0,all)}<span class="exdt"><strong>${group.map(e=>esc(e[1])).join(" + ")}</strong><small>Superset · ${all?`${tot} sets done`:`${Math.max(...group.map(e=>e[2]))} rounds${dn?` · ${dn} of ${tot} done`:""}`}</small></span>${IC.chev}</button></article>`;}
   const last=group[group.length-1],rt=restFor(last[0],p,k)||"60–90 s";
-  let h=`<article class="card ex ss isopen" data-g="${esc(gk)}"><div class="sshead"><p class="sslbl">${kw("Superset")}</p><button type="button" class="icob fold" data-act="excol" aria-label="Fold superset">${IC.chev}</button></div>${kw(`<p class="restline" style="margin:0">Do one set of each back to back, then rest and start the next round.</p>`)}<button type="button" class="restbtn" style="margin-bottom:8px" data-act="restpick" data-id="${last[0]}" aria-label="Rest between rounds: ${secLabel(restSecs(last[0],p,k))}. Tap to change.">Rest between rounds <span class="chip">⏱ ${secLabel(restSecs(last[0],p,k))}${restOverride(last[0])?" (yours)":""}</span></button>`;
+  let h=`<article class="card ex ss isopen" data-g="${esc(gk)}"><div class="sshead"><p class="sslbl">${kw("Superset")}</p><button type="button" class="icob fold" data-act="excol" aria-label="Fold superset">${IC.chev}</button></div>${kw(`<p class="restline" style="margin:0">Do one set of each back to back, then rest and start the next round.</p>`)}<button type="button" class="restbtn" style="margin-bottom:8px" data-hold="rest" data-id="${last[0]}" aria-label="Rest between rounds: ${secLabel(restSecs(last[0],p,k))}. Tap to start the rest timer, hold to change the time.">Rest between rounds <span class="chip">▶ ${secLabel(restSecs(last[0],p,k))}${restOverride(last[0])?" (yours)":""}</span></button>`;
   group.forEach((e,j)=>{h+=`<div class="ssx" data-ex="${e[0]}">`+headerHtml(e,ctx,L[j])+lastLine(e[0],k,e[2],e[3],e[4],v2)+howtoHtml(e[0],e[1])+`</div>`;});
   const infos=group.map(e=>rowsInfo(day,e)),nums=group.map(()=>0),max=Math.max(...infos.map(x=>x.rc));
   for(let r=0;r<max;r++){
@@ -1956,52 +1993,89 @@ function eatTotals(day){
 function meter(label,val,target,unit){
   const pct=target?Math.min(100,val/target*100):0,over=val>target;
   const diff=Math.abs(target-val);
-  return `<div><div class="meter-top"><span><span class="big">${fmt(val)}</span> <span class="of">of ${fmt(target)} ${unit} ${label}</span></span></div>
+  return `<div><div class="meter-top"><span><span class="big">${fmt(val)}</span> <span class="of">of ${tg(unit==="kcal"?"kcal":"protein",fmt(target)+" "+unit+(label?" "+label:""))}</span></span></div>
   <div class="bar${over&&unit==="kcal"?" over":""}"><span style="width:${pct}%"></span></div>
   <div class="left">${over?fmt(diff)+" "+unit+" over":fmt(diff)+" "+unit+" to go"}</div></div>`;
 }
-function eatSec(id,title,summary,pct,done,body){const H=secHead(sel,"eat-"+id,title,summary,true,pct,done);return H.html+(H.col?"":body);}
+// ---------- Eat: tiles, quick add, cheat meals ----------
+function dayTargets(day){const S=store.settings,t=(day&&day.tgt)||{};return {k:num(t.k)||num(S.kcal),p:num(t.p)||num(S.protein),own:!!(day&&day.tgt)};}
+function cheatOf(day){return (day&&day.cheat)||null;}
+function eatTile(id,title,summary,icon,body,opt){const key=sel+":eat-"+id,open=!!secOpen[key];
+  return `<div class="etile${open?" open":""}${opt&&opt.done?" done":""}" data-tile="${id}" data-rail="${esc(title)}"><button type="button" class="ethd" data-act="tile" data-id="${id}" aria-expanded="${open}"><span class="etic">${icon}</span><strong>${esc(title)}</strong><small>${summary}</small></button>${opt&&opt.noplus?"":`<button type="button" class="etplus" data-act="tileadd" data-id="${id}" aria-label="Quick add to ${esc(title)}">${IC.plusbig}</button>`}${open?`<div class="etbody">${body}</div>`:""}</div>`;}
+function foodRow(e,i){return `<div class="swr li" data-sw="food" data-i="${i}">${swbg("Edit","Delete")}<div class="sw extra"><button class="entry" data-act="editentry">${esc(e.n||"Food")}<br><small class="of">${e.est?"Rough estimate · ":""}${fmt(Number(e.k)||0)} kcal, ${Math.round((Number(e.p)||0)*10)/10} g protein${Number(e.fb)>0?`, ${r1(Number(e.fb))} g fibre`:""}</small></button><button class="rm" data-act="rmfood" data-i="${i}" aria-label="Remove ${esc(e.n||"food")}">×</button></div></div>`;}
+function quickAdd(slot){
+  const sl=SLOTS.find(x=>x.id===slot);
+  openSheet(sl?"Quick add to "+sl.name:"Quick add food",`<input class="field" id="qkN" placeholder="What did you eat?" aria-label="Food name">
+   <div class="qa" style="margin-top:8px"><input class="field" id="qkK" inputmode="decimal" placeholder="kcal" aria-label="Calories"><input class="field" id="qkP" inputmode="decimal" placeholder="protein g" aria-label="Protein"><input class="field" id="qkF" inputmode="decimal" placeholder="fibre g" aria-label="Fibre (optional)"></div>
+   ${sl?`<button type="button" class="toggle mini-t" style="margin-top:8px;width:100%" data-qsave aria-pressed="false"><span class="box">✓</span><span class="txt"><strong>Also save it as a ${sl.name.toLowerCase()} option</strong></span></button>`:""}
+   <p class="note">Don't know the numbers? Use the food calculator, or log a rough cheat meal instead.</p>`,
+   [{label:"Add to "+(sel===todayKey()?"today":shortDate(sel)),fn:()=>{const n=$("qkN").value.trim(),kc=num($("qkK").value);if(!(kc>0)){$("qkK").focus();return false;}
+      const k=sel,day=ensureDay(k),u=snap(["day-"+k,"settings"]),e={n:n||(sl?sl.name:"Food"),k:Math.round(kc),p:r1(num($("qkP").value))};const fb=num($("qkF").value);if(fb>0)e.fb=r1(fb);if(sl)e.slot=slot;
+      (day.extras=day.extras||[]).push(e);persist("day-"+k);
+      const sv=sheetEl.querySelector("[data-qsave]");if(sl&&sv&&sv.getAttribute("aria-pressed")==="true"){store.settings.myMeals=myMeals().concat([{id:Date.now().toString(36),slot,n:e.n,d:"Your meal",k:e.k,p:e.p,fb:e.fb||0}]);persist("settings");}
+      renderEat();toast("Added "+e.n,u);}},{label:"Cancel",cls:"btn ghost"}]);
+  setTimeout(()=>{const f=$("qkN");if(f)f.focus();},60);}
+function cheatSheet(){
+  const k=sel,day=store.days[k]||{},c=cheatOf(day),T=dayTargets(day),S=store.settings;
+  openSheet("Cheat meal or a different day",`<p class="note" style="margin-top:0">One day off plan won't undo your progress. Pick whatever is easiest to log.</p>
+   <div class="menulist">
+    <button type="button" class="menuitem" data-cheat="skip"><strong>Cheat meal, don't count it</strong><small style="white-space:normal">The day is marked as over your target and left out of your averages and maintenance</small></button>
+    <button type="button" class="menuitem" data-cheat="est"><strong>Cheat meal, rough guess</strong><small style="white-space:normal">Adds a very rough estimate: small, big or huge</small></button>
+    <button type="button" class="menuitem" data-cheat="free"><strong>Free day</strong><small style="white-space:normal">No targets today, like a birthday or holiday. Left out of your averages</small></button>
+    <button type="button" class="menuitem" data-cheat="tgt"><strong>Different targets just ${k===todayKey()?"today":"this day"}</strong><small style="white-space:normal">Like a refeed or a long Hyrox day. Now ${fmt(T.k)} kcal and ${fmt(T.p)} g protein</small></button>
+   </div>${c||day.tgt?`<button class="btn ghost" data-cheat="undo">Back to normal for this day</button>`:""}`,[{label:"Cancel",cls:"btn ghost"}]);
+  sheetEl._kind="cheat";}
 function renderEat(){
-  const k=sel,day=store.days[k]||{},m=day.meals||{},lifting=!["rest","run"].includes(planOf(k)),t=eatTotals(day),S=store.settings;
-  let h=`<section><div class="card meters">${meter("",t.k,S.kcal,"kcal")}${meter("protein",t.p,S.protein,"g")}${t.fb>0||(S.extrasOn||[]).includes("fibre")?`<p class="note" style="margin:-6px 0 0">Fibre logged: <b>${r1(t.fb)} g</b>${(S.extrasOn||[]).includes("fibre")?" of about 30 g":""}. Only foods from the food calculator count.</p>`:""}</div>`;
-  if(!store.settings.tipSwipe)h+=`<p class="note tip">Tap a meal to open it. Swipe any meal, food or supplement left to delete it, or right to edit it. <button class="linkbtn" data-act="tipok">Got it</button></p>`;
+  const k=sel,day=store.days[k]||{},m=day.meals||{},lifting=!["rest","run"].includes(planOf(k)),t=eatTotals(day),S=store.settings,T=dayTargets(day),c=cheatOf(day),ex=day.extras||[];
+  let h=`<section>`;
+  if(c&&c.type==="free")h+=`<div class="card meters freeday"><strong>Free day</strong><p class="note" style="margin:2px 0 0">No targets today${t.k?`, ${fmt(t.k)} kcal logged anyway`:""}. Back on plan tomorrow.</p></div>`;
+  else{h+=`<div class="card meters">${c&&c.type==="skip"?`<p class="cheatnote">Cheat meal today. Calories aren't counted, so this day is marked as over your target.</p>`:""}${meter("",t.k,T.k,"kcal")}${meter("protein",t.p,T.p,"g")}${t.fb>0||(S.extrasOn||[]).includes("fibre")?`<p class="note" style="margin:-6px 0 0">Fibre: <b>${r1(t.fb)} g</b> of ${tg("fibre",fibreGoal()+" g")}. Foods with fibre values count.</p>`:""}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}</div>`;}
+  if(!S.tipSwipe)h+=`<p class="note tip">Tap a tile to open it, or <b>+</b> to add something fast. Swipe a meal or food left to delete it, right to edit. <button class="linkbtn" data-act="tipok">Got it</button></p>`;
+  h+=`<div class="egrid">`;
   for(const s of SLOTS){
-    const cur=chosen(s,day);let b="";
-    for(const o of slotOpts(s)){
-      const on=!!cur&&cur.id===o.id;
-      b+=`<div class="swr" style="margin-bottom:8px" data-sw="meal" data-slot="${s.id}" data-opt="${esc(o.id)}">${swbg("Edit","Remove")}<div class="sw chip-row"><button class="toggle radio" style="margin:0" data-act="pick" data-slot="${s.id}" data-opt="${esc(o.id)}" aria-pressed="${on}"><span class="box">✓</span><span class="txt"><strong>${esc(o.n)}</strong><small>${esc(o.d)}</small></span><span class="num">${fmt(o.k)} kcal<br>${Math.round(o.p)} g</span></button>${String(o.id).startsWith("r:")?"":`<button class="chip-x" data-act="rmmeal" data-opt="${esc(o.id)}" aria-label="Remove ${esc(o.n)}">×</button>`}</div></div>`;
-    }
-    if(!slotOpts(s).length)b+=`<p class="note secnote">Nothing here yet. Save a meal under Add your own meal, or build one with the food calculator.</p>`;
+    const cur=chosen(s,day),mine=ex.map((e,i)=>({e,i})).filter(x=>x.e.slot===s.id);let b="";
+    for(const o of slotOpts(s)){const on=!!cur&&cur.id===o.id;
+      b+=`<div class="swr" style="margin-bottom:8px" data-sw="meal" data-slot="${s.id}" data-opt="${esc(o.id)}">${swbg("Edit","Remove")}<div class="sw chip-row"><button class="toggle radio" style="margin:0" data-act="pick" data-slot="${s.id}" data-opt="${esc(o.id)}" aria-pressed="${on}"><span class="box">✓</span><span class="txt"><strong>${esc(o.n)}</strong><small>${esc(o.d)}</small></span><span class="num">${fmt(o.k)} kcal<br>${Math.round(o.p)} g</span></button>${String(o.id).startsWith("r:")?"":`<button class="chip-x" data-act="rmmeal" data-opt="${esc(o.id)}" aria-label="Remove ${esc(o.n)}">×</button>`}</div></div>`;}
+    if(mine.length)b+=`<div class="card" style="padding:2px 12px;margin:0 0 8px">${mine.map(x=>foodRow(x.e,x.i)).join("")}</div>`;
+    if(!slotOpts(s).length&&!mine.length)b+=`<p class="note secnote">Nothing saved here yet. Tap <b>+</b> to add what you ate.</p>`;
     if(s.note&&!S.fresh)b+=`<p class="note secnote">${s.note}</p>`;
-    let extraK=0;
-    if(!S.fresh&&s.id==="lunch"&&!hiddenMeals().includes("rice")){b+=`<div class="chip-row" style="margin-bottom:8px"><button class="toggle" style="margin:0" data-act="rice" aria-pressed="${!!m.rice}"><span class="box">✓</span><span class="txt"><strong>Extra rice</strong><small>35 g rice (dry). ${lifting?"Suggested today, since it's a lifting day.":"Optional on rest days."}</small></span><span class="num">${RICE.k} kcal<br>${RICE.p} g</span></button><button class="chip-x" data-act="rmmeal" data-opt="rice" aria-label="Remove extra rice">×</button></div>`;if(m.rice)extraK=RICE.k;}
-    h+=eatSec(s.id,s.name,cur?`${esc(cur.n.length>22?cur.n.slice(0,21)+"…":cur.n)} · ${fmt(cur.k+extraK)} kcal`:"Not logged","empty",!!cur,b);
+    let extraK=mine.reduce((a,x)=>a+(Number(x.e.k)||0),0);
+    if(!S.fresh&&s.id==="lunch"&&!hiddenMeals().includes("rice")){b+=`<div class="chip-row" style="margin-bottom:8px"><button class="toggle" style="margin:0" data-act="rice" aria-pressed="${!!m.rice}"><span class="box">✓</span><span class="txt"><strong>Extra rice</strong><small>35 g rice (dry). ${lifting?"Suggested today, since it's a lifting day.":"Optional on rest days."}</small></span><span class="num">${RICE.k} kcal<br>${RICE.p} g</span></button><button class="chip-x" data-act="rmmeal" data-opt="rice" aria-label="Remove extra rice">×</button></div>`;if(m.rice)extraK+=RICE.k;}
+    const tot=(cur?cur.k:0)+extraK,logged=!!cur||mine.length>0;
+    h+=eatTile(s.id,s.name,logged?`${fmt(tot)} kcal${cur?" · "+esc(cur.n.length>18?cur.n.slice(0,17)+"…":cur.n):""}`:"Not logged",logged?ring(1,true):ring("empty"),b,{done:logged});
   }
-  // add-ons
-  {const Q=quick(),ex=day.extras||[];let b=`<div class="card">`;
+  // extras without a meal
+  {const Q=quick(),loose=ex.map((e,i)=>({e,i})).filter(x=>!x.e.slot);let b=`<div class="card">`;
    const chip=(q,i)=>`<span class="chip-row"><button class="chip" data-act="quick" data-i="${i}">${esc(q.n)}<small>${fmt(q.k)} kcal, ${Math.round(q.p*10)/10} g</small></button><button class="chip-x" data-act="rmquick" data-i="${i}" aria-label="Remove ${esc(q.n)} from tap options">×</button></span>`;
    for(const g of QCATS.concat(["Saved"])){const items=Q.map((q,i)=>({q,i})).filter(x=>(QCATS.includes(x.q.c)?x.q.c:"Saved")===g);if(items.length)b+=`<p class="lbl">${g}</p><div class="chips">${items.map(x=>chip(x.q,x.i)).join("")}</div>`;}
-   if(ex.length)b+=ex.map((e,i)=>`<div class="swr li" data-sw="food" data-i="${i}">${swbg("Edit","Delete")}<div class="sw extra"><button class="entry" data-act="editentry">${esc(e.n||"Food")}<br><small class="of">${fmt(Number(e.k)||0)} kcal, ${Math.round((Number(e.p)||0)*10)/10} g protein${Number(e.fb)>0?`, ${r1(Number(e.fb))} g fibre`:""}</small></button><button class="rm" data-act="rmfood" data-i="${i}" aria-label="Remove ${esc(e.n||"food")}">×</button></div></div>`).join("")+`<div style="height:10px"></div>`;
+   if(loose.length)b+=loose.map(x=>foodRow(x.e,x.i)).join("")+`<div style="height:10px"></div>`;
    b+=`<div class="qa"><input class="field" id="qaN" placeholder="Something else" aria-label="Food name"><input class="field" id="qaK" inputmode="numeric" placeholder="kcal" aria-label="Calories"><input class="field" id="qaP" inputmode="decimal" placeholder="protein g" aria-label="Protein in grams"></div>
    <button class="btn" data-act="addfood">Add food</button><button class="linkbtn" data-act="addfood" data-save="1">Add and save as a tap option</button></div>`;
-   const ek=ex.reduce((a,e)=>a+(Number(e.k)||0),0);
-   h+=eatSec("addons","Extra food",ex.length?`${ex.length} added · ${fmt(ek)} kcal`:"Quick add",ex.length?1:"empty",ex.length>0,b);}
-  // supplements
+   const ek=loose.reduce((a,x)=>a+(Number(x.e.k)||0),0);
+   h+=eatTile("addons","Extra food",loose.length?`${loose.length} added · ${fmt(ek)} kcal`:"Snacks and drinks",loose.length?ring(1,true):ring("empty"),b,{done:loose.length>0});}
   {const SU=supps(),ds=day.supps||{},n=SU.filter(x=>ds[x]).length;
-   h+=eatSec("supps","Supplements",SU.length?`${n} of ${SU.length} taken`:"None yet",SU.length?n/SU.length:"empty",SU.length>0&&n>=SU.length,suppsHtml(day)+`<button class="btn ghost" data-act="suppadd">${IC.plus||"+"} Add a supplement</button>`);}
-  // tools
-  h+=eatSec("calc","Food calculator","Any ingredient",`<span class="secic">${IC.search}</span>`,false,foodCalcHtml().replace(/^<h2 class="sec-title">Food calculator<\/h2>/,""));
+   h+=eatTile("supps","Supplements",SU.length?`${n} of ${SU.length} taken`:"None yet",SU.length?ring(n/SU.length,n>=SU.length):ring("empty"),suppsHtml(day)+`<button class="btn ghost" data-act="suppadd">+ Add a supplement</button>`,{done:SU.length>0&&n>=SU.length});}
+  h+=eatTile("cheat","Cheat meal",c?(c.type==="free"?"Free day":"Not counted today"):T.own?"Different targets today":"Or a free day",`<span class="secic">${ICO('<path d="M12 3c2.5 3 4 5.3 4 8a4 4 0 0 1-8 0c0-1.5.6-2.9 1.5-4M10 14.5a2 2 0 0 0 4 0"/>').replace('<svg ','<svg width="15" height="15" ')}</span>`,"",{noplus:true});
+  h+=eatTile("calc","Food calculator","Any ingredient",`<span class="secic">${IC.search}</span>`,foodCalcHtml().replace(/^<h2 class="sec-title">Food calculator<\/h2>/,""));
   {const nh=hiddenMeals().length;
-   h+=eatSec("mine","Add your own meal","Save meals you eat often",`<span class="secic">+</span>`,false,`<div class="card"><p class="note" style="margin:0 0 10px">Already know the calories? Save it as an option under any meal.</p>
+   h+=eatTile("mine","Your meals","Save meals you eat often",`<span class="secic">${ICO('<path d="M5 4h14v16H5zM9 9h6M9 13h6"/>').replace('<svg ','<svg width="15" height="15" ')}</span>`,`<div class="card"><p class="note" style="margin:0 0 10px">Already know the calories? Save it as an option under any meal.</p>
     <select class="field" id="mSl" aria-label="Which meal">${SLOTS.map(x=>`<option value="${x.id}">${x.name}</option>`).join("")}</select>
     <input class="field" id="mN" style="margin-top:8px" placeholder="Name, like Overnight oats" aria-label="Meal name">
     <input class="field" id="mD" style="margin-top:8px" placeholder="What's in it (optional)" aria-label="Description">
     <div class="pair" style="margin-top:8px"><input class="field" id="mK" inputmode="numeric" placeholder="kcal" aria-label="Calories"><input class="field" id="mP" inputmode="decimal" placeholder="protein g" aria-label="Protein"></div>
     <button class="btn" data-act="addmeal">Save meal</button>${nh?`<button class="linkbtn" data-act="showhidden">Show ${nh} removed sample meal${nh>1?"s":""}</button>`:""}</div>`);}
-  {const R=allRecipes();h+=eatSec("recipes","Recipes",`${R.length} recipe${R.length===1?"":"s"}`,`<span class="secic">${ICO('<path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM8 7h6"/>').replace('<svg ','<svg width="15" height="15" ')}</span>`,false,recipesHtml().replace(/^<h2 class="sec-title">Recipes<\/h2>/,""));}
-  h+=`</section>`;
+  {const R=allRecipes();h+=eatTile("recipes","Recipes",`${R.length} recipe${R.length===1?"":"s"}`,`<span class="secic">${ICO('<path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM8 7h6"/>').replace('<svg ','<svg width="15" height="15" ')}</span>`,recipesHtml().replace(/^<h2 class="sec-title">Recipes<\/h2>/,""));}
+  h+=`</div></section>`;
   $("panel").innerHTML=h;
 }
+$("panel").addEventListener("click",e=>{if(tab!=="eat")return;const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  if(a==="tile"){if(id==="cheat"){cheatSheet();return;}const key=sel+":eat-"+id,was=!!secOpen[key];Object.keys(secOpen).forEach(x=>{if(x.startsWith(sel+":eat-"))delete secOpen[x];});if(!was)secOpen[key]=true;renderEat();
+    if(!was)requestAnimationFrame(()=>{const el=document.querySelector(`.etile[data-tile="${id}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<70||r.top>innerHeight*0.55)scrollTo({top:scrollY+r.top-80,behavior:"smooth"});}});}
+  else if(a==="tileadd"){if(SLOTS.some(x=>x.id===id))quickAdd(id);else if(id==="addons")quickAdd(null);else if(id==="supps")suppAdd();
+    else{Object.keys(secOpen).forEach(x=>{if(x.startsWith(sel+":eat-"))delete secOpen[x];});secOpen[sel+":eat-"+id]=true;renderEat();
+      requestAnimationFrame(()=>{const el=document.querySelector(`.etile[data-tile="${id}"]`);if(el)scrollTo({top:scrollY+el.getBoundingClientRect().top-80,behavior:"smooth"});
+        if(id==="calc"){const f=$("fcQ");if(f)f.focus({preventScroll:true});}else if(id==="mine"){const f=$("mN");if(f)f.focus({preventScroll:true});}else if(id==="recipes"){const d=document.querySelector(".addrec");if(d){d.open=true;const f=$("rN");if(f)f.focus({preventScroll:true});}}});}}
+});
 // ---------- Supplements: common choices with info ----------
 // re: matches names the user typed, nut: links to a tracked deficiency
 const SUPPLIB=[
@@ -2046,6 +2120,29 @@ function weekAvg(monKey){
   const v=[];for(let i=0;i<7;i++){const d=store.days[addDays(monKey,i)];if(d&&Number(d.weight)>0)v.push(Number(d.weight));}
   return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
 }
+// ---------- What each target means (tap any number) ----------
+function goalKind(){const g=num((store.settings.profile||{}).goal);return g<0?"cut":g>0?"bulk":store.settings.profile?"maintain":"cut";}
+function myKg(){return bodyKgOn(todayKey())||toKg(num((store.settings.profile||{}).w))||0;}
+function tg(kind,text){return `<button type="button" class="tgt" data-tgt="${kind}" aria-label="${esc(String(text).replace(/<[^>]+>/g,""))}. Tap for what it means">${text}</button>`;}
+function tgtInfo(kind){const S=store.settings,g=goalKind(),kg=myKg(),pf=S.profile||{},R=calcTargets(Object.assign({sex:"m",act:1.55,goal:-550},pf));
+  const T={
+   kcal:["Calories",g==="cut"?`<p><b>A ceiling.</b> You're losing fat, so ${fmt(S.kcal)} kcal is the most to eat. Landing on it or a little under is the goal. Going over now and then is fine, but it slows progress.</p><p>Don't go far under either: big gaps cost muscle, sleep and training energy.</p>`:g==="bulk"?`<p><b>A minimum.</b> You're building muscle, so reach ${fmt(S.kcal)} kcal every day. Going 100–200 kcal over is fine.</p><p>Way over just adds more fat than muscle.</p>`:`<p><b>Hit it closely.</b> You're maintaining, so aim within about 100 kcal of ${fmt(S.kcal)} either way. Over the week it should average out.</p>`],
+   protein:["Protein",`<p><b>A minimum.</b> Reach ${fmt(S.protein)} g every day${kg?`, about ${(S.protein/kg).toFixed(1)} g per kg`:""}. Going over is fine. It's just more filling and more expensive.</p><p>It protects muscle on a diet and builds it otherwise. Spread it over 3–5 meals.</p>`],
+   carbs:["Carbs",`<p><b>Flexible.</b> Carbs fill the calories left after protein and fat. Eat more around training, especially running and Hyrox days.</p>`],
+   fat:["Fat",`<p><b>A minimum, roughly.</b> Don't go much below${kg?` about ${Math.round(0.8*kg)} g (0.8 g per kg)`:" about 0.8 g per kg"}, since fat is needed for hormones. Above that it's flexible.</p>`],
+   fibre:["Fibre",`<p><b>A minimum.</b> About ${fibreGoal()} g a day keeps digestion regular and keeps you full. More is fine.</p><p>Raise it slowly and drink enough water, or it can cause bloating.</p>`],
+   water:["Water",`<p><b>A minimum guide.</b> ${waterGoal()} Drink more when it's hot or you sweat a lot.</p><p>Pale yellow urine means you're drinking enough.</p>`],
+   magnesium:["Magnesium",`<p><b>A daily target from food</b>: about ${pf.sex==="f"?300:350} mg. If you supplement, keep the supplement under 250 mg a day.</p>`],
+   potassium:["Potassium",`<p><b>A daily target from food</b>: about 4,000 mg. Fruit, vegetables, potatoes and beans make it easy. Don't take potassium pills unless a doctor says so.</p>`],
+   calcium:["Calcium",`<p><b>A daily target</b>: about 1,000 mg, mostly from food. Supplements only for the gap, at most 500 mg at a time.</p>`],
+   vitd:["Vitamin D",`<p><b>A daily amount, not a minimum to beat.</b> 800 IU (20 µg) in the darker months. More isn't better: stay under 4,000 IU unless a doctor says otherwise.</p>`],
+   omega3:["Omega-3",`<p><b>A minimum.</b> 250–500 mg of EPA and DHA a day, or oily fish twice a week.</p>`],
+   creatine:["Creatine",`<p><b>A daily amount.</b> 3–5 g every day. Taking more doesn't help, it just gets flushed out.</p>`]
+  }[kind];if(!T)return;
+  openSheet(T[0],T[1]+`<p class="note">Targets are estimates from your details. Check your weekly average weight and adjust.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
+function fibreGoal(){return Math.max(30,Math.round(num(store.settings.kcal)/1000*14));}
+function waterGoal(){const kg=myKg();if(!kg)return "About 35 ml per kg of body weight a day, plus 0.5–1 L per hour of training.";const base=kg*0.035;return `About ${base.toFixed(1)} L a day for you (35 ml per kg), plus 0.5–1 L per hour of training, so around ${(base+0.75).toFixed(1)} L on training days.`;}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-tgt]");if(!b)return;e.preventDefault();e.stopPropagation();tgtInfo(b.dataset.tgt);},true);
 // ---------- Deficiencies and suggested nutrients ----------
 // test: [what is measured, unit, typical low, typical high]. Labs differ, so people can change the range.
 const DEFS=[
@@ -2060,14 +2157,14 @@ const DEFS=[
  {id:"iodine",n:"Iodine",test:["Iodine (urine)","µg/L",100,199],food:"Iodised salt, fish, seafood and dairy."}
 ];
 const SUGG=[
- {id:"fibre",n:"Fibre",goal:"About 30 g a day",why:"Keeps digestion regular, keeps you full when you're eating less, and is linked to better heart health.",food:"Oats, whole grain bread, lentils, beans, vegetables, fruit and nuts. Foods from the food calculator count towards your daily fibre."},
- {id:"water",n:"Water",goal:"About 35 ml per kg of body weight, more on training days",why:"Even mild dehydration makes training feel harder and can be mistaken for hunger.",food:"Water, tea, milk, fruit and soup all count. Pale yellow urine is a good sign."},
- {id:"omega3",n:"Omega-3",goal:"Oily fish twice a week, or 250–500 mg of EPA and DHA",why:"Good for your heart, and it may help with joint soreness.",food:"Salmon, mackerel, herring and sardines. Walnuts and flax have a plant form your body converts poorly.",supp:"omega3"},
- {id:"vitd",n:"Vitamin D",goal:"800 IU (20 µg) a day from October to March",why:"In Germany the winter sun is too weak to make it. It supports bones, muscles and the immune system.",food:"Oily fish and eggs have a little, but it's hard to get enough from food in winter.",supp:"vitd"},
- {id:"magnesium",n:"Magnesium",goal:"About 350 mg a day for men, 300 mg for women, mostly from food",why:"Needed for muscles and nerves. Some people find a little extra in the evening helps them sleep.",food:"Nuts, seeds, oats, whole grains, legumes and dark chocolate.",supp:"magnesium"},
- {id:"creatine",n:"Creatine",goal:"3–5 g a day",why:"Helps you get stronger and build muscle over time. The best-researched training supplement.",food:"Meat and fish contain a little, but far less than a supplement.",supp:"creatine"},
- {id:"potassium",n:"Potassium",goal:"About 4,000 mg a day",why:"Balances the salt in your diet and supports blood pressure and muscles.",food:"Potatoes, bananas, beans, spinach, yogurt and dried fruit."},
- {id:"calcium",n:"Calcium",goal:"About 1,000 mg a day",why:"Keeps bones strong. Mainly worth watching if you eat little dairy.",food:"Milk, yogurt, quark, cheese, fortified plant milk and tofu.",supp:"calcium"}
+ {id:"fibre",n:"Fibre",goal:()=>tg("fibre",`At least ${fibreGoal()} g a day`),why:"Keeps digestion regular, keeps you full when you're eating less, and is linked to better heart health.",food:"Oats, whole grain bread, lentils, beans, vegetables, fruit and nuts. Foods from the food calculator count towards your daily fibre."},
+ {id:"water",n:"Water",goal:()=>{const kg=myKg();return tg("water",kg?`At least ${(kg*0.035).toFixed(1)} L a day, ${(kg*0.035+0.75).toFixed(1)} L on training days`:"About 35 ml per kg of body weight a day");},why:"Even mild dehydration makes training feel harder and can be mistaken for hunger.",food:"Water, tea, milk, fruit and soup all count. Pale yellow urine is a good sign."},
+ {id:"omega3",n:"Omega-3",goal:()=>tg("omega3","Oily fish twice a week, or 250–500 mg of EPA and DHA"),why:"Good for your heart, and it may help with joint soreness.",food:"Salmon, mackerel, herring and sardines. Walnuts and flax have a plant form your body converts poorly.",supp:"omega3"},
+ {id:"vitd",n:"Vitamin D",goal:()=>tg("vitd","800 IU (20 µg) a day from October to March"),why:"In Germany the winter sun is too weak to make it. It supports bones, muscles and the immune system.",food:"Oily fish and eggs have a little, but it's hard to get enough from food in winter.",supp:"vitd"},
+ {id:"magnesium",n:"Magnesium",goal:()=>tg("magnesium",`About ${(store.settings.profile||{}).sex==="f"?300:350} mg a day, mostly from food`),why:"Needed for muscles and nerves. Some people find a little extra in the evening helps them sleep.",food:"Nuts, seeds, oats, whole grains, legumes and dark chocolate.",supp:"magnesium"},
+ {id:"creatine",n:"Creatine",goal:()=>tg("creatine","3–5 g a day"),why:"Helps you get stronger and build muscle over time. The best-researched training supplement.",food:"Meat and fish contain a little, but far less than a supplement.",supp:"creatine"},
+ {id:"potassium",n:"Potassium",goal:()=>tg("potassium","About 4,000 mg a day"),why:"Balances the salt in your diet and supports blood pressure and muscles.",food:"Potatoes, bananas, beans, spinach, yogurt and dried fruit."},
+ {id:"calcium",n:"Calcium",goal:()=>tg("calcium","About 1,000 mg a day"),why:"Keeps bones strong. Mainly worth watching if you eat little dairy.",food:"Milk, yogurt, quark, cheese, fortified plant milk and tofu.",supp:"calcium"}
 ];
 function hcfg(){const H=store.settings.health||{};return {intake:H.intake!==false,labs:H.labs===true};}
 function myDefs(){return Array.isArray(store.settings.defs)?store.settings.defs:[];}
@@ -2095,13 +2192,13 @@ function defsHtml(k){
   <p class="note">This helps you stick to your plan. It's not medical advice, so follow what your doctor tells you, and get retested when they say.</p></div>`;
   return h;
 }
-function suggHit(k,id){const d=store.days[k];if(!d)return false;if((d.xtra||{})[id])return true;if(id==="fibre")return eatTotals(d).fb>=30;const S=SUGG.find(x=>x.id===id);return !!(S&&S.supp&&suppTaken(d,S.supp));}
+function suggHit(k,id){const d=store.days[k];if(!d)return false;if((d.xtra||{})[id])return true;if(id==="fibre")return eatTotals(d).fb>=fibreGoal();const S=SUGG.find(x=>x.id===id);return !!(S&&S.supp&&suppTaken(d,S.supp));}
 function suggHtml(k){
   const on=store.settings.extrasOn||[],SU=supps();
   let h=`<h2 class="sec-title" data-rail="Suggested">Suggested nutrients</h2><div class="card"><p class="note" style="margin:0 0 10px">None of these are necessary. They're extras that could help, depending on how you eat and train. Track the ones you want to work on.</p>`;
   for(const x of SUGG){const tr=on.includes(x.id),open=openSugg.has(x.id),I=x.supp&&SUPPLIB.find(s=>s.id===x.supp),inSupp=I&&SU.some(n=>I.re.test(n));
-    h+=`<div class="sugg"><div class="sugghd">${tr?`<button class="rtick" data-act="sugghit" data-id="${x.id}" aria-pressed="${suggHit(k,x.id)}" aria-label="Hit ${esc(x.n)} ${k===todayKey()?"today":"on this day"}">✓</button>`:""}<span><strong>${esc(x.n)}<span class="optional">Optional</span></strong><small>${esc(x.goal)}</small></span><button type="button" class="icob" data-act="suggopen" data-id="${x.id}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="More about ${esc(x.n)}">${IC.search}</button></div>
-    ${tr?dots7(k,d=>suggHit(d,x.id))+(x.id==="fibre"?`<p class="note" style="margin-top:6px">${r1(eatTotals(store.days[k]||{}).fb)} g logged ${k===todayKey()?"today":"that day"} from the food calculator.</p>`:""):""}
+    h+=`<div class="sugg"><div class="sugghd">${tr?`<button class="rtick" data-act="sugghit" data-id="${x.id}" aria-pressed="${suggHit(k,x.id)}" aria-label="Hit ${esc(x.n)} ${k===todayKey()?"today":"on this day"}">✓</button>`:""}<span><strong>${esc(x.n)}<span class="optional">Optional</span></strong><small>${typeof x.goal==="function"?x.goal():esc(x.goal)}</small></span><button type="button" class="icob" data-act="suggopen" data-id="${x.id}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="More about ${esc(x.n)}">${IC.search}</button></div>
+    ${tr?dots7(k,d=>suggHit(d,x.id))+(x.id==="fibre"?`<p class="note" style="margin-top:6px">${r1(eatTotals(store.days[k]||{}).fb)} of ${fibreGoal()} g logged ${k===todayKey()?"today":"that day"}. Foods with fibre values count.</p>`:""):""}
     ${open?`<div class="suggbody"><p><b>Why it could help:</b> ${esc(x.why)}</p><p><b>Where to get it:</b> ${esc(x.food)}</p><p class="note" style="margin:0">Not necessary for everyone. It might just help.</p>
       <div class="pair" style="margin-top:8px"><button class="btn ${tr?"ghost":""}" style="margin:0" data-act="suggtrack" data-id="${x.id}">${tr?"Stop tracking":"Track daily"}</button>${I?`<button class="btn ghost" style="margin:0" data-act="suggsupp" data-id="${x.id}"${inSupp?" disabled":""}>${inSupp?"In your supplements":"Add to supplements"}</button>`:""}</div></div>`:""}</div>`;}
   return h+`</div>`;
@@ -2197,7 +2294,7 @@ function burnHtml(){
 }
 function adaptive(){
   const t=todayKey(),start=addDays(t,-27),W=[],F=[];
-  for(let i=0;i<28;i++){const k=addDays(start,i),d=store.days[k];if(!d)continue;if(num(d.weight)>0)W.push({x:i,y:toKg(d.weight)});const et=eatTotals(d);if(et.k>0)F.push(et.k);}
+  for(let i=0;i<28;i++){const k=addDays(start,i),d=store.days[k];if(!d)continue;if(num(d.weight)>0)W.push({x:i,y:toKg(d.weight)});const et=eatTotals(d);if(et.k>0&&!(d.cheat&&(d.cheat.type==="skip"||d.cheat.type==="free")))F.push(et.k);}
   if(W.length<8||W[W.length-1].x-W[0].x<14||F.length<10)return {need:true,w:W.length,f:F.length};
   const n=W.length,mx=W.reduce((a,p)=>a+p.x,0)/n,my=W.reduce((a,p)=>a+p.y,0)/n,slope=W.reduce((a,p)=>a+(p.x-mx)*(p.y-my),0)/W.reduce((a,p)=>a+(p.x-mx)**2,0);
   const intake=F.reduce((a,b)=>a+b,0)/F.length;return {tdee:intake-slope*7700,intake,perWeek:slope*7};
@@ -2278,8 +2375,8 @@ function renderBody(){
   h+=burnHtml()+adaptiveHtml()+muscleSetsHtml(k)+strengthHtml(k)+measHtml(k)+photosHtml()+notesHtml();
   h+=targetsCalcHtml();
   h+=`<h2 class="sec-title">Daily targets</h2><div class="card"><div class="pair">
-    <label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(S.kcal)}"></label>
-    <label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(S.protein)}"></label></div></div>`;
+    <label><span class="lbl">${tg("kcal","Calories")}</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(S.kcal)}"></label>
+    <label><span class="lbl">${tg("protein","Protein (g)")}</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(S.protein)}"></label></div><p class="note" style="font-size:13px">Tap any target to see what it means for you.</p></div>`;
   h+=suggHtml(k)+defsHtml(k)+`</section>`;
   $("panel").innerHTML=h;
 }
@@ -2342,7 +2439,10 @@ function recipesHtml(){
   let h=`<h2 class="sec-title">Recipes</h2><p class="note" style="margin:-4px 0 10px">Recipes also show up as options under Lunch and Dinner. Tap one for ingredients and steps.</p>`;
   h+=R.map(r=>{const open=openRec.has(r.id);return `<div class="card recipe"><button type="button" class="rechd" data-act="recopen" data-id="${esc(r.id)}" aria-expanded="${open}"><span><strong>${esc(r.n)}</strong><small>${fmt(num(r.k))} kcal · ${Math.round(num(r.p))} g protein per serving · makes ${esc(r.s)}${r.time?" · "+esc(r.time):""}</small></span>${IC.chev}</button>
     ${open?`<div class="recbody">${(r.ing||[]).length?`<p class="lbl">Ingredients, for ${esc(r.s)} servings</p><ul>${r.ing.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}${(r.steps||[]).length?`<p class="lbl">Method</p><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:""}${r.note?`<p class="note">${esc(r.note)}</p>`:""}
-    <div class="pair"><button type="button" class="btn" data-act="reclog" data-id="${esc(r.id)}">Log 1 serving today</button>${r.mi>=0?`<button type="button" class="btn ghost" data-act="recedit" data-i="${r.mi}">Edit</button>`:`<button type="button" class="btn ghost" data-act="reccopy" data-id="${esc(r.id)}">Make my own copy</button>`}</div>
+    <div class="portion"><p class="lbl" style="margin-top:12px">How much did you eat?</p><div class="pair"><label><span class="lbl">Servings</span><input class="field" data-rport="${esc(r.id)}" data-pf2="n" inputmode="decimal" value="1" aria-label="Servings eaten"></label><label><span class="lbl">Or your portion (g)</span><input class="field" data-rport="${esc(r.id)}" data-pf2="g" inputmode="decimal" placeholder="${recTw(r)?"grams":"weigh the pot first"}" aria-label="Your portion in grams"${recTw(r)?"":" disabled"}></label></div>
+     <label class="sfld"><span class="lbl">Whole pot, cooked (g, optional)</span><input class="field" data-rport="${esc(r.id)}" data-pf2="tw" inputmode="decimal" value="${recTw(r)||""}" placeholder="Weigh it once, then weigh your portion" aria-label="Weight of the whole cooked recipe"></label>
+     <p class="fcout" id="rpOut-${esc(r.id)}">${portionOut(r)}</p></div>
+    <div class="pair"><button type="button" class="btn" data-act="reclog" data-id="${esc(r.id)}">Log it</button>${r.mi>=0?`<button type="button" class="btn ghost" data-act="recedit" data-i="${r.mi}">Edit</button>`:`<button type="button" class="btn ghost" data-act="reccopy" data-id="${esc(r.id)}">Make my own copy</button>`}</div>
     ${r.mi>=0&&!r.b?`<button type="button" class="linkbtn" style="color:var(--red)" data-act="rmrecipe" data-i="${r.mi}">Delete recipe</button>`:""}</div>`:""}</div>`;}).join("");
   h+=`<details class="card addrec"><summary>Add your own recipe</summary>
     <input class="field" id="rN" style="margin-top:10px" placeholder="Recipe name" aria-label="Recipe name">
@@ -2354,6 +2454,11 @@ function recipesHtml(){
   if(S.halal)h+=`<p class="note">Buy halal-certified meat for these, and check sauces and stock for alcohol or gelatin.</p>`;
   return h;
 }
+function recTw(r){return num((store.settings.recTw||{})[r.id]);}
+function portionOf(r){const box=document.querySelector(`#rpOut-${CSS.escape(r.id)}`)?document.querySelector(`#rpOut-${CSS.escape(r.id)}`).closest(".portion"):null;
+  const v=f=>box?num((box.querySelector(`[data-pf2="${f}"]`)||{}).value):0,tw=v("tw")||recTw(r),g=v("g");
+  if(g>0&&tw>0)return {n:g/tw*num(r.s),how:`${fmt(g)} g of ${fmt(tw)} g`};const n=v("n");return {n:n>0?n:1,how:""};}
+function portionOut(r){const P=portionOf(r);return `<b>${fmt(num(r.k)*P.n)} kcal</b> · ${r1(num(r.p)*P.n)} g protein <span class="of">(${r1(P.n)} serving${P.n===1?"":"s"}${P.how?", "+P.how:""})</span>`;}
 const lines=v=>String(v||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
 function ensureRecipes(){if(!Array.isArray(store.settings.recipes))store.settings.recipes=[];return store.settings.recipes;}
 function supps(){return Array.isArray(store.settings.supps)?store.settings.supps:(store.settings.fresh?[]:DEFAULT_SUPPS);}
@@ -2523,6 +2628,9 @@ $("panel").addEventListener("click",e=>{
   else if(act==="addprice"){ensurePrices().push({n:"New item",e:0,q:1});persist("settings");renderSpend();}
   else if(act==="rmprice"){ensurePrices().splice(+b.dataset.i,1);persist("settings");renderSpend();}
 });
+$("panel").addEventListener("input",e=>{if(e.target.id==="mbS"){mbServ=e.target.value;const x=$("mbPer");if(x)x.innerHTML=mbPerHtml();return;}
+  if(e.target.dataset&&e.target.dataset.rport!==undefined){if(e.target.dataset.pf2==="tw"){const g=e.target.closest(".portion").querySelector('[data-pf2="g"]');if(g){g.disabled=!(num(e.target.value)>0);g.placeholder=g.disabled?"weigh the pot first":"grams";}}const r=allRecipes().find(x=>x.id===e.target.dataset.rport),o=$("rpOut-"+e.target.dataset.rport);if(r&&o)o.innerHTML=portionOut(r);return;}});
+$("panel").addEventListener("change",e=>{if(e.target.id==="mbS")renderEat();});
 $("panel").addEventListener("input",e=>{
   const t=e.target,k=sel,docId="day-"+k;
   if(t.dataset.f){
@@ -2671,6 +2779,8 @@ function fcList(){
   return all.slice(0,40).map(x=>`<button type="button" class="libitem" data-act="fcpick" data-n="${esc(x.n)}" aria-pressed="${fcPick===x.n}"><span><strong>${esc(x.n)}</strong><small>Per 100 g: ${fmt(x.k)} kcal, ${r1(x.p)} g protein, ${r1(x.fb||0)} g fibre</small></span><span class="chk">✓</span></button>`).join("");
 }
 function fcOut(it,g){const m=macrosFor(it,g);return `<b>${fmt(m.k)} kcal</b> · ${r1(m.p)} g protein · ${r1(m.cb)} g carbs · ${r1(m.f)} g fat · ${r1(m.fb)} g fibre`;}
+let mbServ=1;
+function mbPerHtml(){const t=mbTotals(),n=num(mbServ)>0?num(mbServ):1;return n===1?`<span class="of">Cooking a batch? Enter how many portions it makes to see one serving.</span>`:`<b>One serving:</b> ${fcOut({k:t.k/n,p:t.p/n,cb:t.cb/n,f:t.f/n,fb:t.fb/n},100)}`;}
 function mbTotals(){return mb.reduce((a,x)=>{const m=macrosFor(x,x.g);a.k+=m.k;a.p+=m.p;a.cb+=m.cb;a.f+=m.f;a.fb+=m.fb;return a;},{k:0,p:0,cb:0,f:0,fb:0});}
 function foodCalcHtml(){
   const it=fcPick&&allIngr().find(x=>x.n===fcPick);
@@ -2685,9 +2795,10 @@ function foodCalcHtml(){
   if(mb.length){const t=mbTotals();
     h+=`<div class="mb"><p class="lbl" style="margin-top:16px">Meal builder</p>`+mb.map((x,i)=>`<div class="mbrow"><span>${esc(x.n)}</span><input class="field" data-mbg="${i}" inputmode="decimal" value="${esc(x.g)}" aria-label="${esc(x.n)} grams"><span class="of">g</span><button class="rm" data-act="mbrm" data-i="${i}" aria-label="Remove ${esc(x.n)}">×</button></div>`).join("")+
     `<p class="fcout" id="mbTot" style="margin-top:8px">Total: ${fcOut({k:t.k,p:t.p,cb:t.cb,f:t.f,fb:t.fb},100)}</p>
+    <div class="servrow"><label><span class="lbl">Makes how many servings?</span><input class="field" id="mbS" inputmode="decimal" value="${esc(mbServ)}" aria-label="Number of servings"></label><p class="fcout" id="mbPer">${mbPerHtml()}</p></div>
     <input class="field" id="mbN" placeholder="Meal name, like Chicken and rice bowl" aria-label="Meal name" style="margin-top:8px">
-    <div class="pair" style="margin-top:8px"><button class="btn" style="margin:0" data-act="mbadd">Add to today</button><select class="field" id="mbSl" aria-label="Save under">${SLOTS.map(x=>`<option value="${x.id}">Save under ${x.name}</option>`).join("")}</select></div>
-    <button class="btn ghost" data-act="mbsave">Save as my meal</button><button class="linkbtn" data-act="mbclear">Clear builder</button></div>`;}
+    <div class="pair" style="margin-top:8px"><button class="btn" style="margin:0" data-act="mbadd">${num(mbServ)>1?"Add 1 serving":"Add to today"}</button><select class="field" id="mbSl" aria-label="Save under">${SLOTS.map(x=>`<option value="${x.id}">Save under ${x.name}</option>`).join("")}</select></div>
+    <button class="btn ghost" data-act="mbsave">Save ${num(mbServ)>1?"1 serving ":""}as my meal</button>${num(mbServ)>1?`<button class="btn ghost" data-act="mbrecipe">Save as a recipe (${esc(mbServ)} servings)</button>`:""}<button class="linkbtn" data-act="mbclear">Clear builder</button></div>`;}
   h+=`<details class="mine"><summary>Add your own ingredient</summary><p class="note">Copy the values per 100 g from the label.</p>
     <input class="field" id="niN" placeholder="Name" aria-label="Ingredient name">
     <div class="pair" style="margin-top:8px"><input class="field" id="niK" inputmode="decimal" placeholder="kcal" aria-label="kcal per 100 g"><input class="field" id="niP" inputmode="decimal" placeholder="protein g" aria-label="Protein per 100 g"></div>
@@ -2728,7 +2839,7 @@ function calcTargets(pf){
 }
 function targetsOut(pf){
   const r=calcTargets(pf);if(!r)return `<p class="note">Fill in age, height and weight to see your numbers.</p>`;
-  return `<div class="tgrid"><div><span class="big">${fmt(r.kc)}</span><span class="of">kcal a day</span></div><div><span class="big">${fmt(r.prot)}</span><span class="of">g protein</span></div><div><span class="big">${fmt(r.carbs)}</span><span class="of">g carbs</span></div><div><span class="big">${fmt(r.fat)}</span><span class="of">g fat</span></div></div>
+  return `<div class="tgrid"><div>${tg("kcal",`<span class="big">${fmt(r.kc)}</span><span class="of">kcal a day</span>`)}</div><div>${tg("protein",`<span class="big">${fmt(r.prot)}</span><span class="of">g protein</span>`)}</div><div>${tg("carbs",`<span class="big">${fmt(r.carbs)}</span><span class="of">g carbs</span>`)}</div><div>${tg("fat",`<span class="big">${fmt(r.fat)}</span><span class="of">g fat</span>`)}</div></div>
   ${pf.west?`<p class="note warnline">Your weight is a guess, so calories could be off by about ±${fmt(Math.round(2.5*10*(num(pf.act)||1.55)/5)*5)} kcal and protein by about ±${Math.round(2.5*2.2)} g. Weigh yourself and update it in Settings → Personal details.</p>`:""}
   <p class="note">Resting burn (BMR) about ${fmt(r.bmr)} kcal. Maintenance about ${fmt(r.tdee)} kcal. Protein is ${r.pBasis}.${r.clamped?` That goal would put you below ${fmt(r.floor)} kcal, which is too low to sustain, so it's capped there.`:""} These are estimates: check your weekly average weight after 2–3 weeks and adjust by 100–200 kcal.</p>`;
 }
@@ -2779,6 +2890,18 @@ function snap(ids){
   return ()=>{for(const [d,j] of s){const v=JSON.parse(j);if(d==="settings"){for(const key of Object.keys(store.settings))delete store.settings[key];Object.assign(store.settings,v);}else store.days[d.slice(4)]=v;persist(d);}render();};
 }
 const sheetEl=document.createElement("dialog");sheetEl.className="sheet";document.body.appendChild(sheetEl);
+sheetEl.addEventListener("click",e=>{const b=e.target.closest("[data-qsave]");if(b)b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));});
+
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="cheat")return;const b=e.target.closest("[data-cheat]");if(!b)return;const a=b.dataset.cheat,k=sel,day=ensureDay(k),u=snap(["day-"+k]),S=store.settings;
+  if(a==="skip"||a==="free"){day.cheat={type:a};persist("day-"+k);closeSheet();renderEat();toast(a==="free"?"Free day. Back on plan tomorrow":"Cheat meal noted, not counted",u);}
+  else if(a==="undo"){delete day.cheat;delete day.tgt;day.extras=(day.extras||[]).filter(x=>!x.cheat);persist("day-"+k);closeSheet();renderEat();toast("Back to normal",u);}
+  else if(a==="est"){sheetEl.querySelector(".sheet-b").innerHTML=`<p class="note" style="margin-top:0">These are very rough. Pick the closest.</p><div class="menulist">${[["Small","A burger and fries, a few slices of pizza",900,35],["Big","A big takeaway, or dessert on top",1500,50],["Huge","All-you-can-eat, or eating out all evening",2500,80]].map(([n,d,kc,p])=>`<button type="button" class="menuitem" data-cheatsz="${kc}:${p}:${n}"><strong>${n}, about ${fmt(kc)} kcal</strong><small style="white-space:normal">${d}</small></button>`).join("")}</div>`;}
+  else if(a==="tgt"){const T=dayTargets(day);sheetEl.querySelector(".sheet-b").innerHTML=`<p class="note" style="margin-top:0">Only for ${k===todayKey()?"today":shortDate(k)}. Your normal targets stay ${fmt(S.kcal)} kcal and ${fmt(S.protein)} g.</p><div class="pair">${fld("Calories","ctK",T.k,"numeric")}${fld("Protein (g)","ctP",T.p,"numeric")}</div><button class="btn" data-cheat="tgtsave">Save for this day</button>`;}
+  else if(a==="tgtsave"){const kc=num($("ctK").value),p=num($("ctP").value);if(!(kc>0))return;day.tgt={k:Math.round(kc),p:Math.round(p)||num(S.protein)};persist("day-"+k);closeSheet();renderEat();toast("Targets changed for this day only",u);}});
+
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="cheat")return;const b=e.target.closest("[data-cheatsz]");if(!b)return;const [kc,p,n]=b.dataset.cheatsz.split(":"),k=sel,day=ensureDay(k),u=snap(["day-"+k]);
+  (day.extras=day.extras||[]).push({n:"Cheat meal, "+n.toLowerCase(),k:+kc,p:+p,est:true,cheat:true});persist("day-"+k);closeSheet();renderEat();toast("Rough estimate added",u);});
+
 function openSheet(title,body,buttons){
   sheetEl.innerHTML=`<h2 class="sheet-t">${esc(title)}</h2><div class="sheet-b">${body}</div><div class="sheet-a">${buttons.map((b,i)=>`<button type="button" class="${b.cls||"btn"}" data-sb="${i}">${b.label}</button>`).join("")}</div>`;
   sheetEl._btns=buttons;sheetEl._pick=null;sheetEl._scope="today";sheetEl._kind=null;
@@ -2987,9 +3110,12 @@ $("panel").addEventListener("click",e=>{
     else{mb.push(Object.assign({},it,{g}));fcPick=null;renderEat();}}
   else if(act==="mbrm"){mb.splice(+b.dataset.i,1);renderEat();}
   else if(act==="mbclear"){mb=[];renderEat();}
+  else if(act==="mbrecipe"){if(!mb.length)return;const t=mbTotals(),sv=num(mbServ)||1,n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", "),u=snap(["settings"]),id=Date.now().toString(36);
+    ensureRecipes().push({id,n,k:Math.round(t.k/sv),p:r1(t.p/sv),s:sv,ing:mb.map(x=>r1(x.g)+" g "+x.n.replace(/, (raw|dry|drained)$/,"").toLowerCase()),steps:[]});persist("settings");mb=[];mbServ=1;openRec.add(id);renderEat();toast("Recipe saved",u);}
   else if(act==="mbadd"||act==="mbsave"){if(!mb.length)return;const t=mbTotals(),n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", ");
-    if(act==="mbadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n,k:Math.round(t.k),p:r1(t.p),fb:r1(t.fb)});persist("day-"+k);mb=[];renderEat();toast("Meal added to today",u);}
-    else{const S=store.settings,u=snap(["settings"]),sl=$("mbSl").value;S.myMeals=myMeals().concat([{id:Date.now().toString(36),slot:sl,n,d:mb.map(x=>r1(x.g)+" g "+x.n.split(",")[0].toLowerCase()).join(", "),k:Math.round(t.k),p:r1(t.p),fb:r1(t.fb)}]);persist("settings");mb=[];renderEat();toast("Saved under "+SLOTS.find(x=>x.id===sl).name,u);}}
+    const sv=num(mbServ)>0?num(mbServ):1;
+    if(act==="mbadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:sv>1?n+", 1 of "+sv+" servings":n,k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv)});persist("day-"+k);mb=[];mbServ=1;renderEat();toast(sv>1?"One serving added to today":"Meal added to today",u);}
+    else{const S=store.settings,u=snap(["settings"]),sl=$("mbSl").value;S.myMeals=myMeals().concat([{id:Date.now().toString(36),slot:sl,n,d:mb.map(x=>r1(x.g)+" g "+x.n.split(",")[0].toLowerCase()).join(", "),k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv)}]);persist("settings");mb=[];mbServ=1;renderEat();toast("Saved under "+SLOTS.find(x=>x.id===sl).name,u);}}
   else if(act==="niadd"){const n=$("niN").value.trim(),k=num($("niK").value);if(!n){$("niN").focus();return;}if(!(k>=0)||$("niK").value.trim()===""){$("niK").focus();return;}
     const S=store.settings,u=snap(["settings"]);S.ingredients=(S.ingredients||[]).concat([{n,k,p:num($("niP").value),cb:num($("niC").value),f:num($("niF").value),fb:num(($("niB")||{}).value)}]);persist("settings");fcCat="Mine";fcPick=n;renderEat();toast("Ingredient saved",u);}
   else if(act==="usetargets"){const r=calcTargets(Object.assign({sex:"m",act:1.55,goal:-550},profile()));if(!r)return;const S=store.settings,u=snap(["settings"]);S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;persist("settings");render();toast("Targets set to "+fmt(S.kcal)+" kcal and "+S.protein+" g protein",u);}
@@ -3052,7 +3178,7 @@ bothOn("input",e=>{
   if(t.dataset.taccc!==undefined){ensureTheme().accent=t.value;themeChanged(false);}
   else if(t.dataset.tday){const T=ensureTheme();T.days=T.days||{};T.days[t.dataset.tday]=t.value;themeChanged(false);}
 });
-sheetEl.addEventListener("close",()=>{sheetEl._kind=null;});
+sheetEl.addEventListener("close",()=>{const was=sheetEl._kind;sheetEl._kind=null;if(was==="planchange"&&tab==="train")setTimeout(render,0);});
 
 
 
@@ -3170,7 +3296,9 @@ $("panel").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.t
 $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b||tab!=="eat")return;const a=b.dataset.act;
   if(a==="recopen"){const id=b.dataset.id;if(openRec.has(id))openRec.delete(id);else openRec.add(id);renderEat();}
-  else if(a==="reclog"){const r=allRecipes().find(x=>x.id===b.dataset.id);if(!r)return;const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:r.n+", 1 serving",k:Math.round(num(r.k)),p:Math.round(num(r.p))});persist("day-"+k);renderEat();toast("Logged 1 serving of "+r.n,u);}
+  else if(a==="reclog"){const r=allRecipes().find(x=>x.id===b.dataset.id);if(!r)return;const P=portionOf(r),k=sel,day=ensureDay(k),u=snap(["day-"+k]),lab=P.n===1?"1 serving":r1(P.n)+" servings";
+    {const box=document.querySelector(`#rpOut-${CSS.escape(r.id)}`),twI=box&&box.closest(".portion").querySelector('[data-pf2="tw"]');if(twI&&num(twI.value)>0){store.settings.recTw=Object.assign({},store.settings.recTw,{[r.id]:num(twI.value)});persist("settings");}}
+    (day.extras=day.extras||[]).push({n:r.n+", "+lab,k:Math.round(num(r.k)*P.n),p:r1(num(r.p)*P.n)});persist("day-"+k);renderEat();toast("Logged "+lab+" of "+r.n,u);}
   else if(a==="recedit")editRecipe(+b.dataset.i);
   else if(a==="reccopy"){const r=RECIPES.find(x=>x.id===b.dataset.id);if(!r)return;ensureRecipes().push({id:r.id,n:r.n,k:r.k,p:r.p,s:r.s,ing:r.ing.slice(),steps:r.steps.slice(),note:r.note});persist("settings");renderEat();toast("Saved your own copy. Change anything with Edit");}
 });
@@ -3409,8 +3537,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.2";
+const APP_VERSION="3.3";
 const CHANGELOG=[
+  {v:"3.3",d:"9 October 2026",t:"Easier eating and resting",items:["Eat is now a grid of big tiles. Tap one to open it, or + to add food to that meal in seconds","Cheat meal: don't count it, add a rough guess, take a free day, or set different targets for just one day. Those days are left out of your averages","Tap any target, like your calories or protein, to see what it means for you: a ceiling, a minimum, or a number to hit","Suggested nutrients are worked out for you, like your water in litres and your fibre from your calories","Rest timer: tap the time on an exercise to start resting. Hold it to change the time, with a small vibration on phones that support it","The birthday field no longer spills out of its box on iPhone","Single serving calculator: tell the meal builder how many portions a batch makes, log part of a recipe by servings or by weighing your portion, and save a batch as a recipe"]},
   {v:"3.2",d:"9 October 2026",t:"Personal details",items:["Hyrox race prep split template, based on a real Hyrox athlete's week. Only offered if you're not new to the gym","New exercises: incline machine chest press and easy walk","Setup asks for your birthday instead of your age, so your age stays up to date. On your birthday the app says happy birthday","Height, weight and body fat take decimals","Not sure of your weight? Tick the box and your guess is treated as ±2.5 kg. It isn't added to your progress chart, and the app reminds you that weighing in is strongly recommended","New Settings → Preferences → Personal details: change your birthday, height and body fat, log a weigh-in, or correct a starting weight that was wrong without adding a new point to your chart"]},
   {v:"3.1",d:"9 October 2026",t:"Smoother changes",items:["Changing a day's workout asks how: just that day, shift the rest of the week so nothing is lost, or every week from now on. Pick a default in Settings → Preferences → Training","Workout changes show up in History","Opening an exercise folds the one that was open. You can turn this off in Settings → Preferences → Training","The section bar on the right is rebuilt: it no longer misses touches or drifts off centre, the marker moves smoothly as you scroll, and the label uses your accent colour","Ticking a meal no longer folds it and jumps the page","Settings are grouped into App settings, Preferences and Learn and help. School is now called Training guide"]},
   {v:"3.0",d:"9 October 2026",t:"Simpler, cleaner, faster",items:["Full redesign in the shadcn style, with fewer words on screen","Train: tap the workout's name to change it, and tap ? for the details. The logo now only shows in Settings","Warm-up, stretches and every exercise are folded into one line with a progress circle. The one you're on opens by itself, then folds with a tick when you finish and the next one opens","A bar on the right edge shows where you are on long pages. Hold and slide it to jump between sections","Slide along the tab bar, and along any 1 month / 3 months / All style switch, to change it","Hyrox and hybrid exercises: SkiErg, sled push and pull, burpee broad jumps, sandbag lunges, carries, intervals and more, with metres and minutes for runs and stations","New Hybrid and Hyrox split template","Calories burned are worked out per exercise, using your weight and how far, how long or how many sets you did","Eat: meals and sections fold, Evening is now Dinner, and fibre is shown for every ingredient","Supplements: pick from common ones with what they're for, when to take them and what to watch out for, plus your own notes","Body: track deficiencies like iron or vitamin D by daily intake, blood test results or both (Settings → Health tracking)","Body: suggested nutrients like fibre, omega-3 and magnesium, with why they might help. All optional","Training guide in Settings: compound and isolation exercises, every muscle and what trains it, splits, Hyrox and nutrition","The calculator no longer offers losing 1 kg a week unless your activity level makes it safe","Keywords are shown in your accent colour instead of underlined"]},
@@ -3583,7 +3712,7 @@ function guideHtml(){
   h+=ch("Train: logging a workout",`<ul><li>Warm-up, stretches and every exercise are folded into one line with a <b>progress circle</b>. The exercise you're on opens by itself. When you finish its last set it folds away with a tick, and the next one opens. Tap any line to open it.</li><li>Type the weight and reps, then tap <kbd>✓</kbd>. That starts the rest timer. Running and erg exercises ask for metres and minutes, and sled and carry stations for weight and metres.</li><li>Tap <kbd>⌄</kbd> next to a set to see what you did on that set last time, and your best.</li><li><b>+ Set</b> and <b>+ Drop set</b> add rows. Tap a set's number to switch it between a normal set and a drop set. Drag <kbd>⋮⋮</kbd> to reorder.</li><li>Swipe a set left to delete it. Deleted something by mistake? Tap <b>Undo</b>.</li><li>Beat your best and you'll see a <b>New record</b> message. Once you've logged a set, a summary shows your sets, total weight, time and the calories you burned.</li><li>Hold and slide the <b>bar on the right edge</b> to jump between sections on any long page.</li></ul>`);
   h+=ch("Train: exercise options",`<ul><li><b>Tap an exercise's name</b> to swap it (today or every time), remove it for today, open the how-to, add a note, pick a rep style, or use the plate calculator for barbell lifts.</li><li>The <b>magnifying glass</b> shows how to do it: the movement, muscles worked and form tips. The <b>pen</b> adds a note, like seat height.</li><li>The swap list is grouped by muscle, with the same muscle group first.</li><li>New and Some experience see a suggested starting weight the first time, and a reminder to focus on form.</li></ul>`);
   h+=ch("Train: your plan and layout",`<ul><li><b>Edit</b>, at the top right under the week, opens everything you can change: the order of the sections on the page (so the warm-up can come after), which sections show, your own warm-ups and stretches, the exercises in each workout, and your weekly schedule.</li><li><b>Change your weekly split</b> lets you pick a template, set each day, add custom or Dynamic days, and choose how long the split runs.</li><li>On a <b>Dynamic</b> day you pick which workout to do on the day itself.</li><li><b>Tap the workout's name</b> at the top to switch just this day to a different workout. The <b>?</b> next to it explains the workout.</li></ul>`);
-  h+=ch("Rest timer",`<p>Starts by itself when you tick a set, with the right rest for that exercise and rep style. Tap the clock to pause, <b>−15</b>/<b>+15</b> to adjust, <kbd>✕</kbd> to skip. Before a drop set or between exercises in a superset it tells you to keep going. Tap the <b>⏱</b> time on any exercise to set your own. Stretches have a <b>▶</b> hold timer.</p><p>On iPhone the beep can't play while the screen is locked, so keep <b>Keep the screen on</b> switched on in Settings → Rest timer, and check the silent switch.</p>`);
+  h+=ch("Rest timer",`<p>Starts by itself when you tick a set, with the right rest for that exercise and rep style. Tap the clock to pause, <b>−15</b>/<b>+15</b> to adjust, <kbd>✕</kbd> to skip. Before a drop set or between exercises in a superset it tells you to keep going. Tap the <b>▶</b> time on any exercise to start resting straight away. Hold it to pick a different time for that exercise. Stretches have a <b>▶</b> hold timer.</p><p>On iPhone the beep can't play while the screen is locked, so keep <b>Keep the screen on</b> switched on in Settings → Rest timer, and check the silent switch.</p>`);
   h+=ch("Eat",`<ul><li>The bar at the top shows calories and protein against your targets.</li><li>Each meal is folded into one line. Tap it to open, then tick what you ate.</li><li><b>Supplements:</b> add one from the common list to see what it's for, when to take it and what to watch out for (the magnifying glass). The pen adds your own note, like how it affects you.</li><li>Swipe a meal right to edit it, left to remove it.</li><li>The <b>food calculator</b> works out any ingredient by weight. Use the <b>meal builder</b> to combine several and save the result as a meal.</li><li><b>Recipes</b> show ingredients and steps. Tap <b>Log 1 serving today</b> after eating one, or add your own.</li></ul>`);
   h+=ch("Body",`<ul><li>Weigh in each morning. The <b>Progress</b> chart shows each weigh-in and the 7-day average. Tap the chart to see the numbers.</li><li><b>Calories burned</b> estimates today's total and what your training has burned since you started.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li><b>Sets per muscle</b>, <b>Strength</b>, <b>Measurements</b>, <b>Progress photos</b> and <b>Notes</b> sit further down.</li></ul>`);
   h+=ch("Spend and History",`<p><b>Spend</b> works out what your food and supplements cost per week, two weeks or month, grouped by store. Add products with how long they last, then tap a store and a product to log a purchase.</p><p><b>History</b> shows a month at a glance. Tap any day to open it.</p>`);
@@ -3730,18 +3859,33 @@ function afterTick(k,id,i,btn){
 }
 const RTOPTS=[30,45,60,75,90,120,150,180,240];
 function restPickBody(id,k){
-  const p=planOf(k),rec=restRec(id,p,k),ov=restOverride(id),def=tcfg().def>0?tcfg().def:0,cur=restSecs(id,p,k);
-  return `<p class="note" style="margin-top:0">Recommended: <b>${secLabel(rec)}</b>${def?`. Your default for everything: <b>${secLabel(def)}</b>`:""}. Pick a time to use for this exercise from now on.</p>
-  <div class="rtopts">${RTOPTS.map(s=>`<button type="button" data-rtpick="${s}" aria-pressed="${ov===s}">${secLabel(s).replace(" min","m").replace(" s","s")}</button>`).join("")}<button type="button" class="wide" data-rtpick="0" aria-pressed="${!ov}">Use ${def?"my default":"recommended"} (${secLabel(def||rec)})</button></div>
-  <p class="note">Now: <b>${secLabel(cur)}</b>. The timer starts by itself when you tick a set.</p>`;
+  const p=planOf(k),rec=restRec(id,p,k),ov=restOverride(id),def=tcfg().def>0?tcfg().def:0;
+  return `<p class="note" style="margin-top:0">Tap a time to save it for this exercise and start resting.</p>
+  <div class="rtopts">${RTOPTS.map(s=>`<button type="button" data-rtpick="${s}" aria-pressed="${ov===s}">${secLabel(s).replace(" min","m").replace(" s","s")}</button>`).join("")}<button type="button" class="wide" data-rtpick="0" aria-pressed="${!ov}">${def?"My default":"Recommended"}: ${secLabel(def||rec)}</button></div>`;
 }
 function openRestPick(id,k){
-  openSheet("Rest time: "+exName(k,id),restPickBody(id,k),[{label:"Start timer now",fn:()=>{rtAudioUnlock();rtStart(restSecs(id,planOf(k),k),"Rest",exName(k,id));}},{label:"Done",cls:"btn ghost"}]);
+  openSheet("Rest: "+exName(k,id),restPickBody(id,k),[{label:"Close",cls:"btn ghost"}]);
   sheetEl._kind="restpick";sheetEl._rid=id;sheetEl._rk=k;
 }
+// ---- Haptics: vibrate on Android, the switch trick on iPhone (iOS 18 and newer) ----
+let hapticEl=null;
+function haptic(ms){try{if(navigator.vibrate&&navigator.vibrate(ms||10))return;}catch(e){}
+  try{if(!hapticEl){hapticEl=document.createElement("label");hapticEl.setAttribute("aria-hidden","true");hapticEl.style.cssText="position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none";const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.tabIndex=-1;hapticEl.appendChild(i);document.body.appendChild(hapticEl);}hapticEl.click();}catch(e){}}
+// ---- Tap to start, hold to change ----
+const holdS={el:null,t:0,held:false,x:0,y:0,ticks:[]};
+function holdClear(){if(holdS.el)holdS.el.classList.remove("holding");clearTimeout(holdS.t);holdS.ticks.forEach(clearTimeout);holdS.ticks=[];holdS.el=null;}
+document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest("[data-hold]");if(!b)return;holdClear();holdS.el=b;holdS.held=false;holdS.x=e.clientX;holdS.y=e.clientY;b.classList.add("holding");haptic(8);
+  holdS.ticks=[150,300].map(t=>setTimeout(()=>haptic(6),t));
+  holdS.t=setTimeout(()=>{if(holdS.el!==b)return;holdS.held=true;b.classList.remove("holding");haptic(25);openRestPick(b.dataset.id,sel);},480);});
+document.addEventListener("pointermove",e=>{if(holdS.el&&Math.hypot(e.clientX-holdS.x,e.clientY-holdS.y)>10)holdClear();});
+document.addEventListener("pointerup",()=>{if(holdS.el){holdS.el.classList.remove("holding");clearTimeout(holdS.t);holdS.ticks.forEach(clearTimeout);holdS.el=null;}});
+document.addEventListener("pointercancel",holdClear);
+document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest("[data-hold]"))e.preventDefault();});
+$("panel").addEventListener("click",e=>{const b=e.target.closest("[data-hold]");if(!b)return;if(holdS.held){holdS.held=false;return;}
+  const k=sel,id=b.dataset.id;rtAudioUnlock();haptic(12);rtStart(restSecs(id,planOf(k),k),"Rest",exName(k,id));});
 bothOn("click",e=>{
   if(e.currentTarget===sheetEl&&sheetEl._kind==="restpick"){const b=e.target.closest("[data-rtpick]");if(!b)return;const s=+b.dataset.rtpick,T=ensureT();T.ex=T.ex||{};
-    if(s)T.ex[sheetEl._rid]=s;else delete T.ex[sheetEl._rid];persist("settings");sheetEl.querySelector(".sheet-b").innerHTML=restPickBody(sheetEl._rid,sheetEl._rk);if(tab==="train")renderTrain();return;}
+    if(s)T.ex[sheetEl._rid]=s;else delete T.ex[sheetEl._rid];persist("settings");const id=sheetEl._rid,k=sheetEl._rk;closeSheet();if(tab==="train")renderTrain();rtAudioUnlock();rtStart(restSecs(id,planOf(k),k),"Rest",exName(k,id));return;}
   if(!inSettings(e))return;
   const b=e.target.closest("[data-rtset]");if(!b)return;const T=ensureT(),[key,val]=b.dataset.rtset.split(":");
   if(key==="clear"){const u=snap(["settings"]);T.ex={};persist("settings");refreshSettings();render();toast("Your rest times were cleared",u);return;}
