@@ -907,6 +907,13 @@ const INFO={
   chop:{m:["obliques"],s:["abs"],c:["Cable at shoulder height, stand side-on with your feet wide.","Arms nearly straight, rotate your torso to pull the handle across your body.","Turn from your torso and hips, not your arms.","Return slowly, then switch sides."],x:"Pulling with your arms instead of rotating."},
   bwsquat:{m:["quads","glutes"],s:[],c:["Feet shoulder-width, arms out in front for balance.","Sit as deep as is comfortable, chest up.","Keep a steady pace until you can't do another good rep."],x:"Reps getting shallower as you tire."}
 };
+Object.assign(INFO,{
+  fullpull:INFO.pullup,backext45:{m:["lowback","glutes"],s:["hams"],c:["Set the pad just below your hip bones, feet locked in.","Hold a plate against your chest.","Lower with a straight back until you feel your hamstrings stretch.","Rise until your body is in a straight line and squeeze your glutes."],x:"Swinging up and arching hard past straight."},
+  mfly:{m:["chest"],s:["fdelt"],c:["Set the seat so the handles are at chest height.","Keep a slight, fixed bend in your elbows.","Bring the handles together in a hugging arc and squeeze for a second.","Open slowly to a good stretch."],x:"Letting the weight pull your arms back too far."},
+  mrow:{m:["midback","lats"],s:["rdelt","biceps"],c:["Chest against the pad, feet planted.","Pull the handles toward your lower ribs, elbows close.","Squeeze your shoulder blades together for a second.","Let your arms straighten slowly."],x:"Leaning back to yank the weight."},
+  wallball:{m:["quads","fdelt"],s:["glutes","triceps","abs"],c:["Hold the ball at your chest, feet shoulder-width.","Squat until your hips are below your knees.","Drive up and throw the ball to the target in one movement.","Catch it and go straight into the next squat."],x:"Shallow squats, or throwing with your arms only."},
+  farmer:{m:["forearms","traps"],s:["abs","glutes","calves"],c:["Pick up the weights with a flat back, like a deadlift.","Stand tall, shoulders down and back.","Walk with short, quick steps.","Put them down with control."],x:"Leaning to one side or letting your shoulders round forward."}
+});
 const MNAME={chest:"chest",uchest:"upper chest",fdelt:"front delts",sdelt:"side delts",rdelt:"rear delts",biceps:"biceps",triceps:"triceps",forearms:"forearms",abs:"abs",obliques:"obliques",quads:"quads",adductors:"inner thighs",lats:"lats",traps:"upper back",midback:"mid-back",lowback:"lower back",glutes:"glutes",glutemed:"side glutes",hams:"hamstrings",calves:"calves"};
 const MDESC={chest:"The pecs. They push your arms forward and across your body.",uchest:"The top part of the pecs, just under the collarbones. Incline presses hit it most.",fdelt:"The front of the shoulder. It lifts your arm forward and helps every press.",sdelt:"The side of the shoulder. It lifts your arm out to the side and makes shoulders look wider.",rdelt:"The back of the shoulder. It pulls your arm back and keeps shoulders healthy.",biceps:"The front of the upper arm. It bends the elbow and turns the palm up.",triceps:"The back of the upper arm, two-thirds of its size. It straightens the elbow.",forearms:"Grip and wrist muscles. They hold the weight on pulls, carries and hangs.",abs:"The six-pack (rectus abdominis). It curls your ribs toward your hips and braces your trunk.",obliques:"The sides of the waist. They twist and bend your trunk and stop it twisting.",quads:"The front of the thigh, four muscles. They straighten the knee.",adductors:"The inner thigh. It pulls the legs together and steadies squats and lunges.",lats:"The wide back muscles under the armpits. They pull your arms down and back.",traps:"The upper trapezius, from the neck to the shoulders. It shrugs and tilts the shoulder blades up.",midback:"The middle traps and rhomboids between the shoulder blades. They squeeze the blades together.",lowback:"The spinal erectors along the spine. They keep your back straight and extend it.",glutes:"The gluteus maximus, the biggest muscle in the body. It extends the hip.",glutemed:"The gluteus medius on the side of the hip. It moves the leg out and keeps your pelvis level.",hams:"The back of the thigh. It bends the knee and extends the hip.",calves:"The calf muscles. They push you up onto your toes."};
 function bodyMap(m,s){
@@ -1017,7 +1024,7 @@ function ik(A,T,l1,l2,s){
 }
 function lerpPose(a,b,u){
   const L2=(x,y)=>x+(y-x)*u,P=(x,y)=>[L2(x[0],y[0]),L2(x[1],y[1])];
-  return {h:P(a.h,b.h),t:L2(a.t,b.t),H:P(a.H,b.H),F:P(a.F,b.F),F2:a.F2?P(a.F2,b.F2||a.F2):null,ft:L2(a.ft,b.ft)};
+  return {h:P(a.h,b.h),t:L2(a.t,b.t),H:P(a.H,b.H),F:P(a.F,b.F),F2:a.F2?P(a.F2,b.F2||a.F2):null,H2:a.H2?P(a.H2,b.H2||a.H2):null,ft:L2(a.ft,b.ft)};
 }
 function cap(a,b,r1,r2,c){
   const dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||0.01,nx=-dy/d,ny=dx/d,F=v=>v.toFixed(1);
@@ -1051,7 +1058,7 @@ function drawPose(M,q){
     const off=(pt,dx,dy)=>[pt[0]+dx,pt[1]+dy];
     if(q.F2)back+=limb(q.h,q.F2,L.th,L.sh,kh2,ghost,q.ft,10,8).o;
     else back+=limb(off(q.h,-2,0),off(q.F,-3,0),L.th,L.sh,kh,ghost,q.ft,10,8).o;
-    back+=limb(off(S,-2,-1),off(q.H,-3,-1),L.ua,L.fa,eh,ghost,null,7,6).o;
+    back+=limb(off(S,-2,-1),q.H2?q.H2:off(q.H,-3,-1),L.ua,L.fa,eh,ghost,null,7,6).o;
     out+=torso(q.h,S,[[-0.04,6],[0.2,5.6],[0.45,5],[0.7,6.2],[0.9,6],[1.02,4.4]],ink);
     const lg=limb(q.h,q.F,L.th,L.sh,kh,ink,q.ft,10,8),ar=limb(S,q.H,L.ua,L.fa,eh,ink,null,7,6);
     out+=lg.o+ar.o;hand=[ar.E];q._F=lg.E;
@@ -1069,6 +1076,10 @@ function drawPose(M,q){
       else if(p[0]==="db")pr+=`<rect x="${(P[0]-6).toFixed(1)}" y="${(P[1]-3).toFixed(1)}" width="12" height="6" rx="2" fill="var(--red)"/>`;
       else if(p[0]==="handle"||p[0]==="pad")pr+=`<circle cx="${P[0].toFixed(1)}" cy="${P[1].toFixed(1)}" r="4" fill="var(--red)"/>`;
       else if(p[0]==="platform")pr+=`<line x1="${(P[0]-10).toFixed(1)}" y1="${(P[1]-12).toFixed(1)}" x2="${(P[0]+8).toFixed(1)}" y2="${(P[1]+12).toFixed(1)}" stroke="var(--red)" stroke-width="4" stroke-linecap="round"/>`;
+      else if(p[0]==="kb")pr+=`<circle cx="${P[0].toFixed(1)}" cy="${(P[1]+6).toFixed(1)}" r="6" fill="var(--red)"/><path d="M${(P[0]-3.5).toFixed(1)} ${(P[1]+2).toFixed(1)} Q${P[0].toFixed(1)} ${(P[1]-5).toFixed(1)} ${(P[0]+3.5).toFixed(1)} ${(P[1]+2).toFixed(1)}" fill="none" stroke="var(--red)" stroke-width="2"/>`;
+      else if(p[0]==="ball")pr+=`<circle cx="${P[0].toFixed(1)}" cy="${(P[1]-4).toFixed(1)}" r="7" fill="var(--red)"/>`;
+      else if(p[0]==="wheel")pr+=`<circle cx="${P[0].toFixed(1)}" cy="${(P[1]+1).toFixed(1)}" r="6" fill="none" stroke="var(--red)" stroke-width="3"/>`;
+      else if(p[0]==="lever")pr+=`<line x1="${p[2]}" y1="${p[3]}" x2="${P[0].toFixed(1)}" y2="${P[1].toFixed(1)}" stroke="var(--red)" stroke-width="3.5" stroke-linecap="round"/>`;
       else if(p[0]==="cable")pr+=`<line x1="${p[2]}" y1="${p[3]}" x2="${P[0].toFixed(1)}" y2="${P[1].toFixed(1)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="${p[2]}" cy="${p[3]}" r="3" fill="var(--muted)"/>`;
     }
   }
@@ -1090,6 +1101,114 @@ const MOT2={
   pullup:{v:"f",ng:1,st:[["c",80,8,3]],kh:[1,0],eh:[1,0],a:{h:[80,86],t:-90,H:[106,8],F:[86,130],ft:0},b:{h:[80,56],t:-90,H:[108,8],F:[86,104],ft:0}},
   dbsp:{v:"s",st:[["l",47,104,45,50,6]],p:[["db","H"]],eh:[-1,0.6],kh:[1,-1],a:{h:[56,96],t:-92,H:[60,52],F:[92,121],ft:0},b:{h:[56,96],t:-92,H:[58,16],F:[92,121],ft:0}}
 };
+// ---------- More movement figures (4.0) ----------
+const RUNA={h:[72,68],t:-80,H:[90,62],H2:[56,76],F:[98,108],F2:[44,104],ft:10},RUNB={h:[72,68],t:-80,H:[56,76],H2:[90,62],F:[44,104],F2:[98,108],ft:10};
+const WALKA={h:[72,70],t:-88,H:[84,72],H2:[62,72],F:[86,121],F2:[58,121],ft:0},WALKB={h:[72,70],t:-88,H:[62,72],H2:[84,72],F:[58,121],F2:[86,121],ft:0};
+Object.assign(MOT,{
+  run:{v:"s",cyc:1,kh:[1,-0.2],kh2:[1,0.6],eh:[-1,1],a:RUNA,b:RUNB},
+  walk:{v:"s",cyc:1,per:1700,kh:[1,-0.2],eh:[-0.5,1],a:WALKA,b:WALKB},
+  carry:{v:"s",cyc:1,per:1700,p:[["kb","H"]],kh:[1,-0.2],eh:[-0.3,1],a:{h:[72,70],t:-90,H:[73,74],F:[86,121],F2:[58,121],ft:0},b:{h:[72,70],t:-90,H:[73,74],F:[58,121],F2:[86,121],ft:0}},
+  dbfly:{v:"s",st:[["l",20,87,120,87,6]],p:[["db","H"]],eb:1,kb:-1,eh:[0,-1],kh:[-1,-1],a:{h:[52,80],t:0,H:[91,40],F:[30,121],ft:0},b:{h:[52,80],t:0,H:[90,100],F:[30,121],ft:0}},
+  pecdeck:{v:"f",st:[["r",60,94,40,6]],p:[["handle","H"]],eh:[0.4,1],kh:[1,0],fs:1,a:{h:[80,92],t:-90,H:[126,60],F:[100,121],ft:0},b:{h:[80,92],t:-90,H:[88,62],F:[100,121],ft:0}},
+  lowfly:{v:"f",p:[["cable","H",150,118]],eh:[0.6,1],kh:[1,0],a:{h:[80,70],t:-90,H:[124,92],F:[88,121],ft:0},b:{h:[80,70],t:-90,H:[88,40],F:[88,121],ft:0}},
+  highfly:{v:"f",p:[["cable","H",150,-10]],eh:[0.6,1],kh:[1,0],a:{h:[80,70],t:-90,H:[126,18],F:[88,121],ft:0},b:{h:[80,70],t:-90,H:[87,74],F:[88,121],ft:0}},
+  incpush:{v:"s",st:[["r",98,95,40,30]],eh:[-1,-0.4],kh:[0,1],a:{h:[66,90],t:-34,H:[112,95],F:[24,119],ft:110},b:{h:[70,100],t:-22,H:[112,95],F:[24,119],ft:110}},
+  declpush:{v:"s",st:[["r",8,96,30,29]],eh:[-1,-0.4],kh:[0,-1],a:{h:[68,76],t:15,H:[109,123],F:[24,94],ft:100},b:{h:[70,92],t:22,H:[109,123],F:[24,94],ft:100}},
+  landmine:{v:"s",p:[["lever","H",14,122]],eh:[1,1],kh:[1,-0.3],a:{h:[70,70],t:-88,F:[74,121],F2:[60,121],H:[82,40],ft:0},b:{h:[70,70],t:-84,F:[74,121],F2:[60,121],H:[106,14],ft:0}},
+  svend:{v:"s",p:[["plate","H"]],eh:[1,1],kh:[1,-0.2],a:{h:[70,70],t:-90,H:[84,52],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[110,52],F:[72,121],ft:0}},
+  deadlift:{v:"s",p:[["plate","H"]],eh:[-0.3,1],kh:[1,-0.4],a:{h:[52,84],t:-34,H:[86,106],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[73,74],F:[72,121],ft:0}},
+  rackpull:{v:"s",st:[["l",88,96,88,124,4]],p:[["plate","H"]],eh:[-0.3,1],kh:[1,-0.4],a:{h:[58,76],t:-55,H:[82,94],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[73,74],F:[72,121],ft:0}},
+  row:{v:"s",p:[["plate","H"]],eh:[-1,0.2],kh:[1,-0.4],a:{h:[58,76],t:-28,H:[94,98],F:[72,121],ft:0},b:{h:[58,76],t:-28,H:[78,74],F:[72,121],ft:0}},
+  dbrow:{v:"s",st:[["r",96,92,40,8]],p:[["db","H"]],eh:[-1,0.2],kh:[1,-0.4],a:{h:[60,76],t:-20,H:[90,100],H2:[118,92],F:[66,121],F2:[50,121],ft:0},b:{h:[60,76],t:-20,H:[74,76],H2:[118,92],F:[66,121],F2:[50,121],ft:0}},
+  cablerow:{v:"s",p:[["handle","H"],["cable","H",156,104]],eh:[0,1],kh:[0.2,-1],a:{h:[48,108],t:-78,H:[94,94],F:[104,114],ft:-80},b:{h:[48,108],t:-96,H:[62,92],F:[104,114],ft:-80}},
+  invrow:{v:"s",st:[["c",102,62,3]],eh:[-1,1],kh:[1,1],a:{h:[64,112],t:-8,H:[102,64],F:[14,121],ft:-75},b:{h:[60,100],t:-28,H:[102,64],F:[14,121],ft:-75}},
+  shrug:{v:"s",p:[["db","H"]],eh:[0,1],kh:[1,-0.2],a:{h:[70,70],t:-90,H:[73,75],F:[72,121],ft:0},b:{h:[70,66],t:-90,H:[73,71],F:[72,121],ft:-12}},
+  superman:{v:"s",eh:[0,-1],kh:[0,-1],a:{h:[82,117],t:180,H:[4,117],F:[134,119],ft:0},b:{h:[82,117],t:-170,H:[6,98],F:[132,104],ft:0}},
+  frontraise:{v:"s",p:[["db","H"]],eh:[1,1],kh:[1,-0.2],a:{h:[70,70],t:-90,H:[73,74],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[110,33],F:[72,121],ft:0}},
+  uprow:{v:"s",p:[["handle","H"],["cable","H",96,124]],eh:[-1,-0.6],kh:[1,-0.2],a:{h:[68,70],t:-90,H:[76,76],F:[70,121],ft:0},b:{h:[68,70],t:-90,H:[78,40],F:[70,121],ft:0}},
+  yraise:{v:"s",st:[["l",50,106,96,62,6]],p:[["db","H"]],eh:[1,1],kh:[1,-0.4],a:{h:[56,98],t:-45,H:[90,110],F:[34,121],ft:0},b:{h:[56,98],t:-45,H:[118,40],F:[34,121],ft:0}},
+  incurl:{v:"s",st:[["l",47,104,40,54,6]],p:[["db","H"]],eh:[0,1],kh:[1,-1],a:{h:[56,96],t:-100,H:[48,96],F:[92,121],ft:0},b:{h:[56,96],t:-100,H:[64,62],F:[92,121],ft:0}},
+  skull:{v:"s",st:[["l",20,87,120,87,6]],p:[["plate","H"]],eh:[0,-1],kh:[-1,-1],a:{h:[52,80],t:0,H:[92,40],F:[30,121],ft:0},b:{h:[52,80],t:0,H:[110,66],F:[30,121],ft:0}},
+  kickback:{v:"s",p:[["handle","H"],["cable","H",152,112]],eh:[1,-0.6],kh:[1,-0.4],a:{h:[60,74],t:-28,H:[86,74],F:[72,121],F2:[56,121],ft:0},b:{h:[60,74],t:-28,H:[56,62],F:[72,121],F2:[56,121],ft:0}},
+  benchdip:{v:"s",st:[["r",22,92,32,8]],eh:[-1,0],kh:[1,-1],a:{h:[54,88],t:-90,H:[44,92],F:[112,121],ft:-80},b:{h:[56,108],t:-86,H:[44,92],F:[112,121],ft:-80}},
+  wristcurl:{v:"s",st:[["r",30,90,30,6]],p:[["db","H"]],eh:[1,1],kh:[1,-1],a:{h:[48,88],t:-90,H:[84,94],F:[80,122],ft:0},b:{h:[48,88],t:-90,H:[84,84],F:[80,122],ft:0}},
+  stepup:{v:"s",st:[["r",80,96,34,29]],p:[["db","H"]],eh:[0,1],kh:[1,-0.4],kh2:[1,-0.4],a:{h:[64,74],t:-86,H:[67,76],F:[92,96],F2:[58,121],ft:0},b:{h:[90,46],t:-90,H:[93,48],F:[94,96],F2:[82,94],ft:0}},
+  wallsit:{v:"s",st:[["l",40,-14,40,124,4]],eh:[0,1],kh:[1,-1],a:{h:[48,90],t:-90,H:[50,94],F:[74,121],ft:0},b:{h:[48,91],t:-90,H:[50,95],F:[74,121],ft:0}},
+  goodmorning:{v:"s",p:[["plate","H"]],eh:[-1,1],kh:[1,-0.3],a:{h:[70,70],t:-90,H:[66,38],F:[72,121],ft:0},b:{h:[60,72],t:-18,H:[94,62],F:[72,121],ft:0}},
+  slrdl:{v:"s",p:[["db","H"]],eh:[-0.3,1],kh:[1,-0.2],kh2:[1,1],a:{h:[70,70],t:-90,H:[72,72],F:[72,121],F2:[66,121],ft:0},b:{h:[64,74],t:-12,H:[100,106],F:[72,121],F2:[18,80],ft:0}},
+  nordic:{v:"s",st:[["r",22,112,48,8]],eh:[1,1],kh:[1,1],a:{h:[62,95],t:-90,H:[74,80],F:[30,112],ft:180},b:{h:[80,104],t:-40,H:[122,108],F:[30,112],ft:180}},
+  stlegcurl:{v:"s",st:[["l",100,40,100,124,5]],p:[["pad","F"]],kh:[1,0],kh2:[1,-0.2],eh:[1,1],a:{h:[66,70],t:-86,H:[98,64],F:[68,118],F2:[60,121],ft:0},b:{h:[66,70],t:-86,H:[98,64],F:[44,88],F2:[60,121],ft:0}},
+  bridge:{v:"s",eh:[0,-1],kh:[0.2,-1],a:{h:[64,117],t:178,H:[62,123],F:[90,121],ft:0},b:{h:[66,98],t:155,H:[62,123],F:[90,121],ft:0}},
+  gkick:{v:"s",st:[["l",108,40,108,124,5]],p:[["handle","H"]],kh:[1,-0.2],kh2:[1,0.6],eh:[-1,1],a:{h:[70,72],t:-70,H:[106,64],F:[72,121],F2:[66,121],ft:0},b:{h:[70,72],t:-70,H:[106,64],F:[72,121],F2:[24,90],ft:0}},
+  revhyper:{v:"s",st:[["r",68,84,62,7],["l",120,90,120,124,4]],eh:[0,1],kh:[1,0.4],a:{h:[72,80],t:0,H:[122,96],F:[70,124],ft:90},b:{h:[72,80],t:0,H:[122,96],F:[22,74],ft:180}},
+  tib:{v:"s",st:[["l",50,-14,50,124,4]],eh:[0,1],kh:[1,-0.2],a:{h:[62,70],t:-96,H:[64,72],F:[76,121],ft:0},b:{h:[62,70],t:-96,H:[64,72],F:[76,121],ft:-35}},
+  plank:{v:"s",eh:[-1,1],kh:[0,1],a:{h:[72,106],t:-10,H:[130,121],F:[26,119],ft:110},b:{h:[72,104],t:-11,H:[130,121],F:[26,119],ft:110}},
+  abwheel:{v:"s",p:[["wheel","H"]],eh:[0,1],kh:[1,1],a:{h:[56,96],t:-60,H:[82,117],F:[26,119],ft:180},b:{h:[64,106],t:-14,H:[122,117],F:[26,119],ft:180}},
+  crunch:{v:"s",eh:[0,-1],kh:[0.3,-1],a:{h:[70,118],t:180,H:[24,112],F:[100,121],ft:0},b:{h:[70,118],t:-158,H:[30,96],F:[100,121],ft:0}},
+  deadbug:{v:"s",eh:[0,-1],kh:[0,-1],kh2:[0,-1],a:{h:[80,118],t:180,H:[42,80],F:[104,92],F2:[104,92],ft:0},b:{h:[80,118],t:180,H:[6,113],F:[128,110],F2:[104,92],ft:0}},
+  hollow:{v:"s",eh:[0,-1],kh:[0,-1],a:{h:[80,118],t:-172,H:[6,104],F:[128,106],ft:0},b:{h:[80,117],t:-168,H:[8,100],F:[128,102],ft:0}},
+  bicycle:{v:"s",cyc:1,per:1600,eh:[0,-1],kh:[0,-1],kh2:[0,-1],a:{h:[70,118],t:-160,H:[30,96],F:[94,92],F2:[118,106],ft:0},b:{h:[70,118],t:-160,H:[30,96],F:[118,106],F2:[94,92],ft:0}},
+  russian:{v:"f",both:1,fs:1,p:[["ball","H"]],eh:[0,1],kh:[1,-1],a:{h:[80,108],t:-90,H:[62,90],F:[96,121],ft:0},b:{h:[80,108],t:-90,H:[98,90],F:[96,121],ft:0}},
+  pallof:{v:"s",p:[["handle","H"]],eh:[1,1],kh:[1,-0.3],a:{h:[70,74],t:-90,H:[82,54],F:[76,121],F2:[60,121],ft:0},b:{h:[70,74],t:-90,H:[110,52],F:[76,121],F2:[60,121],ft:0}},
+  sidebend:{v:"f",p:[["db","H"]],eh:[1,0.4],kh:[1,0],a:{h:[80,70],t:-90,H:[96,74],F:[90,121],ft:0},b:{h:[80,70],t:-80,H:[100,84],F:[90,121],ft:0}},
+  mclimb:{v:"s",cyc:1,per:900,eh:[-1,-1],kh:[0,1],kh2:[1,1],a:{h:[73,98],t:-24,H:[109,123],F:[26,119],F2:[78,112],ft:110},b:{h:[73,98],t:-24,H:[109,123],F:[78,112],F2:[26,119],ft:110}},
+  rower:{v:"s",st:[["l",20,118,140,118,4],["r",124,96,18,22]],p:[["handle","H"]],eh:[0,1],kh:[0.3,-1],a:{h:[52,108],t:-58,H:[110,92],F:[100,112],ft:-60},b:{h:[76,108],t:-112,H:[72,86],F:[118,112],ft:-60}},
+  skierg:{v:"s",st:[["r",110,-14,14,138]],p:[["handle","H"],["cable","H",110,-6]],eh:[1,0.4],kh:[1,-0.4],a:{h:[70,70],t:-90,H:[86,4],F:[72,121],ft:0},b:{h:[62,80],t:-48,H:[94,102],F:[72,121],ft:0}},
+  bike:{v:"s",cyc:1,per:1100,st:[["l",44,78,60,78,5],["l",52,80,70,122,4],["l",92,52,82,122,4],["l",86,52,98,52,5]],eh:[1,1],kh:[1,-0.6],kh2:[1,-0.6],a:{h:[54,74],t:-62,H:[96,54],H2:[96,54],F:[78,112],F2:[70,96],ft:0},b:{h:[54,74],t:-62,H:[96,54],H2:[96,54],F:[70,96],F2:[78,112],ft:0}},
+  sled:{v:"s",cyc:1,per:1300,st:[["r",116,98,34,24],["l",118,58,118,122,4]],kh:[1,-0.3],kh2:[1,0.4],eh:[1,0],a:{h:[56,86],t:-22,H:[120,70],H2:[120,70],F:[82,121],F2:[26,114],ft:30},b:{h:[56,86],t:-22,H:[120,70],H2:[120,70],F:[30,114],F2:[80,121],ft:30}},
+  sledpull:{v:"s",p:[["cable","H",160,118]],eh:[-1,1],kh:[1,-0.5],a:{h:[64,76],t:-100,H:[106,62],F:[82,121],F2:[54,121],ft:0},b:{h:[64,76],t:-100,H:[70,86],F:[82,121],F2:[54,121],ft:0}},
+  sleddrag:{v:"s",cyc:1,per:1500,p:[["handle","H"],["cable","H",160,118]],kh:[1,-0.5],kh2:[1,-0.5],eh:[0,1],a:{h:[74,80],t:-112,H:[98,94],H2:[98,94],F:[100,121],F2:[66,121],ft:0},b:{h:[74,80],t:-112,H:[98,94],H2:[98,94],F:[66,121],F2:[100,121],ft:0}},
+  bearcrawl:{v:"s",cyc:1,per:1200,eh:[0,1],kh:[1,0.4],kh2:[1,0.4],a:{h:[58,84],t:0,H:[104,121],H2:[90,121],F:[56,121],F2:[42,121],ft:0},b:{h:[60,84],t:0,H:[90,121],H2:[104,121],F:[42,121],F2:[56,121],ft:0}},
+  wallball:{v:"s",st:[["l",152,-14,152,124,3],["r",146,-8,6,8]],p:[["ball","H"]],eh:[1,1],kh:[1,-0.4],a:{h:[54,100],t:-62,H:[86,60],F:[72,121],ft:0},b:{h:[70,68],t:-90,H:[90,2],F:[72,119],ft:20}},
+  burpee:{v:"s",eh:[-1,-1],kh:[1,-0.3],a:{h:[72,100],t:-20,H:[108,123],F:[28,119],ft:110},b:{h:[72,64],t:-90,H:[78,-4],F:[72,115],ft:30}},
+  boxjump:{v:"s",st:[["r",86,92,38,33]],eh:[0,1],kh:[1,-0.4],a:{h:[46,96],t:-50,H:[48,96],F:[60,121],ft:0},b:{h:[98,62],t:-76,H:[124,58],F:[100,92],ft:0}},
+  kbswing:{v:"s",p:[["kb","H"]],eh:[0,1],kh:[1,-0.4],a:{h:[56,78],t:-36,H:[62,110],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[110,40],F:[72,121],ft:0}},
+  dbsnatch:{v:"s",p:[["db","H"]],eh:[0,1],kh:[1,-0.4],a:{h:[52,88],t:-40,H:[82,110],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[76,-6],F:[72,121],ft:0}},
+  thruster:{v:"s",p:[["db","H"]],eh:[1,1],kh:[1,-0.4],a:{h:[54,100],t:-58,H:[80,64],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[74,-6],F:[72,121],ft:0}},
+  medslam:{v:"s",p:[["ball","H"]],eh:[1,0],kh:[1,-0.4],a:{h:[70,70],t:-92,H:[72,-6],F:[72,121],ft:0},b:{h:[58,82],t:-30,H:[100,114],F:[72,121],ft:0}},
+  pclean:{v:"s",p:[["plate","H"]],eh:[1,0.4],kh:[1,-0.4],a:{h:[50,90],t:-38,H:[84,106],F:[72,121],ft:0},b:{h:[70,70],t:-90,H:[86,38],F:[72,121],ft:0}},
+  ropes:{v:"s",cyc:1,per:700,p:[["cable","H",160,120]],eh:[1,1],kh:[1,-0.4],a:{h:[62,84],t:-72,H:[106,58],F:[76,121],ft:0},b:{h:[62,84],t:-72,H:[106,90],F:[76,121],ft:0}},
+  jumprope:{v:"s",cyc:1,per:600,eh:[-1,1],kh:[1,-0.3],a:{h:[72,68],t:-90,H:[86,76],F:[72,119],ft:15},b:{h:[72,62],t:-90,H:[86,70],F:[72,113],ft:40}},
+  stairs:{v:"s",cyc:1,per:1500,st:[["r",84,106,40,19],["r",104,88,36,37]],kh:[1,-0.4],kh2:[1,-0.4],eh:[-0.5,1],a:{h:[72,62],t:-84,H:[84,66],H2:[64,68],F:[90,104],F2:[70,113],ft:0},b:{h:[72,62],t:-84,H:[64,68],H2:[84,66],F:[70,113],F2:[90,104],ft:0}},
+  wallpush:{v:"s",st:[["l",124,-14,124,124,4]],eh:[-1,-0.5],kh:[1,-0.1],a:{h:[64,74],t:-58,H:[121,36],F:[40,121],ft:40},b:{h:[72,74],t:-52,H:[121,36],F:[40,121],ft:40}},
+  pike:{v:"s",eh:[-1,0],kh:[0,-1],a:{h:[50,70],t:42,H:[88,123],F:[24,119],ft:110},b:{h:[54,74],t:52,H:[88,123],F:[24,119],ft:110}},
+  wallhs:{v:"s",st:[["l",114,-14,114,124,4]],eh:[1,0],kh:[1,0],a:{h:[102,44],t:90,H:[102,123],F:[106,-8],ft:-90},b:{h:[102,45],t:90,H:[102,123],F:[106,-7],ft:-90}},
+  hspu:{v:"s",st:[["l",114,-14,114,124,4]],eh:[-1,0],kh:[1,0],a:{h:[102,44],t:90,H:[94,123],F:[106,-8],ft:-90},b:{h:[102,62],t:90,H:[94,123],F:[106,10],ft:-90}},
+  tucklever:{v:"s",ng:1,st:[["c",40,8,3]],eh:[0,1],kh:[1,-1],a:{h:[78,46],t:180,H:[40,8],F:[76,30],ft:180},b:{h:[78,45],t:180,H:[40,8],F:[76,29],ft:180}},
+  lsit:{v:"s",st:[["r",58,112,10,13],["r",80,112,10,13]],eh:[0,1],kh:[1,0],a:{h:[70,100],t:-90,H:[70,110],F:[120,100],ft:-80},b:{h:[70,99],t:-90,H:[70,110],F:[120,99],ft:-80}},
+  tucklsit:{v:"s",st:[["r",58,112,10,13],["r",80,112,10,13]],eh:[0,1],kh:[0.4,-1],a:{h:[70,100],t:-90,H:[70,110],F:[92,98],ft:0},b:{h:[70,99],t:-90,H:[70,110],F:[92,97],ft:0}},
+  t2b:{v:"s",ng:1,st:[["c",74,8,3]],eh:[-1,-1],kh:[1,0],a:{h:[72,86],t:-90,H:[74,8],F:[70,128],ft:60},b:{h:[80,62],t:-104,H:[74,8],F:[92,12],ft:-60}},
+  legraise:{v:"s",ng:1,st:[["c",74,8,3]],eh:[-1,-1],kh:[1,0],a:{h:[72,86],t:-90,H:[74,8],F:[70,128],ft:60},b:{h:[72,86],t:-96,H:[74,8],F:[118,80],ft:-20}},
+  lpullup:{v:"s",ng:1,st:[["c",74,8,3]],eh:[-1,-1],kh:[1,0],a:{h:[72,86],t:-90,H:[74,8],F:[120,86],ft:-30},b:{h:[72,56],t:-90,H:[74,8],F:[120,56],ft:-30}}
+});
+MOT.run.per=900;
+// variants that move like an existing figure, with their own kit
+const MOTA={
+  dbbench:["bench",{p:[["db","H"]]}],smithbench:["bench"],declbench:["bench"],cgbench:["bench"],jmpress:["bench"],
+  inbench:["incdb",{p:[["plate","H"]]}],smithinc:["incdb",{p:[["plate","H"]]}],incmpress:["mcpress"],mfly:["pecdeck"],revfly:["pecdeck",{swap:1}],rdcable:["highfly",{swap:1}],
+  rowerg:["rower"],rowint:["rower"],ergint:["rower"],skiint:["skierg"],
+  tbar:["row"],pendlay:["row",{a:{t:-12,h:[56,80],H:[96,106]},b:{t:-12,h:[56,80],H:[80,84]}}],meadows:["row",{p:[["db","H"]]}],sealrow:["csrow",{p:[["db","H"]]}],csdbrow:["csrow",{p:[["db","H"]]}],kprow:["csrow"],mrow:["csrow"],
+  widepd:["pulldown"],cgpd:["pulldown"],revpd:["pulldown"],pullover:["sapd"],
+  chinup:["pullup"],apull:["pullup"],wpull:["pullup"],fullpull:["pullup"],bandpull:["pullup"],negpull:["pullup",{swap:1}],archerpull:["pullup"],muscleup:["pullup"],lpull:["lpullup"],
+  scappull:["pullup",{a:{h:[72,86]},b:{h:[72,80]}}],hang:["pullup",{a:{h:[72,86]},b:{h:[72,85]}}],
+  mshoulder:["dbsp",{p:[["handle","H"]]}],arnold:["dbsp"],kbpress:["ohp",{p:[["kb","H"]]}],mlat:["lat",{p:[["handle","H"]]}],cablelat:["lat",{p:[["handle","H"]]}],luraise:["lat"],cuban:["uprow",{p:[["db","H"]]}],
+  bbcurl:["hammer",{p:[["plate","H"]]}],dbcurl:["hammer"],zottman:["hammer"],revcurl:["hammer",{p:[["plate","H"]]}],cablecurl:["hammer",{p:[["handle","H"],["cable","H",100,124]]}],bayes:["hammer",{p:[["handle","H"],["cable","H",8,110]]}],
+  preacher:["curl"],mpreacher:["curl"],spider:["curl",{p:[["db","H"]]}],conc:["curl",{p:[["db","H"]]}],
+  dboh:["ohext",{p:[["db","H"]]}],sapush:["pushdown"],diamond:["pushups"],mdip:["dips"],negdip:["dips",{swap:1}],pdip:["dips"],ringdip:["dips"],revwrist:["wristcurl"],
+  frontsquat:["squat"],hacksquat:["squat",{p:[]}],smithsquat:["squat"],pendulum:["squat",{p:[]}],goblet:["squat",{p:[["kb","H"]],a:{H:[84,52]},b:{H:[86,82]}}],beltsquat:["squat",{p:[]}],airsquat:["bwsquat"],sissy:["bwsquat"],boxpistol:["bwsquat"],pistol:["bwsquat"],shrimp:["bwsquat"],
+  revlunge:["lunge"],splitsq:["lunge"],bwbss:["bss",{p:[]}],sblunge:["lunge",{p:[["plate","H"]],a:{H:[84,48]},b:{H:[84,74]}}],
+  sldl:["rdl"],sumo:["deadlift"],ghr:["nordic"],mhipthrust:["hipthrust"],slhip:["hipthrust",{p:[]}],pullthru:["rdl",{p:[["handle","H"],["cable","H",4,118]]}],cableabd:["abd"],backext45:["backext"],
+  donkey:["calf"],lpcalf:["calf"],slcalf:["calf"],
+  declcrunch:["crunch"],mcrunch:["ccrunch",{p:[]}],captain:["hlr"],kneeraise:["hlr"],lightcore:["plank"],skinplank:["pushups"],
+  wallpush:null,kneepush:["pushups"],fullpush:["pushups"],archerpush:["pushups"],pppush:["pushups"],onepush:["pushups"],elevpike:["pike"],
+  comprun:["run"],longrun:["run"],run1k:["run"],runint:["run"],easyz2:["run"],tempo:["run"],shuttle:["run"],hyroxsim:["run"],walkrec:["walk"],incwalk:["walk"],elliptical:["walk"],
+  cycling:["bike"],farmer:["carry"],kbrack:["carry",{p:[["kb","H"]],a:{H:[86,40]},b:{H:[86,40]},eh:[1,1]}],sbcarry:["carry",{p:[["plate","H"]],a:{H:[88,54]},b:{H:[88,54]},eh:[1,1]}],
+  sledpush:["sled"],bbj:["burpee"],devil:["burpee",{p:[["db","H"]]}],kbcomplex:["kbswing"]
+};
+for(const [id,v] of Object.entries(MOTA)){if(!v||MOT[id])continue;const B=MOT[v[0]],ov=v[1]||{};if(!B)continue;const o=Object.assign({},B,ov);
+  o.a=ov.swap?Object.assign({},B.b,ov.a||{}):Object.assign({},B.a,ov.a||{});o.b=ov.swap?Object.assign({},B.a,ov.b||{}):Object.assign({},B.b,ov.b||{});MOT[id]=o;
+  if(MOT2[v[0]]&&!MOT2[id])MOT2[id]=MOT2[v[0]];}
+
 function motionSVG(id,alt){
   const M=alt?MOT2[id]:MOT[id];if(!M)return "";
   return `<svg class="motion" data-mot="${id}"${alt?' data-alt="1"':""} viewBox="0 -14 160 144" role="img" aria-label="Animated stick figure showing the start and end of the movement"><g class="st">${staticParts(M)}</g><g class="fig">${drawPose(M,M.a)}</g></svg>`;
@@ -1106,7 +1225,7 @@ function runMotion(){
     const c=((now-t0)/3200)%1;let u;
     if(c<0.15)u=0;else if(c<0.5)u=(c-0.15)/0.35;else if(c<0.65)u=1;else u=1-(c-0.65)/0.35;
     u=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-    for(const el of live){const M=(el.dataset.alt?MOT2:MOT)[el.dataset.mot];el.querySelector(".fig").innerHTML=drawPose(M,lerpPose(M.a,M.b,u));}
+    for(const el of live){const M=(el.dataset.alt?MOT2:MOT)[el.dataset.mot];let v=u;if(M.cyc){const ph=((now-t0)/(M.per||1000))%1;v=0.5-0.5*Math.cos(ph*2*Math.PI);}el.querySelector(".fig").innerHTML=drawPose(M,lerpPose(M.a,M.b,v));}
     motRAF=requestAnimationFrame(step);
   };
   motRAF=requestAnimationFrame(step);
@@ -3926,8 +4045,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.9";
+const APP_VERSION="4.0";
 const CHANGELOG=[
+  {v:"4.0",d:"10 October 2026",t:"Every exercise, animated",items:["All 227 exercises now have a movement figure, up from 38. That includes deadlifts, rows, skull crushers, planks, crunches, dips, every calisthenics move and all the Hyrox and cardio work","Running, walking, rowing, cycling, sled pushes, carries, bear crawls, jump rope and battle ropes play as a smooth loop, with arms and legs moving in turn","New equipment in the figures: kettlebells, medicine balls, wall-ball targets, the ab wheel, landmine bars, sleds, rowers, the SkiErg, bikes, boxes and walls","Variations show their own kit, so a dumbbell bench shows dumbbells and a goblet squat shows a kettlebell held at the chest","Every exercise now has a muscle map too, including wall balls, farmer's carries and the machine moves in the Hyrox template"]},
   {v:"3.9",d:"10 October 2026",t:"Real muscles, real people",items:["A new muscle map with proper muscle shapes, front and back: upper and lower chest, all three shoulder heads, traps, mid-back, lats, lower back, both glutes, the quad and hamstring heads, calves and more","Tap any muscle on the map, or its name under it, to see what it is, what it does and whether it's a main muscle or a helper","Incline presses now show the upper chest as the main muscle","The Training guide shows a muscle map for every muscle","The movement figures look like people now, with a real torso, head, neck, hands and feet","Log cardio by distance, time or both. With both you also get your pace, and calories use the distance for walks and runs. Miles if you use feet and inches","More rice: basmati, jasmine, brown, parboiled, risotto, sushi and wild rice, and rice noodles","More vegetables: frozen mixed vegetables, Asia stir-fry mix, Mediterranean mix, peas, sweetcorn, Brussels sprouts, aubergine, asparagus, kale and okra","Portion my foods spreads food more sensibly: usual portions grow with your calories, meals stay balanced, it no longer cuts your protein food to chase fat, and it gets closer to your calories"]},
   {v:"3.8",d:"10 October 2026",t:"Meal planner",items:["Track zinc, vitamin B12, vitamin C, folate and iodine, plus limits for salt, added sugar, saturated fat and alcohol. Limits show as a stay-under bar that turns amber when you go over. Tap any of them for what it means","Drinks in the food calculator: beer, wine, spirits, cola, orange juice and energy drinks","Suggest meals: the app picks easy, cheap meals for the meals you haven't eaten yet and works out portions that land on your calories, protein, carbs and fat","Portion my foods: pick what you want to eat, like eggs for breakfast and chicken and rice for dinner, and the app works out how much of each","Change any amount with − and +, and everything else adjusts around it. Lock an amount to keep it fixed","Plan what's left today or a whole day, with vegetarian, no fish and no dairy filters","Each suggested meal has short steps, another idea button, and logs to the right meal in one tap","Bigger rest timer button with a stopwatch icon","The bar on the right is now a real scrollbar that matches the page, shows which section you're in while you scroll, and fast-scrolls when you hold and drag it. Much smoother","Keywords like superset can be tapped inside pop-ups too"]},
   {v:"3.7",d:"10 October 2026",t:"Carbs and fat",items:["Carbs and fat now show under calories and protein, with your targets","Foods from the calculator, the + search, the meal builder and quick picks save their carbs and fat. You can also type them in when adding food by hand","Tappable targets are shown in your accent colour instead of underlined","Fixed the top of the app sitting under the status bar on iPhone"]},
