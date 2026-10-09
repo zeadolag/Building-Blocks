@@ -2820,8 +2820,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
   if(k==="level")S.level=v;else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="2.6";
+const APP_VERSION="2.7";
 const CHANGELOG=[
+  {v:"2.7",d:"9 October 2026",t:"Install as an app",items:["New Settings page with steps to install Body Builder on iPhone, Android and computers","Android phones get an Install button that opens the phone's own install prompt","Explains offline use, and adds a Share the link button for friends"]},
   {v:"2.6",d:"9 October 2026",t:"Less scrolling",items:["Settings is now a short menu. Each section opens on its own page, with Change log always last","Warm-up and stretches fold away once everything is ticked, and Cardio stays folded until you use it. Tap a section title to open or close it","Exercises fold into one line once every set is done. Tap to open them again","On the Edit page, layout, warm-up and stretches are folded until you open them"]},
   {v:"2.5",d:"9 October 2026",t:"Brick logo is back",items:["Back to the logo with two capital B's built from toy bricks, red in front of blue","The logo in the app has no background","How-to buttons are now a magnifying glass everywhere, including warm-ups and stretches","No more how-to for walking","Food calculator values checked against USDA data and supermarket labels. Fixed chicken thigh, lean beef mince and zaziki, and added regular cottage cheese next to the light one"]},
   {v:"2.4",d:"9 October 2026",t:"Body tab, recipes and help",items:["Progress chart with each weigh-in and a 7-day average. Tap it to see the numbers","Calories burned today and since you started, shown as a range, compared with body fat and food","Your real maintenance, worked out from your weight trend and the food you log","Sets per muscle this week, with the 10–20 set range marked","Strength chart showing your estimated one-rep max over time","Measurements, progress photos (website only, saved on your phone) and dated notes","Steps field removed from the Body tab","Recipes with ingredients and steps, and Log 1 serving today. Creamy garlic herb Cajun chicken is built in","Help rewritten as 21 chapters: using the app and training basics","New logo: a barbell with two capital B's as the plates","This change log"]},
@@ -2835,6 +2836,35 @@ const CHANGELOG=[
   {v:"1.0",d:"Early October 2026",t:"First version",items:["Workouts with sets, reps and drop sets","Meals, calories and protein","Body weight and weekly trend","Spending","Swipe to edit or delete, with undo"]}
 ];
 function changelogHtml(){return `<div class="guide clog">${CHANGELOG.map((c,i)=>`<details${i===0?" open":""}><summary><span><span class="chn vtag">${c.v}</span>${esc(c.t)}<small class="cld">${esc(c.d)}</small></span></summary><div class="gb"><ul>${c.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></details>`).join("")}</div>`;}
+// ---------- Install as an app ----------
+const SITE_URL="https://zeadolag.github.io/Building-Blocks/";
+let deferredInstall=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;if(tab==="settings")renderSettings();});
+addEventListener("appinstalled",()=>{deferredInstall=null;toast("Body Builder is installed");if(tab==="settings")renderSettings();});
+function isInstalled(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}}
+function installHtml(){
+  const ua=navigator.userAgent||"",ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),android=/Android/.test(ua),samsung=/SamsungBrowser/.test(ua),firefox=/Firefox|FxiOS/.test(ua);
+  let h="";
+  if(!isLocalMode())h+=`<div class="card"><p style="margin:0">To install Body Builder, open the website version on your phone:</p><p style="margin:8px 0 0"><a class="demo" href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace("https://","")}</a></p><p class="note">The version inside Claude can't be installed. The website version keeps its data on your phone, separate from this one.</p></div>`;
+  else if(isInstalled())h+=`<div class="card"><p style="margin:0"><b>You're using the installed app.</b> Nothing else to do.</p></div>`;
+  else if(deferredInstall)h+=`<div class="card"><p style="margin:0 0 4px">Your browser can install Body Builder straight away.</p><button type="button" class="btn" data-act="install">Install Body Builder</button></div>`;
+  const sec=(t,b,open,mine)=>`<details${open?" open":""}><summary><span>${t}${mine?`<span class="yours">Your phone</span>`:""}</span></summary><div class="gb">${b}</div></details>`;
+  const A=`<h4>Chrome</h4><ol><li>Open <b>${SITE_URL.replace("https://","")}</b> in Chrome.</li><li>Tap <b>Install</b> if a banner appears at the bottom. Otherwise tap <kbd>⋮</kbd> at the top right, then <b>Install app</b> (on some phones it says <b>Add to Home screen</b>).</li><li>Tap <b>Install</b> to confirm.</li></ol><p>Body Builder then shows up in your app drawer and on your home screen, opens full screen, and appears in recent apps like any other app.</p>
+  <h4>Samsung Internet</h4><ol><li>Tap the install icon in the address bar if you see it. Otherwise tap <kbd>☰</kbd> at the bottom right.</li><li>Tap <b>Add page to</b>, then <b>Home screen</b>.</li></ol>
+  <h4>Firefox</h4><ol><li>Tap <kbd>⋮</kbd>, then <b>Install</b> or <b>Add to Home screen</b>.</li></ol>`;
+  const I=`<ol><li>Open <b>${SITE_URL.replace("https://","")}</b> in <b>Safari</b>. Chrome on iPhone works too, through its Share button.</li><li>Tap <b>Share</b>: the square with an arrow pointing up. On newer iPhones it's behind <kbd>•••</kbd> at the bottom right.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Leave <b>Open as Web App</b> switched on if you see it, then tap <b>Add</b>.</li></ol>`;
+  const D=`<ol><li>Open the website in Chrome or Edge.</li><li>Click the install icon at the right end of the address bar, or open the menu and choose <b>Install Body Builder</b>.</li></ol>`;
+  const order=ios?[["iPhone and iPad",I,1],["Android",A],["Computer",D]]:android?[["Android",A,1],["iPhone and iPad",I],["Computer",D]]:[["iPhone and iPad",I],["Android",A],["Computer",D,1]];
+  h+=`<div class="guide" style="margin-top:12px">${order.map(([t,b,m])=>sec(t,b,!!m,!!m&&(ios||android))).join("")}</div>`;
+  h+=`<h2 class="sec-title">Works offline</h2><div class="card"><p style="margin:0">Once you've opened it once, Body Builder works without internet, so you can log in a gym with no signal. Everything is saved on your phone.</p><p class="note">Updates download the next time you're online. If something looks out of date, close the app and open it again.</p></div>`;
+  if(isLocalMode())h+=`<h2 class="sec-title">Share with friends</h2><div class="card"><p style="margin:0 0 4px">Everyone who opens the link gets their own fresh copy, with their own data.</p><button type="button" class="btn ghost" data-act="sharelink">Share the link</button></div>`;
+  return h;
+}
+$("panel").addEventListener("click",async e=>{if(tab!=="settings")return;const b=e.target.closest("[data-act]");if(!b)return;
+  if(b.dataset.act==="install"&&deferredInstall){const d=deferredInstall;deferredInstall=null;try{d.prompt();const r=await d.userChoice;if(r&&r.outcome==="dismissed")toast("No problem. You can install it from here any time");}catch(err){}renderSettings();}
+  else if(b.dataset.act==="sharelink"){const data={title:"Body Builder",text:"Track your workouts, food and progress",url:SITE_URL};
+    try{if(navigator.share){await navigator.share(data);return;}}catch(err){return;}
+    try{await navigator.clipboard.writeText(SITE_URL);toast("Link copied");}catch(err){toast(SITE_URL);}}});
 let setPage=null;
 function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcfg(),lv={new:"New",some:"Some experience",exp:"Experienced"}[S.level]||"Not set";
   return [
@@ -2844,6 +2874,7 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["units","Units and currency",`${U()} · ${curCode()}`,()=>`<div class="card">${unitsHtml()}</div>`],
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
     ...(isLocalMode()?[["backup","Backup","Save or restore all your data",()=>`<div class="card">${backupHtml()}</div>`]]:[]),
+    ["install","Install as an app",isLocalMode()&&isInstalled()?"Installed":"Home screen, offline use and sharing",()=>installHtml()],
     ["help","Help","How to use the app, and training basics",()=>guideHtml()],
     ["changelog","Change log",`Version ${APP_VERSION}`,()=>changelogHtml()]
   ];}
@@ -2884,7 +2915,7 @@ function guideHtml(){
   h+=ch("Body",`<ul><li>Weigh in each morning. The <b>Progress</b> chart shows each weigh-in and the 7-day average. Tap the chart to see the numbers.</li><li><b>Calories burned</b> estimates today's total and what your training has burned since you started.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li><b>Sets per muscle</b>, <b>Strength</b>, <b>Measurements</b>, <b>Progress photos</b> and <b>Notes</b> sit further down.</li></ul>`);
   h+=ch("Spend and History",`<p><b>Spend</b> works out what your food and supplements cost per week, two weeks or month, grouped by store. Add products with how long they last, then tap a store and a product to log a purchase.</p><p><b>History</b> shows a month at a glance. Tap any day to open it.</p>`);
   h+=ch("Settings and the tab bar",`<p>Theme and colours, the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units and currency, rest timer, backups, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
-  h+=ch("Add it to your home screen",`${(ios?[["iPhone and iPad",iosB],["Android",andB]]:[["Android",andB],["iPhone and iPad",iosB]]).map(([t,b])=>`<h4>${t}</h4>${b}`).join("")}`);
+  h+=ch("Install it as an app",`<p>Body Builder can be installed on iPhone, Android and computers, and then works offline. Step-by-step instructions are in <b>Settings → Install as an app</b>.</p>`);
   h+=ch("Your data and backups",`<p>${isLocalMode()?"Everything is saved on this phone or browser only. Nobody else can see it, and everyone who uses the app has their own data. Use <b>Settings → Backup</b> now and then, and to move to a new phone. Progress photos stay on the phone and aren't in backups.":"Your data is saved to your Claude account and syncs between your devices."}</p>`);
   h+=`<p class="gtitle">Training basics</p>`;
   h+=ch("How muscle grows",`<p>Muscle grows when you train it hard enough to send a signal, eat enough protein to repair it, and recover between sessions. Training is the signal, food and sleep do the building. You don't grow in the gym, you grow in the days after.</p><p>For most people, training each muscle about twice a week with 10–20 hard sets in total gives the best results.</p>`);
