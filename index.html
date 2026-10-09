@@ -2080,7 +2080,7 @@ $("panel").addEventListener("click",e=>{if(tab!=="eat")return;const b=e.target.c
 // re: matches names the user typed, nut: links to a tracked deficiency
 const SUPPLIB=[
  {id:"creatine",n:"Creatine monohydrate, 3–5 g",re:/creatin/i,cat:"Training",when:"Any time of day, every day. Timing doesn't matter, taking it daily does.",why:"The best-researched supplement for strength and muscle. Helps you do a rep or two more and recover between sets.",use:"3–5 g a day with water. No loading phase needed. Expect 1–2 kg of extra water in your muscles in the first weeks, which isn't fat.",risk:"Very safe for healthy people. Talk to a doctor first if you have kidney problems."},
- {id:"vitd",n:"Vitamin D3, 800–1,000 IU",re:/vitamin\s*d|vit\.?\s*d|\bd3\b/i,nut:"vitd",cat:"Vitamins",when:"With a meal that has some fat, usually breakfast or lunch. Most useful from October to March.",why:"In Germany the sun is too weak to make vitamin D from about October to March. It supports bones, muscles and the immune system.",use:"800–1,000 IU (20–25 µg) a day is the usual amount when you get little sun. A doctor may prescribe more if a test shows you're low.",risk:"Don't take more than 4,000 IU a day long term without a doctor. Too much raises calcium in the blood."},
+ {id:"vitd",n:"Vitamin D3",re:/vitamin\s*d|vit\.?\s*d|\bd3\b/i,nut:"vitd",cat:"Vitamins",get when(){return "With a meal that has some fat, usually breakfast or lunch. Most useful "+vitdWhen()+".";},get why(){return vitdWhy();},get use(){return `${RG().vitd} IU (${RG().vitd/40} µg) a day is the ${RG().src} guideline where you live. Many people use 800–1,000 IU when they get little sun. A doctor may prescribe more if a test shows you're low.`;},risk:"Don't take more than 4,000 IU a day long term without a doctor. Too much raises calcium in the blood."},
  {id:"omega3",n:"Omega-3 (fish or algae oil)",re:/omega|fish\s*oil|algae/i,nut:"omega3",cat:"Fats",when:"With a meal to avoid fishy burps.",why:"Good for your heart and may help with joint soreness. Worth it if you eat oily fish less than twice a week.",use:"250–500 mg of EPA and DHA combined a day. Check the label: the oil amount isn't the same as EPA and DHA.",risk:"Talk to a doctor if you take blood thinners. High doses can cause stomach upset."},
  {id:"magnesium",n:"Magnesium (glycinate or citrate)",re:/magnes/i,nut:"magnesium",cat:"Minerals",when:"In the evening. Some people find it helps them relax and sleep.",why:"Involved in muscle and nerve function. You lose some in sweat. May help with sleep and cramps if you're low.",use:"200–300 mg a day from a supplement is typical. Glycinate is gentle on the stomach, citrate can loosen stools.",risk:"More than 250 mg a day from supplements can cause diarrhoea. Avoid with kidney problems unless a doctor says otherwise."},
  {id:"iron",n:"Iron",re:/\biron\b|eisen|ferro|ferr/i,nut:"iron",cat:"Minerals",when:"On an empty stomach or with vitamin C, away from coffee, tea, dairy and calcium by about 2 hours.",why:"Carries oxygen in your blood. Low iron makes you tired and hurts endurance.",use:"Only take it if a blood test shows you're low, at the dose your doctor gives you. Every other day is often absorbed just as well.",risk:"Don't take iron without a test. Too much builds up in the body and can harm the liver. Keep it away from children."},
@@ -2093,7 +2093,7 @@ const SUPPLIB=[
  {id:"whey",n:"Whey protein",re:/whey|protein\s*powder|eiweiß/i,cat:"Protein",when:"Whenever it helps you reach your protein target, often after training or as a snack.",why:"An easy way to get more protein. It's just food, not magic.",use:"One scoop is usually 20–30 g of protein. Count it in your food.",risk:"Can upset your stomach if you don't handle lactose well. Try whey isolate or a plant protein."},
  {id:"multi",n:"Multivitamin",re:/multi/i,cat:"Vitamins",when:"With breakfast.",why:"A safety net if your diet is limited. Not needed if you eat a varied diet.",use:"One a day, following the label.",risk:"Watch out for doubling up if you also take single vitamins like D or zinc."},
  {id:"betaala",n:"Beta-alanine",re:/beta.?alanin/i,cat:"Training",when:"Every day, split into smaller doses with meals.",why:"May help in hard efforts of 1–4 minutes, like intervals and Hyrox stations.",use:"3–6 g a day, split up. It builds up over a few weeks.",risk:"Causes a harmless tingling feeling. Smaller doses reduce it."},
- {id:"melatonin",n:"Melatonin",re:/melatonin/i,cat:"Sleep",when:"30–60 minutes before bed, only now and then, for example for jet lag.",why:"Can help you fall asleep when your rhythm is off.",use:"In Germany, supplements are up to 1 mg, which is usually enough.",risk:"Not for regular long-term use without a doctor. Can make you drowsy the next morning. Don't drive if you feel sleepy."},
+ {id:"melatonin",n:"Melatonin",re:/melatonin/i,cat:"Sleep",when:"30–60 minutes before bed, only now and then, for example for jet lag.",why:"Can help you fall asleep when your rhythm is off.",use:"0.5–1 mg is usually enough. Shops in some countries sell much higher doses, which rarely work better.",risk:"Not for regular long-term use without a doctor. Can make you drowsy the next morning. Don't drive if you feel sleepy."},
  {id:"ashwa",n:"Ashwagandha",re:/ashwag/i,cat:"Other",when:"With a meal.",why:"Some studies suggest less stress and better sleep. The evidence is mixed.",use:"Follow the label, and take breaks.",risk:"Rare cases of liver damage. Avoid it when pregnant, with thyroid problems or with some medications. Ask a doctor first."}
 ];
 function suppInfo(n){return SUPPLIB.find(x=>x.re.test(n))||null;}
@@ -2120,6 +2120,32 @@ function weekAvg(monKey){
   const v=[];for(let i=0;i<7;i++){const d=store.days[addDays(monKey,i)];if(d&&Number(d.weight)>0)v.push(Number(d.weight));}
   return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
 }
+// ---------- Region: which nutrition guidelines apply, and when the sun is weak ----------
+// vitd in IU, ca/k/mg in mg ([men, women] where they differ), fib = minimum g a day, fe = iron mg [men, women]
+const REGIONS={
+ dach:{n:"Germany, Austria or Switzerland",src:"DGE",vitd:800,ca:1000,k:4000,mg:[350,300],fib:30,fe:[11,16]},
+ eu:{n:"Elsewhere in Europe",src:"EFSA",vitd:600,ca:950,k:3500,mg:[350,300],fib:25,fe:[11,16]},
+ uk:{n:"United Kingdom or Ireland",src:"NHS",vitd:400,ca:700,k:3500,mg:[300,270],fib:30,fe:[8.7,14.8]},
+ us:{n:"United States or Canada",src:"NIH",vitd:600,ca:1000,k:[3400,2600],mg:[400,310],fib:25,fe:[8,18]},
+ au:{n:"Australia or New Zealand",src:"NHMRC",vitd:200,ca:1000,k:[3800,2800],mg:[400,310],fib:[30,25],fe:[8,18]},
+ world:{n:"Somewhere else",src:"WHO",vitd:200,ca:1000,k:3510,mg:[260,220],fib:25,fe:[9,20]}
+};
+function tzName(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||"";}catch(e){return "";}}
+function guessRegion(){const tz=tzName(),lang=(navigator.language||"").toLowerCase();
+  if(/^Europe\/(Berlin|Vienna|Zurich|Busingen)$/.test(tz))return "dach";if(/^Europe\/(London|Dublin|Belfast)$/.test(tz))return "uk";if(/^Europe\//.test(tz))return "eu";
+  if(/^Australia\/|^Pacific\/Auckland/.test(tz))return "au";if(/^America\//.test(tz)&&/-(us|ca)$/.test(lang)||/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Toronto|Vancouver|Edmonton|Winnipeg|Halifax|Detroit|Boise|Regina|St_Johns|Indiana)/.test(tz)||/^Pacific\/Honolulu/.test(tz))return "us";
+  return "world";}
+function regionId(){const r=store.settings.region;return REGIONS[r]?r:guessRegion();}
+function RG(){return REGIONS[regionId()];}
+function bySex(v){return Array.isArray(v)?v[(store.settings.profile||{}).sex==="f"?1:0]:v;}
+// When the sun is too weak to make vitamin D, from the phone's time zone
+function sunZone(){const tz=tzName();
+  if(/^(Asia\/(Singapore|Jakarta|Kuala_Lumpur|Manila|Bangkok|Ho_Chi_Minh|Saigon|Kolkata|Calcutta|Colombo|Dhaka|Dubai|Qatar|Riyadh|Bahrain|Kuwait|Muscat|Karachi|Yangon|Phnom_Penh)|Africa\/(Lagos|Nairobi|Accra|Abidjan|Kampala|Dar_es_Salaam|Addis_Ababa|Kinshasa|Luanda|Dakar|Khartoum|Cairo)|America\/(Bogota|Lima|Caracas|Panama|Guayaquil|La_Paz|Manaus|Belem|Fortaleza|Recife|Mexico_City|Cancun|Havana|Santo_Domingo|Jamaica|Puerto_Rico|Costa_Rica|Guatemala|El_Salvador|Managua|Tegucigalpa)|Pacific\/(Fiji|Guam|Port_Moresby))/.test(tz))return "sunny";
+  if(/^(Australia\/|Pacific\/Auckland|America\/(Argentina|Santiago|Sao_Paulo|Montevideo|Asuncion)|Africa\/(Johannesburg|Maputo|Windhoek|Harare|Gaborone))/.test(tz))return "south";
+  return "north";}
+function vitdWhen(){const z=sunZone();return z==="north"?"from October to March":z==="south"?"from April to September":"if you're mostly indoors or covered up";}
+function vitdWhy(){const z=sunZone();return z==="sunny"?"Where you live the sun is usually strong enough all year, as long as you get some on your skin. A supplement helps if you're mostly indoors, cover up, or tested low.":`In ${z==="north"?"autumn and winter":"autumn and winter (April to September)"} the sun where you live is usually too weak to make it. It supports bones, muscles and the immune system.`;}
+function regionNote(){const R=RG();return `Amounts follow ${R.src} guidelines (${R.n.toLowerCase().replace(/^./,c=>c.toUpperCase())}). Change your region in Settings → App settings → Units and region.`;}
 // ---------- What each target means (tap any number) ----------
 function goalKind(){const g=num((store.settings.profile||{}).goal);return g<0?"cut":g>0?"bulk":store.settings.profile?"maintain":"cut";}
 function myKg(){return bodyKgOn(todayKey())||toKg(num((store.settings.profile||{}).w))||0;}
@@ -2130,17 +2156,17 @@ function tgtInfo(kind){const S=store.settings,g=goalKind(),kg=myKg(),pf=S.profil
    protein:["Protein",`<p><b>A minimum.</b> Reach ${fmt(S.protein)} g every day${kg?`, about ${(S.protein/kg).toFixed(1)} g per kg`:""}. Going over is fine. It's just more filling and more expensive.</p><p>It protects muscle on a diet and builds it otherwise. Spread it over 3–5 meals.</p>`],
    carbs:["Carbs",`<p><b>Flexible.</b> Carbs fill the calories left after protein and fat. Eat more around training, especially running and Hyrox days.</p>`],
    fat:["Fat",`<p><b>A minimum, roughly.</b> Don't go much below${kg?` about ${Math.round(0.8*kg)} g (0.8 g per kg)`:" about 0.8 g per kg"}, since fat is needed for hormones. Above that it's flexible.</p>`],
-   fibre:["Fibre",`<p><b>A minimum.</b> About ${fibreGoal()} g a day keeps digestion regular and keeps you full. More is fine.</p><p>Raise it slowly and drink enough water, or it can cause bloating.</p>`],
+   fibre:["Fibre",`<p><b>A minimum.</b> About ${fibreGoal()} g a day, worked out from your calories (14 g per 1,000 kcal, at least ${bySex(RG().fib)} g) keeps digestion regular and keeps you full. More is fine.</p><p>Raise it slowly and drink enough water, or it can cause bloating.</p>`],
    water:["Water",`<p><b>A minimum guide.</b> ${waterGoal()} Drink more when it's hot or you sweat a lot.</p><p>Pale yellow urine means you're drinking enough.</p>`],
-   magnesium:["Magnesium",`<p><b>A daily target from food</b>: about ${pf.sex==="f"?300:350} mg. If you supplement, keep the supplement under 250 mg a day.</p>`],
-   potassium:["Potassium",`<p><b>A daily target from food</b>: about 4,000 mg. Fruit, vegetables, potatoes and beans make it easy. Don't take potassium pills unless a doctor says so.</p>`],
-   calcium:["Calcium",`<p><b>A daily target</b>: about 1,000 mg, mostly from food. Supplements only for the gap, at most 500 mg at a time.</p>`],
-   vitd:["Vitamin D",`<p><b>A daily amount, not a minimum to beat.</b> 800 IU (20 µg) in the darker months. More isn't better: stay under 4,000 IU unless a doctor says otherwise.</p>`],
+   magnesium:["Magnesium",`<p><b>A daily target from food</b>: about ${bySex(RG().mg)} mg. If you supplement, keep the supplement under 250 mg a day.</p>`],
+   potassium:["Potassium",`<p><b>A daily target from food</b>: about ${fmt(bySex(RG().k))} mg. Fruit, vegetables, potatoes and beans make it easy. Don't take potassium pills unless a doctor says so.</p>`],
+   calcium:["Calcium",`<p><b>A daily target</b>: about ${fmt(RG().ca)} mg, mostly from food. Supplements only for the gap, at most 500 mg at a time.</p>`],
+   vitd:["Vitamin D",`<p><b>A daily amount, not a minimum to beat.</b> ${RG().vitd} IU (${RG().vitd/40} µg) ${vitdWhen()}. More isn't better: stay under 4,000 IU unless a doctor says otherwise.</p>`],
    omega3:["Omega-3",`<p><b>A minimum.</b> 250–500 mg of EPA and DHA a day, or oily fish twice a week.</p>`],
    creatine:["Creatine",`<p><b>A daily amount.</b> 3–5 g every day. Taking more doesn't help, it just gets flushed out.</p>`]
   }[kind];if(!T)return;
-  openSheet(T[0],T[1]+`<p class="note">Targets are estimates from your details. Check your weekly average weight and adjust.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
-function fibreGoal(){return Math.max(30,Math.round(num(store.settings.kcal)/1000*14));}
+  openSheet(T[0],T[1]+`<p class="note">${["kcal","protein","carbs","fat","water"].includes(kind)?"Targets are estimates from your details. Check your weekly average weight and adjust.":regionNote()}</p>`,[{label:"Got it",cls:"btn ghost"}]);}
+function fibreGoal(){return Math.max(bySex(RG().fib),Math.round(num(store.settings.kcal)/1000*14));}
 function waterGoal(){const kg=myKg();if(!kg)return "About 35 ml per kg of body weight a day, plus 0.5–1 L per hour of training.";const base=kg*0.035;return `About ${base.toFixed(1)} L a day for you (35 ml per kg), plus 0.5–1 L per hour of training, so around ${(base+0.75).toFixed(1)} L on training days.`;}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-tgt]");if(!b)return;e.preventDefault();e.stopPropagation();tgtInfo(b.dataset.tgt);},true);
 // ---------- Deficiencies and suggested nutrients ----------
@@ -2160,11 +2186,11 @@ const SUGG=[
  {id:"fibre",n:"Fibre",goal:()=>tg("fibre",`At least ${fibreGoal()} g a day`),why:"Keeps digestion regular, keeps you full when you're eating less, and is linked to better heart health.",food:"Oats, whole grain bread, lentils, beans, vegetables, fruit and nuts. Foods from the food calculator count towards your daily fibre."},
  {id:"water",n:"Water",goal:()=>{const kg=myKg();return tg("water",kg?`At least ${(kg*0.035).toFixed(1)} L a day, ${(kg*0.035+0.75).toFixed(1)} L on training days`:"About 35 ml per kg of body weight a day");},why:"Even mild dehydration makes training feel harder and can be mistaken for hunger.",food:"Water, tea, milk, fruit and soup all count. Pale yellow urine is a good sign."},
  {id:"omega3",n:"Omega-3",goal:()=>tg("omega3","Oily fish twice a week, or 250–500 mg of EPA and DHA"),why:"Good for your heart, and it may help with joint soreness.",food:"Salmon, mackerel, herring and sardines. Walnuts and flax have a plant form your body converts poorly.",supp:"omega3"},
- {id:"vitd",n:"Vitamin D",goal:()=>tg("vitd","800 IU (20 µg) a day from October to March"),why:"In Germany the winter sun is too weak to make it. It supports bones, muscles and the immune system.",food:"Oily fish and eggs have a little, but it's hard to get enough from food in winter.",supp:"vitd"},
- {id:"magnesium",n:"Magnesium",goal:()=>tg("magnesium",`About ${(store.settings.profile||{}).sex==="f"?300:350} mg a day, mostly from food`),why:"Needed for muscles and nerves. Some people find a little extra in the evening helps them sleep.",food:"Nuts, seeds, oats, whole grains, legumes and dark chocolate.",supp:"magnesium"},
+ {id:"vitd",n:"Vitamin D",goal:()=>tg("vitd",`${RG().vitd} IU (${RG().vitd/40} µg) a day ${vitdWhen()}`),why:()=>vitdWhy(),food:"Oily fish and eggs have a little, but it's hard to get enough from food in winter.",supp:"vitd"},
+ {id:"magnesium",n:"Magnesium",goal:()=>tg("magnesium",`About ${bySex(RG().mg)} mg a day, mostly from food`),why:"Needed for muscles and nerves. Some people find a little extra in the evening helps them sleep.",food:"Nuts, seeds, oats, whole grains, legumes and dark chocolate.",supp:"magnesium"},
  {id:"creatine",n:"Creatine",goal:()=>tg("creatine","3–5 g a day"),why:"Helps you get stronger and build muscle over time. The best-researched training supplement.",food:"Meat and fish contain a little, but far less than a supplement.",supp:"creatine"},
- {id:"potassium",n:"Potassium",goal:()=>tg("potassium","About 4,000 mg a day"),why:"Balances the salt in your diet and supports blood pressure and muscles.",food:"Potatoes, bananas, beans, spinach, yogurt and dried fruit."},
- {id:"calcium",n:"Calcium",goal:()=>tg("calcium","About 1,000 mg a day"),why:"Keeps bones strong. Mainly worth watching if you eat little dairy.",food:"Milk, yogurt, quark, cheese, fortified plant milk and tofu.",supp:"calcium"}
+ {id:"potassium",n:"Potassium",goal:()=>tg("potassium",`About ${fmt(bySex(RG().k))} mg a day`),why:"Balances the salt in your diet and supports blood pressure and muscles.",food:"Potatoes, bananas, beans, spinach, yogurt and dried fruit."},
+ {id:"calcium",n:"Calcium",goal:()=>tg("calcium",`About ${fmt(RG().ca)} mg a day`),why:"Keeps bones strong. Mainly worth watching if you eat little dairy.",food:"Milk, yogurt, quark, cheese, fortified plant milk and tofu.",supp:"calcium"}
 ];
 function hcfg(){const H=store.settings.health||{};return {intake:H.intake!==false,labs:H.labs===true};}
 function myDefs(){return Array.isArray(store.settings.defs)?store.settings.defs:[];}
@@ -2196,12 +2222,13 @@ function suggHit(k,id){const d=store.days[k];if(!d)return false;if((d.xtra||{})[
 function suggHtml(k){
   const on=store.settings.extrasOn||[],SU=supps();
   let h=`<h2 class="sec-title" data-rail="Suggested">Suggested nutrients</h2><div class="card"><p class="note" style="margin:0 0 10px">None of these are necessary. They're extras that could help, depending on how you eat and train. Track the ones you want to work on.</p>`;
+  const sugEnd=`<p class="note" style="font-size:12.5px">${regionNote()}</p>`;
   for(const x of SUGG){const tr=on.includes(x.id),open=openSugg.has(x.id),I=x.supp&&SUPPLIB.find(s=>s.id===x.supp),inSupp=I&&SU.some(n=>I.re.test(n));
     h+=`<div class="sugg"><div class="sugghd">${tr?`<button class="rtick" data-act="sugghit" data-id="${x.id}" aria-pressed="${suggHit(k,x.id)}" aria-label="Hit ${esc(x.n)} ${k===todayKey()?"today":"on this day"}">✓</button>`:""}<span><strong>${esc(x.n)}<span class="optional">Optional</span></strong><small>${typeof x.goal==="function"?x.goal():esc(x.goal)}</small></span><button type="button" class="icob" data-act="suggopen" data-id="${x.id}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="More about ${esc(x.n)}">${IC.search}</button></div>
     ${tr?dots7(k,d=>suggHit(d,x.id))+(x.id==="fibre"?`<p class="note" style="margin-top:6px">${r1(eatTotals(store.days[k]||{}).fb)} of ${fibreGoal()} g logged ${k===todayKey()?"today":"that day"}. Foods with fibre values count.</p>`:""):""}
-    ${open?`<div class="suggbody"><p><b>Why it could help:</b> ${esc(x.why)}</p><p><b>Where to get it:</b> ${esc(x.food)}</p><p class="note" style="margin:0">Not necessary for everyone. It might just help.</p>
+    ${open?`<div class="suggbody"><p><b>Why it could help:</b> ${esc(typeof x.why==="function"?x.why():x.why)}</p><p><b>Where to get it:</b> ${esc(x.food)}</p><p class="note" style="margin:0">Not necessary for everyone. It might just help.</p>
       <div class="pair" style="margin-top:8px"><button class="btn ${tr?"ghost":""}" style="margin:0" data-act="suggtrack" data-id="${x.id}">${tr?"Stop tracking":"Track daily"}</button>${I?`<button class="btn ghost" style="margin:0" data-act="suggsupp" data-id="${x.id}"${inSupp?" disabled":""}>${inSupp?"In your supplements":"Add to supplements"}</button>`:""}</div></div>`:""}</div>`;}
-  return h+`</div>`;
+  return h+sugEnd+`</div>`;
 }
 function healthSettingsHtml(){const H=hcfg(),sw=(key,lab,sub,on)=>`<div class="setrow"><span class="sl">${lab}<small>${sub}</small></span><button type="button" class="switch" role="switch" aria-checked="${on}" data-hset="${key}" aria-label="${lab}"><i></i></button></div>`;
   return `<div>${sw("intake","Daily intake","Tick off each day you took the supplement or ate enough of it. Shows the last 7 and 30 days.",H.intake)}${sw("labs","Blood test results","Log values from your blood tests and see them on a chart next to the typical range.",H.labs)}</div><p class="note">Add what you want to track on the Body tab, under Deficiencies.</p>`;}
@@ -2336,8 +2363,9 @@ const MEAS=[["waist","Waist"],["chest","Chest"],["hips","Hips"],["arm","Arm"],["
 function measHtml(k){
   const d=store.days[k]||{},m=d.meas||{},first={},last={};
   for(const x of Object.keys(store.days).sort()){const mm=store.days[x].meas||{};for(const [key] of MEAS)if(num(mm[key])>0){if(first[key]==null)first[key]={v:num(mm[key]),k:x};last[key]={v:num(mm[key]),k:x};}}
-  return `<h2 class="sec-title">Measurements</h2><div class="card"><p class="note" style="margin:0 0 8px">In cm, measured relaxed, ideally the same day each week. Your waist often shows fat loss better than the scale.</p>
-  <div class="measgrid">${MEAS.map(([key,l])=>{const f=first[key],L=last[key],dd=f&&L&&L.k!==f.k?L.v-f.v:null;return `<label><span class="lbl">${l}</span><input class="field" data-meas="${key}" inputmode="decimal" placeholder="${L?L.v:"cm"}" value="${esc(m[key]||"")}">${dd!=null?`<small class="of">${dd>0?"+":""}${dd.toFixed(1)} cm since ${shortDate(f.k)}</small>`:""}</label>`;}).join("")}</div></div>`;
+  const LU=LEN()==="in"?"in":"cm";
+  return `<h2 class="sec-title">Measurements</h2><div class="card"><p class="note" style="margin:0 0 8px">In ${LU==="in"?"inches":"cm"}, measured relaxed, ideally the same day each week. Your waist often shows fat loss better than the scale.</p>
+  <div class="measgrid">${MEAS.map(([key,l])=>{const f=first[key],L=last[key],dd=f&&L&&L.k!==f.k?L.v-f.v:null;return `<label><span class="lbl">${l}</span><input class="field" data-meas="${key}" inputmode="decimal" placeholder="${L?lenShow(L.v):LU}" value="${m[key]?esc(lenShow(m[key])):""}">${dd!=null?`<small class="of">${dd>0?"+":""}${(LU==="in"?dd/2.54:dd).toFixed(1)} ${LU} since ${shortDate(f.k)}</small>`:""}</label>`;}).join("")}</div></div>`;
 }
 function notesHtml(){
   const N=Array.isArray(store.settings.bodyNotes)?store.settings.bodyNotes:[];
@@ -2391,7 +2419,7 @@ $("panel").addEventListener("click",e=>{
     S.defs=myDefs().concat([{id,start:sel}]);persist("settings");renderBody();toast("Tracking "+defMeta({id}).n);}
   else if(a==="defrm"){const u=snap(["settings"]),id=b.dataset.id;S.defs=myDefs().filter(x=>x.id!==id);persist("settings");renderBody();toast("Stopped tracking",u);}
   else if(a==="definfo"){const d=myDefs().find(x=>x.id===b.dataset.id),M=defMeta(d||{id:b.dataset.id}),I=SUPPLIB.find(x=>x.nut===M.id);
-    openSheet(M.n,`${M.food?`<p style="margin-top:0"><b>Food sources:</b> ${esc(M.food)}</p>`:""}${I?`<p><b>If you take a supplement:</b> ${esc(I.when)} ${esc(I.use)}</p><p class="warnline"><b>Careful:</b> ${esc(I.risk)}</p>`:""}<p class="note">Ticking ${esc(I?I.n.split(",")[0]:M.n)} in your supplements on the Eat tab counts here automatically.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
+    openSheet(M.n,`${M.id==="iron"?`<p style="margin-top:0"><b>Daily need:</b> about ${bySex(RG().fe)} mg from food (${RG().src}). ${(store.settings.profile||{}).sex==="f"?"Women who have periods need more than men.":"Women who have periods need about twice as much."}</p>`:""}${M.food?`<p style="margin-top:${M.id==="iron"?8:0}px"><b>Food sources:</b> ${esc(M.food)}</p>`:""}${I?`<p><b>If you take a supplement:</b> ${esc(I.when)} ${esc(I.use)}</p><p class="warnline"><b>Careful:</b> ${esc(I.risk)}</p>`:""}<p class="note">Ticking ${esc(I?I.n.split(",")[0]:M.n)} in your supplements on the Eat tab counts here automatically.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
   else if(a==="labadd"){const id=b.dataset.id,v=document.querySelector(`[data-labv="${CSS.escape(id)}"]`),dt=document.querySelector(`[data-labd="${CSS.escape(id)}"]`);if(!v||!(num(v.value)>0)){if(v)v.focus();return;}
     S.labs=S.labs||{};(S.labs[id]=S.labs[id]||[]).push({k:(dt&&dt.value)||sel,v:String(v.value).replace(",",".").trim()});persist("settings");renderBody();toast("Result saved");}
   else if(a==="suggopen"){const id=b.dataset.id;if(openSugg.has(id))openSugg.delete(id);else openSugg.add(id);renderBody();}
@@ -2404,7 +2432,7 @@ $("panel").addEventListener("change",e=>{const t=e.target;if(tab!=="body")return
   if(t.dataset.strength!==undefined){strengthId=t.value;renderBody();}
   else if(t.dataset.photo!==undefined&&t.files&&t.files[0])phAdd(t.files[0]);
   else if(t.dataset.meas){renderBody();}});
-$("panel").addEventListener("input",e=>{const t=e.target;if(tab!=="body"||!t.dataset.meas)return;const d=ensureDay(sel);d.meas=d.meas||{};const v=t.value.replace(",",".").trim();if(v==="")delete d.meas[t.dataset.meas];else if(num(v)>0)d.meas[t.dataset.meas]=num(v);persist("day-"+sel);});
+$("panel").addEventListener("input",e=>{const t=e.target;if(tab!=="body"||!t.dataset.meas)return;const d=ensureDay(sel);d.meas=d.meas||{};const v=t.value.replace(",",".").trim();if(v==="")delete d.meas[t.dataset.meas];else if(num(v)>0)d.meas[t.dataset.meas]=lenStore(v);persist("day-"+sel);});
 function chart(endKey){
   const pts=[];for(let i=41;i>=0;i--){const k=addDays(endKey,-i),d=store.days[k];if(d&&Number(d.weight)>0)pts.push({i:41-i,w:Number(d.weight)});}
   if(pts.length<2)return `<p class="empty">Log your morning weight on a few days to see your trend here.</p>`;
@@ -2730,7 +2758,8 @@ $("panel").addEventListener("input",e=>{
   else if(t.id==="fcQ"){fcQ=t.value;const r=$("fcRes");if(r)r.innerHTML=fcList();}
   else if(t.id==="fcG"){const it=allIngr().find(x=>x.n===fcPick),o=$("fcOut");if(it&&o)o.innerHTML=fcOut(it,num(t.value));}
   else if(t.dataset.mbg!==undefined){const x=mb[+t.dataset.mbg];if(x){x.g=num(t.value);const tt=mbTotals(),o=$("mbTot");if(o)o.innerHTML="Total: "+fcOut({k:tt.k,p:tt.p,cb:tt.cb,f:tt.f},100);}}
-  else if(t.dataset.pf&&t.closest(".tcalc")){if(t.dataset.pf==="dob"&&t.value&&!ageOn(t.value)){return;}const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");tUpdate(S.profile);}
+  else if(t.dataset.pf&&t.closest(".tcalc")){if(t.dataset.pf==="dob"&&t.value&&!ageOn(t.value)){return;}
+    if(t.dataset.pf==="hft"||t.dataset.pf==="hin"){const S=store.settings,box=t.closest(".tcalc"),ft=num((box.querySelector('[data-pf="hft"]')||{}).value),inch=num((box.querySelector('[data-pf="hin"]')||{}).value);S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile.h=String(Math.round((ft*12+inch)*2.54*10)/10);persist("settings");tUpdate(S.profile);return;}const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");tUpdate(S.profile);}
   else if(t.dataset.ed==="name"){const {P}=curPlanEdit();P.name=t.value.slice(0,40)||"Workout";persist("settings");}
   else if(t.dataset.exI!==undefined){const {P}=curPlanEdit(),i=+t.dataset.exI,f=+t.dataset.exF;if(!P.ex[i])return;if(f===2){const v=Math.round(num(t.value));if(v>0&&v<=10)P.ex[i][2]=v;}else P.ex[i][3]=t.value.slice(0,24);persist("settings");}
   else if(t.dataset.note){S.notes=S.notes||{};const v=t.value.slice(0,140);if(v)S.notes[t.dataset.note]=v;else delete S.notes[t.dataset.note];persist("settings");}
@@ -2854,7 +2883,7 @@ function weightGuessHtml(pf){const w=num(pf.w),d=U()==="lb"?5.5:2.5;
 function fmt1(v){return (Math.round(v*10)/10).toString();}
 function profileFields(pf){
   return `<div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label><label><span class="lbl">Birthday</span><input class="field" type="date" data-pf="dob" max="${todayKey()}" value="${esc(pf.dob||"")}" aria-label="Birthday">${!pf.dob&&num(pf.a)?`<small class="of">Age ${esc(pf.a)} for now. Add your birthday to keep it up to date.</small>`:""}</label></div>
-  <div class="pair" style="margin-top:8px"><label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="decimal" placeholder="e.g. 184.5" value="${esc(pf.h||"")}"></label><label><span class="lbl">${pf.west?"Rough weight":"Weight"} (${U()})</span><input class="field" data-pf="w" inputmode="decimal" placeholder="e.g. 86.4" value="${esc(pf.w||"")}"></label></div>
+  <div class="pair" style="margin-top:8px">${heightFields(pf)}<label><span class="lbl">${pf.west?"Rough weight":"Weight"} (${U()})</span><input class="field" data-pf="w" inputmode="decimal" placeholder="e.g. 86.4" value="${esc(pf.w||"")}"></label></div>
   ${weightGuessHtml(pf)}
   <label class="sfld"><span class="lbl">Activity</span><select class="field" data-pf="act">${ACTS.map(([v,l])=>`<option value="${v}"${num(pf.act)===v?" selected":""}>${l}</option>`).join("")}</select></label>
   <label class="sfld"><span class="lbl">Goal</span><select class="field" data-pf="goal">${goalOpts(pf)}</select></label>
@@ -3499,8 +3528,17 @@ function tabsSettingsHtml(){
     ${TAB_LOCKED.includes(t)?"":`<button type="button" class="switch" role="switch" aria-checked="${!hid}" data-tabset="vis:${t}" aria-label="Show ${nm} in the tab bar"><i></i></button>`}
     <button type="button" class="mini" data-tabset="up:${t}"${i===0?" disabled":""} aria-label="Move ${nm} left">↑</button><button type="button" class="mini" data-tabset="down:${t}"${i===order.length-1?" disabled":""} aria-label="Move ${nm} right">↓</button></div>`;}).join("");
 }
+function LEN(){const v=store.settings.len;return v==="in"||v==="cm"?v:(regionId()==="us"?"in":"cm");}
+function cmToFtIn(cm){const t=num(cm)/2.54;let ft=Math.floor(t/12),inch=Math.round((t-ft*12)*10)/10;if(inch>=12){ft++;inch=0;}return [ft,inch];}
+function lenShow(cm){return LEN()==="in"?(Math.round(num(cm)/2.54*10)/10).toString():(Math.round(num(cm)*10)/10).toString();}
+function lenStore(v){return LEN()==="in"?Math.round(num(v)*2.54*10)/10:num(v);}
+function heightFields(pf){if(LEN()!=="in")return `<label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="decimal" placeholder="e.g. 184.5" value="${esc(pf.h||"")}"></label>`;
+  const [ft,inch]=num(pf.h)?cmToFtIn(pf.h):["",""];return `<div><span class="lbl">Height (ft, in)</span><div class="pair" style="gap:6px"><input class="field" data-pf="hft" inputmode="numeric" placeholder="ft" value="${ft}" aria-label="Height, feet"><input class="field" data-pf="hin" inputmode="decimal" placeholder="in" value="${inch}" aria-label="Height, inches"></div></div>`;}
 function unitsHtml(){
-  return `<label class="sfld" style="margin-top:0"><span class="lbl">Currency</span><select class="field" data-uset="currency">${CURS.map(([c,n])=>`<option value="${c}"${c===curCode()?" selected":""}>${n} (${c})</option>`).join("")}</select></label>
+  return `<label class="sfld" style="margin-top:0"><span class="lbl">Region</span><select class="field" data-uset="region">${Object.entries(REGIONS).map(([id,R])=>`<option value="${id}"${id===regionId()?" selected":""}>${R.n} (${R.src})</option>`).join("")}</select></label>
+  <p class="note" style="margin:4px 0 12px">Sets which nutrition guidelines are used for vitamins and minerals, and when vitamin D matters most. ${store.settings.region?"":"Guessed from your phone's time zone."}</p>
+  <p class="lbl">Height and measurements</p><div class="seg" role="group" aria-label="Length unit">${[["cm","Centimetres"],["in","Feet and inches"]].map(([v,l])=>`<button type="button" data-uset="len:${v}" aria-pressed="${LEN()===v}">${l}</button>`).join("")}</div>
+  <label class="sfld"><span class="lbl">Currency</span><select class="field" data-uset="currency">${CURS.map(([c,n])=>`<option value="${c}"${c===curCode()?" selected":""}>${n} (${c})</option>`).join("")}</select></label>
   <p class="lbl" style="margin-top:14px">Weight</p><div class="seg" role="group" aria-label="Weight unit">${[["kg","Kilograms (kg)"],["lb","Pounds (lb)"]].map(([v,l])=>`<button type="button" data-uset="unit:${v}" aria-pressed="${U()===v}">${l}</button>`).join("")}</div>
   <p class="note" style="margin-top:0">Switching converts the weights you've already logged.</p>`;
 }
@@ -3519,7 +3557,7 @@ function personalHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550},profile()),F=firstWeigh(),L=latestWeight(),a=pf.dob?ageOn(pf.dob):num(pf.a);
   return `<div class="card tcalc personal"><div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label>
    <label><span class="lbl">Birthday</span><input class="field" type="date" data-pf="dob" max="${todayKey()}" value="${esc(pf.dob||"")}">${a?`<small class="of">${a} years old</small>`:""}</label></div>
-   <div class="pair" style="margin-top:8px"><label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="decimal" value="${esc(pf.h||"")}"></label><label><span class="lbl">Body fat % (optional)</span><input class="field" data-pf="bf" inputmode="decimal" value="${esc(pf.bf||"")}"></label></div></div>
+   <div class="pair" style="margin-top:8px">${heightFields(pf)}<label><span class="lbl">Body fat % (optional)</span><input class="field" data-pf="bf" inputmode="decimal" value="${esc(pf.bf||"")}"></label></div></div>
   <p class="sec-title" style="margin-top:18px">Weight</p><div class="card personal">
    ${L?`<div><span class="big">${fmt1(num(L))} ${U()}</span> <span class="of">latest weigh-in</span></div>${F?`<p class="note" style="margin-top:2px">Your progress starts at ${fmt1(F.w)} ${U()} on ${shortDate(F.k)}.</p>`:""}`:`<div><span class="big">${num(pf.w)?fmt1(num(pf.w))+" "+U():"Not set"}</span> <span class="of">${pf.west?"your guess":"from setup"}</span></div>`}
    ${pf.west?`<p class="note warnline">This is a guess (±${U()==="lb"?5.5:2.5} ${U()}). Weighing yourself is strongly recommended, so your targets and charts are accurate.</p>`:`<p class="note">Weighing in regularly is strongly recommended. It's what makes your targets, maintenance and progress chart accurate.</p>`}
@@ -3537,8 +3575,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.3";
+const APP_VERSION="3.4";
 const CHANGELOG=[
+  {v:"3.4",d:"9 October 2026",t:"Works wherever you live",items:["New region setting, guessed from your phone's time zone: Germany, Austria and Switzerland, the rest of Europe, the UK and Ireland, the US and Canada, Australia and New Zealand, or elsewhere","Vitamin D, calcium, potassium, magnesium, fibre and iron follow the official guidelines for your region","Vitamin D advice follows your season: October to March in the north, April to September in the south, and only if you're mostly indoors near the equator","Height and body measurements in feet and inches if you prefer"]},
   {v:"3.3",d:"9 October 2026",t:"Easier eating and resting",items:["Eat is now a grid of big tiles. Tap one to open it, or + to add food to that meal in seconds","Cheat meal: don't count it, add a rough guess, take a free day, or set different targets for just one day. Those days are left out of your averages","Tap any target, like your calories or protein, to see what it means for you: a ceiling, a minimum, or a number to hit","Suggested nutrients are worked out for you, like your water in litres and your fibre from your calories","Rest timer: tap the time on an exercise to start resting. Hold it to change the time, with a small vibration on phones that support it","The birthday field no longer spills out of its box on iPhone","Single serving calculator: tell the meal builder how many portions a batch makes, log part of a recipe by servings or by weighing your portion, and save a batch as a recipe"]},
   {v:"3.2",d:"9 October 2026",t:"Personal details",items:["Hyrox race prep split template, based on a real Hyrox athlete's week. Only offered if you're not new to the gym","New exercises: incline machine chest press and easy walk","Setup asks for your birthday instead of your age, so your age stays up to date. On your birthday the app says happy birthday","Height, weight and body fat take decimals","Not sure of your weight? Tick the box and your guess is treated as ±2.5 kg. It isn't added to your progress chart, and the app reminds you that weighing in is strongly recommended","New Settings → Preferences → Personal details: change your birthday, height and body fat, log a weigh-in, or correct a starting weight that was wrong without adding a new point to your chart"]},
   {v:"3.1",d:"9 October 2026",t:"Smoother changes",items:["Changing a day's workout asks how: just that day, shift the rest of the week so nothing is lost, or every week from now on. Pick a default in Settings → Preferences → Training","Workout changes show up in History","Opening an exercise folds the one that was open. You can turn this off in Settings → Preferences → Training","The section bar on the right is rebuilt: it no longer misses touches or drifts off centre, the marker moves smoothly as you scroll, and the label uses your accent colour","Ticking a meal no longer folds it and jumps the page","Settings are grouped into App settings, Preferences and Learn and help. School is now called Training guide"]},
@@ -3626,7 +3665,7 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["tabs","Tab bar",hidden.length?`${hidden.length} hidden: ${hidden.map(t=>TABDEF[t][0]).join(", ")}`:"All tabs shown",()=>`<div class="card">${tabsSettingsHtml()}</div>`],
     ["training","Training",`${lv} · rep style ${(STYLES[S.repDefault]||["as planned"])[0].toLowerCase()}`,()=>`<div class="card">${trainingSettingsHtml()}</div>`],
     ["personal","Personal details",(()=>{const pf=profile(),a=pf.dob?ageOn(pf.dob):num(pf.a);return [a?a+" years":"",num(pf.h)?fmt1(num(pf.h))+" cm":"",pf.west?"weight is a guess":""].filter(Boolean).join(" · ")||"Birthday, height and weight";})(),()=>personalHtml()],
-    ["units","Units and currency",`${U()} · ${curCode()}`,()=>`<div class="card">${unitsHtml()}</div>`],
+    ["units","Units and region",`${U()} · ${LEN()==="in"?"ft and in":"cm"} · ${curCode()} · ${RG().src}`,()=>`<div class="card">${unitsHtml()}</div>`],
     ["health","Health tracking",(()=>{const H=hcfg();return [H.intake?"Daily intake":"",H.labs?"Blood tests":""].filter(Boolean).join(" and ")||"Off";})(),()=>`<div class="card">${healthSettingsHtml()}</div>`],
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
     ...(isLocalMode()?[["backup","Backup","Save or restore all your data",()=>`<div class="card">${backupHtml()}</div>`]]:[]),
@@ -3654,10 +3693,11 @@ $("panel").addEventListener("click",e=>{
       else{T.hidden.push(t);persist("settings");if(tab===t)tab="settings";render();toast(nm+" is hidden. Open it any time from Settings → Tab bar");}return;}
     const i=T.order.indexOf(t),j=a==="up"?i-1:i+1;if(j<0||j>=T.order.length)return;[T.order[i],T.order[j]]=[T.order[j],T.order[i]];persist("settings");render();
     const nb=document.querySelector(`[data-tabset="${a}:${t}"]`);if(nb&&!nb.disabled)nb.focus();return;}
+  const ln=e.target.closest("[data-uset^='len:']");if(ln&&tab==="settings"){store.settings.len=ln.dataset.uset.split(":")[1];persist("settings");render();return;}
   const u=e.target.closest("[data-uset^='unit:']");
   if(u&&tab==="settings"){const to=u.dataset.uset.split(":")[1];if(to===U())return;convertUnits(to);render();toast("Weights now in "+(to==="lb"?"pounds":"kilograms")+". Logged weights were converted");}
 });
-$("panel").addEventListener("change",e=>{const t=e.target;if(t.dataset&&t.dataset.uset==="currency"){store.settings.currency=t.value;persist("settings");render();toast("Currency set to "+t.value);}});
+$("panel").addEventListener("change",e=>{const t=e.target;if(t.dataset&&t.dataset.uset==="region"){store.settings.region=t.value;persist("settings");render();toast("Guidelines for "+REGIONS[t.value].n);return;}if(t.dataset&&t.dataset.uset==="currency"){store.settings.currency=t.value;persist("settings");render();toast("Currency set to "+t.value);}});
 // ---------- School: training knowledge ----------
 const MDESC={chest:"Pushes your arms forward and together.",fdelt:"Front of the shoulder. Raises your arm forward and helps every press.",sdelt:"Side of the shoulder. Lifts your arm out to the side and makes shoulders look wider.",rdelt:"Back of the shoulder. Pulls your arm back and helps posture.",biceps:"Bends your elbow and turns your palm up.",triceps:"Straightens your elbow. Two thirds of your upper arm.",forearms:"Grip and wrist strength.",abs:"Bends your spine forward and keeps your trunk stiff when you lift.",obliques:"Twists and side-bends your trunk, and stops it from twisting.",quads:"Front of the thigh. Straightens your knee.",adductors:"Inner thigh. Pulls your legs together and helps in squats.",lats:"Big back muscles. Pull your arms down and back.",traps:"Upper back and neck. Shrugs and holds your shoulder blades.",midback:"Between your shoulder blades. Squeezes them together in rows.",lowback:"Keeps your spine straight when you bend and lift.",glutes:"Extends your hips. Your strongest muscle.",glutemed:"Side of the hip. Keeps your knee and pelvis stable on one leg.",hams:"Back of the thigh. Bends the knee and extends the hip.",calves:"Points your foot and pushes you off the ground."};
 function compoundOf(x){return (x.m||[]).length+(x.s||[]).length>=3&&!["Biceps","Triceps","Forearms","Calves"].includes(x.g)||["Hyrox and hybrid","Full body and cardio"].includes(x.g);}
