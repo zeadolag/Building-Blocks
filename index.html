@@ -420,6 +420,21 @@ details.mine summary{cursor:pointer;color:var(--blue);font-weight:500}
 .histday .hb{color:var(--muted)}
 .servrow{display:grid;gap:4px;margin-top:8px}
 .portion .field:disabled{opacity:.5}
+.nutcard{padding:12px 14px}
+.nuthd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.nuthd strong{font-weight:600;font-size:15px}
+.nutrow{display:grid;grid-template-columns:84px minmax(0,1fr) 104px;align-items:center;gap:8px;padding:5px 0;font-size:13px}
+.nutrow:has(.wbtn){grid-template-columns:84px minmax(0,1fr) 104px auto}
+.nutv{text-align:right}
+.nutrow .tgt{font-weight:500;font-size:13px}
+.nutbar{height:6px;border-radius:999px;background:var(--mutedbg);overflow:hidden}
+.nutbar span{display:block;height:100%;border-radius:999px;background:var(--blue)}
+.nutbar.done span{background:var(--green)}
+.nutv{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.nutv small{font-weight:400;color:var(--muted);font-size:12px}
+.wbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;font-size:12px;font-weight:500;padding:3px 8px}
+.libitem.added{background:color-mix(in srgb,var(--green) 14%,transparent)}
+.afsel{border-top:1px solid var(--line);margin-top:8px}
 .egrid{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:row dense;gap:10px;margin-top:4px}
 .etile{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-height:118px;display:flex;flex-direction:column}
 .etile.done{border-color:color-mix(in srgb,var(--green) 35%,var(--line))}
@@ -1978,17 +1993,27 @@ function myMeals(){return Array.isArray(store.settings.myMeals)?store.settings.m
 function slotOpts(slot){
   const hid=hiddenMeals();
   const os=store.settings.fresh?[]:slot.opts.filter(o=>!hid.includes(o.id));
-  for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,fb:Number(mm.fb)||0,mine:1});
+  for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,fb:Number(mm.fb)||0,nu:mm.nu||null,mine:1});
   if(slot.recipes)for(const r of allRecipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0});
   return os;
 }
 function chosen(slot,day){const v=(day.meals||{})[slot.id];if(!v)return null;const os=slotOpts(slot);if(v===true)return os[0];return os.find(o=>o.id===v)||null;}
+// Grams from a quick item's name, matched to an ingredient, so fibre and minerals can be estimated
+function quickNu(q){const g=num((String(q.n).match(/(\d+(?:[.,]\d+)?)\s*g\b/)||[])[1]);let grams=g;if(!grams&&/egg/i.test(q.n)){const c=num((String(q.n).match(/(\d+)/)||[])[1])||1;grams=c*55;}
+  const w=String(q.n).toLowerCase().split(/[ ,]+/)[0];if(!grams||!w)return {};const it=allIngr().find(x=>x.n.toLowerCase().startsWith(w));if(!it)return {};const m=macrosFor(it,grams);return {fb:r1(m.fb)||undefined,nu:m.nu||undefined};}
+// Supplements count towards what they contain: amount from the name if given, else a typical dose
+const SUPPNU={creatine:["cr",5,"g"],vitd:["d",1000,"IU"],omega3:["o3",500,"mg"],magnesium:["mg",300,"mg"],iron:["fe",14,"mg"],calcium:["ca",500,"mg"]};
+function suppNu(n){const I=suppInfo(n);if(!I||!SUPPNU[I.id])return null;const [key,def,unit]=SUPPNU[I.id];
+  const m=String(n).replace(/(\d),(\d{3})/g,"$1$2").match(/(\d+(?:[.,]\d+)?)\s*(mg|g|iu|ie|µg|mcg|ug)\b/i);let v=def;
+  if(m){let x=num(m[1]);const u=m[2].toLowerCase();if(key==="d")v=u==="iu"||u==="ie"?x:x*40;else if(key==="cr")v=u==="g"?x:x/1000;else v=u==="g"?x*1000:u==="mg"?x:x/1000;}
+  return {[key]:v};}
 function eatTotals(day){
-  let k=0,p=0,fb=0;
-  for(const s of SLOTS){const o=chosen(s,day);if(o){k+=o.k;p+=o.p;fb+=Number(o.fb)||0;}}
+  let k=0,p=0,fb=0,nu={};
+  for(const s of SLOTS){const o=chosen(s,day);if(o){k+=o.k;p+=o.p;fb+=Number(o.fb)||0;nu=nuAdd(nu,o.nu);}}
   if((day.meals||{}).rice){k+=RICE.k;p+=RICE.p;fb+=0.5;}
-  for(const e of day.extras||[]){k+=Number(e.k)||0;p+=Number(e.p)||0;fb+=Number(e.fb)||0;}
-  return {k,p,fb};
+  for(const e of day.extras||[]){k+=Number(e.k)||0;p+=Number(e.p)||0;fb+=Number(e.fb)||0;nu=nuAdd(nu,e.nu);}
+  for(const n of Object.keys(day.supps||{}))if(day.supps[n])nu=nuAdd(nu,suppNu(n));
+  return {k,p,fb,nu,water:num(day.water)};
 }
 function meter(label,val,target,unit){
   const pct=target?Math.min(100,val/target*100):0,over=val>target;
@@ -1997,6 +2022,27 @@ function meter(label,val,target,unit){
   <div class="bar${over&&unit==="kcal"?" over":""}"><span style="width:${pct}%"></span></div>
   <div class="left">${over?fmt(diff)+" "+unit+" over":fmt(diff)+" "+unit+" to go"}</div></div>`;
 }
+// ---------- + on a meal tile: search everything, then add ----------
+let afQ="",afSlot=null,afPick=null;
+function afItems(){const q=afQ.trim().toLowerCase(),has=x=>!q||x.toLowerCase().includes(q),out=[];
+  const sl=SLOTS.find(x=>x.id===afSlot);
+  for(const s0 of SLOTS)for(const o of slotOpts(s0))if(!String(o.id).startsWith("r:")&&has(o.n)&&!out.some(x=>x.t==="meal"&&x.n===o.n))out.push({t:"meal",n:o.n,d:`${s0.name} · ${fmt(o.k)} kcal, ${Math.round(o.p)} g protein`,o,sl:s0.id});
+  for(const r of allRecipes())if(has(r.n))out.push({t:"recipe",n:r.n,d:`Recipe · ${fmt(num(r.k))} kcal, ${Math.round(num(r.p))} g protein per serving`,r});
+  quick().forEach((x,i)=>{if(has(x.n))out.push({t:"quick",n:x.n,d:`Quick pick · ${fmt(x.k)} kcal, ${r1(x.p)} g protein`,i});});
+  for(const it of allIngr())if(has(it.n))out.push({t:"ingr",n:it.n,d:`Per 100 g: ${fmt(it.k)} kcal, ${r1(it.p)} g protein`,it});
+  if(sl)out.sort((a,b)=>(b.t==="meal"&&b.sl===afSlot)-(a.t==="meal"&&a.sl===afSlot));
+  return out;}
+function afList(){const L=afItems(),lab={meal:"Your meals",recipe:"Recipes",quick:"Quick picks",ingr:"Ingredients, by weight"};let h="",last="";
+  if(!L.length)return `<p class="note">Nothing matches. <button type="button" class="linkbtn" style="padding:0" data-af="manual">Type it in instead</button></p>`;
+  L.slice(0,60).forEach((x,i)=>{if(x.t!==last){last=x.t;h+=`<p class="libhead">${lab[x.t]}</p>`;}h+=`<button type="button" class="libitem" data-af="pick" data-i="${i}"><span><strong>${esc(x.n)}</strong><small>${esc(x.d)}</small></span><span class="plus">${x.t==="ingr"?"›":"+"}</span></button>`;});
+  return h;}
+function addFoodSheet(slot){afSlot=slot;afQ="";afPick=null;const sl=SLOTS.find(x=>x.id===slot);
+  openSheet(sl?"Add to "+sl.name:"Add food",`<input class="field" id="afQ" placeholder="Search meals, recipes and ingredients" aria-label="Search food">
+   <div id="afRes" class="swres">${afList()}</div><div id="afSel"></div>
+   <button type="button" class="linkbtn" data-af="manual">Know the numbers? Type them in</button>`,[{label:"Done",cls:"btn ghost"}]);
+  sheetEl._kind="addfood";}
+function afLog(e,label){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);if(afSlot)e.slot=afSlot;(day.extras=day.extras||[]).push(e);persist("day-"+k);renderEat();toast("Added "+label,u);}
+function afSelHtml(it){return `<div class="afsel"><p class="lbl" style="margin-top:10px">${esc(it.n)}</p><div class="pair"><label><span class="lbl">Grams</span><input class="field" id="afG" inputmode="decimal" value="100"></label><div class="fcout" id="afOut">${fcOut(it,100)}</div></div><button class="btn" data-af="addingr">Add</button></div>`;}
 // ---------- Eat: tiles, quick add, cheat meals ----------
 function dayTargets(day){const S=store.settings,t=(day&&day.tgt)||{};return {k:num(t.k)||num(S.kcal),p:num(t.p)||num(S.protein),own:!!(day&&day.tgt)};}
 function cheatOf(day){return (day&&day.cheat)||null;}
@@ -2014,7 +2060,7 @@ function quickAdd(slot){
       (day.extras=day.extras||[]).push(e);persist("day-"+k);
       const sv=sheetEl.querySelector("[data-qsave]");if(sl&&sv&&sv.getAttribute("aria-pressed")==="true"){store.settings.myMeals=myMeals().concat([{id:Date.now().toString(36),slot,n:e.n,d:"Your meal",k:e.k,p:e.p,fb:e.fb||0}]);persist("settings");}
       renderEat();toast("Added "+e.n,u);}},{label:"Cancel",cls:"btn ghost"}]);
-  setTimeout(()=>{const f=$("qkN");if(f)f.focus();},60);}
+}
 function cheatSheet(){
   const k=sel,day=store.days[k]||{},c=cheatOf(day),T=dayTargets(day),S=store.settings;
   openSheet("Cheat meal or a different day",`<p class="note" style="margin-top:0">One day off plan won't undo your progress. Pick whatever is easiest to log.</p>
@@ -2029,7 +2075,8 @@ function renderEat(){
   const k=sel,day=store.days[k]||{},m=day.meals||{},lifting=!["rest","run"].includes(planOf(k)),t=eatTotals(day),S=store.settings,T=dayTargets(day),c=cheatOf(day),ex=day.extras||[];
   let h=`<section>`;
   if(c&&c.type==="free")h+=`<div class="card meters freeday"><strong>Free day</strong><p class="note" style="margin:2px 0 0">No targets today${t.k?`, ${fmt(t.k)} kcal logged anyway`:""}. Back on plan tomorrow.</p></div>`;
-  else{h+=`<div class="card meters">${c&&c.type==="skip"?`<p class="cheatnote">Cheat meal today. Calories aren't counted, so this day is marked as over your target.</p>`:""}${meter("",t.k,T.k,"kcal")}${meter("protein",t.p,T.p,"g")}${t.fb>0||(S.extrasOn||[]).includes("fibre")?`<p class="note" style="margin:-6px 0 0">Fibre: <b>${r1(t.fb)} g</b> of ${tg("fibre",fibreGoal()+" g")}. Foods with fibre values count.</p>`:""}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}</div>`;}
+  else{h+=`<div class="card meters">${c&&c.type==="skip"?`<p class="cheatnote">Cheat meal today. Calories aren't counted, so this day is marked as over your target.</p>`:""}${meter("",t.k,T.k,"kcal")}${meter("protein",t.p,T.p,"g")}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}</div>`;}
+  if(!(c&&c.type==="free"))h+=nutCard(k,t);
   if(!S.tipSwipe)h+=`<p class="note tip">Tap a tile to open it, or <b>+</b> to add something fast. Swipe a meal or food left to delete it, right to edit. <button class="linkbtn" data-act="tipok">Got it</button></p>`;
   h+=`<div class="egrid">`;
   for(const s of SLOTS){
@@ -2069,9 +2116,11 @@ function renderEat(){
   $("panel").innerHTML=h;
 }
 $("panel").addEventListener("click",e=>{if(tab!=="eat")return;const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  if(a==="water"){const d=ensureDay(sel),u=snap(["day-"+sel]);d.water=Math.round((num(d.water)+num(b.dataset.v))*100)/100;persist("day-"+sel);renderEat();toast("+250 ml water",u);return;}
+  if(a==="nutset"){tab="settings";setPage="nutrients";render();scrollTo(0,0);return;}
   if(a==="tile"){if(id==="cheat"){cheatSheet();return;}const key=sel+":eat-"+id,was=!!secOpen[key];Object.keys(secOpen).forEach(x=>{if(x.startsWith(sel+":eat-"))delete secOpen[x];});if(!was)secOpen[key]=true;renderEat();
     if(!was)requestAnimationFrame(()=>{const el=document.querySelector(`.etile[data-tile="${id}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<70||r.top>innerHeight*0.55)scrollTo({top:scrollY+r.top-80,behavior:"smooth"});}});}
-  else if(a==="tileadd"){if(SLOTS.some(x=>x.id===id))quickAdd(id);else if(id==="addons")quickAdd(null);else if(id==="supps")suppAdd();
+  else if(a==="tileadd"){if(SLOTS.some(x=>x.id===id))addFoodSheet(id);else if(id==="addons")addFoodSheet(null);else if(id==="supps")suppAdd();
     else{Object.keys(secOpen).forEach(x=>{if(x.startsWith(sel+":eat-"))delete secOpen[x];});secOpen[sel+":eat-"+id]=true;renderEat();
       requestAnimationFrame(()=>{const el=document.querySelector(`.etile[data-tile="${id}"]`);if(el)scrollTo({top:scrollY+el.getBoundingClientRect().top-80,behavior:"smooth"});
         if(id==="calc"){const f=$("fcQ");if(f)f.focus({preventScroll:true});}else if(id==="mine"){const f=$("mN");if(f)f.focus({preventScroll:true});}else if(id==="recipes"){const d=document.querySelector(".addrec");if(d){d.open=true;const f=$("rN");if(f)f.focus({preventScroll:true});}}});}}
@@ -2096,6 +2145,8 @@ const SUPPLIB=[
  {id:"melatonin",n:"Melatonin",re:/melatonin/i,cat:"Sleep",when:"30–60 minutes before bed, only now and then, for example for jet lag.",why:"Can help you fall asleep when your rhythm is off.",use:"0.5–1 mg is usually enough. Shops in some countries sell much higher doses, which rarely work better.",risk:"Not for regular long-term use without a doctor. Can make you drowsy the next morning. Don't drive if you feel sleepy."},
  {id:"ashwa",n:"Ashwagandha",re:/ashwag/i,cat:"Other",when:"With a meal.",why:"Some studies suggest less stress and better sleep. The evidence is mixed.",use:"Follow the label, and take breaks.",risk:"Rare cases of liver damage. Avoid it when pregnant, with thyroid problems or with some medications. Ask a doctor first."}
 ];
+const SUPP2NUT={creatine:"creatine",vitd:"vitd",omega3:"omega3",magnesium:"magnesium",iron:"iron",calcium:"calcium"};
+function suppTrack(n){const I=suppInfo(n),id=I&&SUPP2NUT[I.id],S=store.settings;if(!id||S.suppAutoTrack===false)return;S.nutOff=(S.nutOff||[]).filter(x=>x!==id);if(!(S.extrasOn||[]).includes(id))S.extrasOn=(S.extrasOn||[]).concat([id]);}
 function suppInfo(n){return SUPPLIB.find(x=>x.re.test(n))||null;}
 function suppTaken(day,nut){return Object.keys((day&&day.supps)||{}).some(n=>day.supps[n]&&(suppInfo(n)||{}).nut===nut);}
 const openSupp=new Set();
@@ -2111,7 +2162,7 @@ function suppAdd(){
   openSheet("Add a supplement",`<p class="note" style="margin-top:0">Pick a common one to get tips on when and how to take it, or type your own. This is general information, not medical advice.</p>
   <div class="swres">${SUPPLIB.map(x=>{const on=have.some(n=>x.re.test(n));return `<button type="button" class="libitem${on?" cant":""}" data-pick="${esc(x.n)}" aria-pressed="false"${on?" disabled":""}><span><strong>${esc(x.n)}</strong><small>${esc(x.cat)}${on?" · already on your list":" · "+esc(x.why.split(".")[0])}</small></span><span class="chk">✓</span></button>`;}).join("")}</div>
   <label class="sfld"><span class="lbl">Or type your own</span><input class="field" id="spN" data-nofocus="1" placeholder="Name and dose, like Zinc 10 mg"></label>`,
-  [{label:"Add",fn:()=>{const own=($("spN")||{}).value?$("spN").value.trim():"",n=own||sheetEl._pick;if(!n)return false;const u=snap(["settings"]);ensureSupps().push(n);persist("settings");renderEat();toast("Added "+n,u);}},{label:"Cancel",cls:"btn ghost"}]);
+  [{label:"Add",fn:()=>{const own=($("spN")||{}).value?$("spN").value.trim():"",n=own||sheetEl._pick;if(!n)return false;const u=snap(["settings"]);ensureSupps().push(n);suppTrack(n);persist("settings");renderEat();toast("Added "+n,u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function suppNote(n){const S=store.settings,cur=(S.suppNotes||{})[n]||"";
   openSheet("Note: "+n,`<p class="note" style="margin-top:0">How does it affect you? Anything to remember, like side effects or what time works best.</p><textarea class="field area" id="spNote" placeholder="For example: taking it at night helps me sleep">${esc(cur)}</textarea>`,
@@ -2163,9 +2214,22 @@ function tgtInfo(kind){const S=store.settings,g=goalKind(),kg=myKg(),pf=S.profil
    calcium:["Calcium",`<p><b>A daily target</b>: about ${fmt(RG().ca)} mg, mostly from food. Supplements only for the gap, at most 500 mg at a time.</p>`],
    vitd:["Vitamin D",`<p><b>A daily amount, not a minimum to beat.</b> ${RG().vitd} IU (${RG().vitd/40} µg) ${vitdWhen()}. More isn't better: stay under 4,000 IU unless a doctor says otherwise.</p>`],
    omega3:["Omega-3",`<p><b>A minimum.</b> 250–500 mg of EPA and DHA a day, or oily fish twice a week.</p>`],
+   iron:["Iron",`<p><b>A daily target from food</b>: about ${bySex(RG().fe)} mg. Only take iron pills if a blood test shows you're low, since too much is harmful.</p>`],
    creatine:["Creatine",`<p><b>A daily amount.</b> 3–5 g every day. Taking more doesn't help, it just gets flushed out.</p>`]
   }[kind];if(!T)return;
   openSheet(T[0],T[1]+`<p class="note">${["kcal","protein","carbs","fat","water"].includes(kind)?"Targets are estimates from your details. Check your weekly average weight and adjust.":regionNote()}</p>`,[{label:"Got it",cls:"btn ghost"}]);}
+// What each tracked nutrient adds up to, and its goal for this person
+const NUTS=[["fibre","Fibre","g"],["water","Water","L"],["creatine","Creatine","g"],["omega3","Omega-3","mg"],["vitd","Vitamin D","IU"],["magnesium","Magnesium","mg"],["potassium","Potassium","mg"],["calcium","Calcium","mg"],["iron","Iron","mg"]];
+function nutVal(id,t){return id==="fibre"?t.fb:id==="water"?t.water:id==="creatine"?(t.nu.cr||0):id==="omega3"?(t.nu.o3||0):id==="vitd"?(t.nu.d||0):id==="magnesium"?(t.nu.mg||0):id==="potassium"?(t.nu.k||0):id==="calcium"?(t.nu.ca||0):id==="iron"?(t.nu.fe||0):0;}
+function nutGoal(id,k){const R=RG(),kg=myKg(),train=k&&!["rest"].includes(planOf(k));
+  return id==="fibre"?fibreGoal():id==="water"?(kg?Math.round((kg*0.035+(train?0.75:0))*10)/10:2.5):id==="creatine"?3:id==="omega3"?250:id==="vitd"?R.vitd:id==="magnesium"?bySex(R.mg):id==="potassium"?bySex(R.k):id==="calcium"?R.ca:id==="iron"?bySex(R.fe):0;}
+function nutOn(){const S=store.settings,on=(Array.isArray(S.extrasOn)?S.extrasOn:[]).slice(),off=Array.isArray(S.nutOff)?S.nutOff:[];
+  if(S.suppAutoTrack!==false&&typeof SUPP2NUT!=="undefined")for(const n of supps()){const I=suppInfo(n),id=I&&SUPP2NUT[I.id];if(id&&!on.includes(id)&&!off.includes(id))on.push(id);}return on;}
+function nutCard(k,t){const on=NUTS.filter(n=>nutOn().includes(n[0]));if(!on.length)return "";
+  return `<div class="card nutcard" data-rail="Nutrients"><div class="nuthd"><strong>Nutrients</strong><button type="button" class="linkbtn" style="padding:0" data-act="nutset">Choose</button></div>${on.map(([id,l,u])=>{const v=nutVal(id,t),g=nutGoal(id,k),pct=Math.min(1,g?v/g:0),done=v>=g;
+    const show=x=>u==="L"?(Math.round(x*10)/10).toString():u==="g"&&x<10?(Math.round(x*10)/10).toString():fmt(x);
+    return `<div class="nutrow">${tg(id,l)}<div class="nutbar${done?" done":""}"><span style="width:${(pct*100).toFixed(0)}%"></span></div><span class="nutv">${show(v)}<small>/${show(g)} ${u}</small></span>${id==="water"?`<button type="button" class="wbtn" data-act="water" data-v="0.25" aria-label="Add 250 ml of water">+250 ml</button>`:""}</div>`;}).join("")}
+  <p class="note" style="font-size:12px;margin-top:6px">From food with known values (food calculator, saved meals, recipes, quick picks) and the supplements you tick. Typical values, so treat them as a guide.</p></div>`;}
 function fibreGoal(){return Math.max(bySex(RG().fib),Math.round(num(store.settings.kcal)/1000*14));}
 function waterGoal(){const kg=myKg();if(!kg)return "About 35 ml per kg of body weight a day, plus 0.5–1 L per hour of training.";const base=kg*0.035;return `About ${base.toFixed(1)} L a day for you (35 ml per kg), plus 0.5–1 L per hour of training, so around ${(base+0.75).toFixed(1)} L on training days.`;}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-tgt]");if(!b)return;e.preventDefault();e.stopPropagation();tgtInfo(b.dataset.tgt);},true);
@@ -2190,6 +2254,7 @@ const SUGG=[
  {id:"magnesium",n:"Magnesium",goal:()=>tg("magnesium",`About ${bySex(RG().mg)} mg a day, mostly from food`),why:"Needed for muscles and nerves. Some people find a little extra in the evening helps them sleep.",food:"Nuts, seeds, oats, whole grains, legumes and dark chocolate.",supp:"magnesium"},
  {id:"creatine",n:"Creatine",goal:()=>tg("creatine","3–5 g a day"),why:"Helps you get stronger and build muscle over time. The best-researched training supplement.",food:"Meat and fish contain a little, but far less than a supplement.",supp:"creatine"},
  {id:"potassium",n:"Potassium",goal:()=>tg("potassium",`About ${fmt(bySex(RG().k))} mg a day`),why:"Balances the salt in your diet and supports blood pressure and muscles.",food:"Potatoes, bananas, beans, spinach, yogurt and dried fruit."},
+ {id:"iron",n:"Iron",goal:()=>tg("iron",`About ${bySex(RG().fe)} mg a day from food`),why:"Carries oxygen in your blood. Mainly worth watching for women who have periods, vegetarians and endurance athletes.",food:"Red meat, lentils, beans, tofu, oats and leafy greens. Vitamin C with a meal helps you absorb it from plants.",supp:"iron"},
  {id:"calcium",n:"Calcium",goal:()=>tg("calcium",`About ${fmt(RG().ca)} mg a day`),why:"Keeps bones strong. Mainly worth watching if you eat little dairy.",food:"Milk, yogurt, quark, cheese, fortified plant milk and tofu.",supp:"calcium"}
 ];
 function hcfg(){const H=store.settings.health||{};return {intake:H.intake!==false,labs:H.labs===true};}
@@ -2218,9 +2283,9 @@ function defsHtml(k){
   <p class="note">This helps you stick to your plan. It's not medical advice, so follow what your doctor tells you, and get retested when they say.</p></div>`;
   return h;
 }
-function suggHit(k,id){const d=store.days[k];if(!d)return false;if((d.xtra||{})[id])return true;if(id==="fibre")return eatTotals(d).fb>=fibreGoal();const S=SUGG.find(x=>x.id===id);return !!(S&&S.supp&&suppTaken(d,S.supp));}
+function suggHit(k,id){const d=store.days[k];if(!d)return false;if((d.xtra||{})[id])return true;if(NUTS.some(n=>n[0]===id)){const t=eatTotals(d);if(nutVal(id,t)>=nutGoal(id,k))return true;}const S=SUGG.find(x=>x.id===id);return !!(S&&S.supp&&suppTaken(d,S.supp));}
 function suggHtml(k){
-  const on=store.settings.extrasOn||[],SU=supps();
+  const on=nutOn(),SU=supps();
   let h=`<h2 class="sec-title" data-rail="Suggested">Suggested nutrients</h2><div class="card"><p class="note" style="margin:0 0 10px">None of these are necessary. They're extras that could help, depending on how you eat and train. Track the ones you want to work on.</p>`;
   const sugEnd=`<p class="note" style="font-size:12.5px">${regionNote()}</p>`;
   for(const x of SUGG){const tr=on.includes(x.id),open=openSugg.has(x.id),I=x.supp&&SUPPLIB.find(s=>s.id===x.supp),inSupp=I&&SU.some(n=>I.re.test(n));
@@ -2230,6 +2295,9 @@ function suggHtml(k){
       <div class="pair" style="margin-top:8px"><button class="btn ${tr?"ghost":""}" style="margin:0" data-act="suggtrack" data-id="${x.id}">${tr?"Stop tracking":"Track daily"}</button>${I?`<button class="btn ghost" style="margin:0" data-act="suggsupp" data-id="${x.id}"${inSupp?" disabled":""}>${inSupp?"In your supplements":"Add to supplements"}</button>`:""}</div></div>`:""}</div>`;}
   return h+sugEnd+`</div>`;
 }
+function nutSettingsHtml(){const on=nutOn(),S=store.settings;
+  return `<p class="note" style="margin-top:0">Choose what shows on the Eat tab. Each one is worked out from the food you log and the supplements you tick.</p>${NUTS.map(([id,l,u])=>`<div class="setrow"><span class="sl">${l}<small>Your target: ${(u==="L"?"":"")}${(()=>{const g=nutGoal(id,todayKey());return (u==="L"?g:fmt(g))+" "+u;})()}${["creatine","omega3","vitd"].includes(id)?", mostly from supplements":""}</small></span><button type="button" class="switch" role="switch" aria-checked="${on.includes(id)}" data-nset="${id}" aria-label="Track ${l}"><i></i></button></div>`).join("")}
+  <div class="setrow"><span class="sl">Track supplements I add<small>Adding creatine, vitamin D, omega-3 and so on turns on tracking for it.</small></span><button type="button" class="switch" role="switch" aria-checked="${S.suppAutoTrack!==false}" data-nset="__auto" aria-label="Track supplements I add"><i></i></button></div>`;}
 function healthSettingsHtml(){const H=hcfg(),sw=(key,lab,sub,on)=>`<div class="setrow"><span class="sl">${lab}<small>${sub}</small></span><button type="button" class="switch" role="switch" aria-checked="${on}" data-hset="${key}" aria-label="${lab}"><i></i></button></div>`;
   return `<div>${sw("intake","Daily intake","Tick off each day you took the supplement or ate enough of it. Shows the last 7 and 30 days.",H.intake)}${sw("labs","Blood test results","Log values from your blood tests and see them on a chart next to the typical range.",H.labs)}</div><p class="note">Add what you want to track on the Body tab, under Deficiencies.</p>`;}
 // ---------- Body tab ----------
@@ -2423,8 +2491,8 @@ $("panel").addEventListener("click",e=>{
   else if(a==="labadd"){const id=b.dataset.id,v=document.querySelector(`[data-labv="${CSS.escape(id)}"]`),dt=document.querySelector(`[data-labd="${CSS.escape(id)}"]`);if(!v||!(num(v.value)>0)){if(v)v.focus();return;}
     S.labs=S.labs||{};(S.labs[id]=S.labs[id]||[]).push({k:(dt&&dt.value)||sel,v:String(v.value).replace(",",".").trim()});persist("settings");renderBody();toast("Result saved");}
   else if(a==="suggopen"){const id=b.dataset.id;if(openSugg.has(id))openSugg.delete(id);else openSugg.add(id);renderBody();}
-  else if(a==="suggtrack"){const id=b.dataset.id,on=S.extrasOn||[];S.extrasOn=on.includes(id)?on.filter(x=>x!==id):on.concat([id]);persist("settings");renderBody();}
-  else if(a==="suggsupp"){const x=SUGG.find(y=>y.id===b.dataset.id),I=SUPPLIB.find(y=>y.id===x.supp);if(!I)return;const u=snap(["settings"]);ensureSupps().push(I.n);persist("settings");renderBody();toast(I.n.split(",")[0]+" added to your supplements",u);}
+  else if(a==="suggtrack"){const id=b.dataset.id,on=nutOn(),off=S.nutOff||[];if(on.includes(id)){S.extrasOn=(S.extrasOn||[]).filter(x=>x!==id);S.nutOff=off.concat([id]);}else{S.extrasOn=(S.extrasOn||[]).concat([id]);S.nutOff=off.filter(x=>x!==id);}persist("settings");renderBody();}
+  else if(a==="suggsupp"){const x=SUGG.find(y=>y.id===b.dataset.id),I=SUPPLIB.find(y=>y.id===x.supp);if(!I)return;const u=snap(["settings"]);ensureSupps().push(I.n);suppTrack(I.n);persist("settings");renderBody();toast(I.n.split(",")[0]+" added to your supplements",u);}
   else if(a==="bnrm"){const u=snap(["settings"]);S.bodyNotes.splice(+b.dataset.i,1);persist("settings");renderBody();toast("Note deleted",u);}
   else if(a==="phview"){const p=PH.list.find(x=>x.id===b.dataset.id);if(!p)return;openSheet(shortDate(p.k),`<img class="phbig" src="${PH.urls[p.id]}" alt="Progress photo from ${shortDate(p.k)}">`,[{label:"Delete photo",cls:"btn danger",fn:()=>{phDel(p.id);}},{label:"Close",cls:"btn ghost"}]);}
 });
@@ -2645,7 +2713,7 @@ $("panel").addEventListener("click",e=>{
     const day=ensureDay(k);(day.extras=day.extras||[]).push({n:n||"Food",k:kc,p:pr});persist(docId);
     if(b.dataset.save&&n){ensureQuick().push({n,k:kc,p:pr});persist("settings");}
     renderEat();
-  }else if(act==="quick"){const q=quick()[+b.dataset.i];if(q){const day=ensureDay(k);(day.extras=day.extras||[]).push({n:q.n,k:q.k,p:q.p});persist(docId);renderEat();}
+  }else if(act==="quick"){const q=quick()[+b.dataset.i];if(q){const day=ensureDay(k);(day.extras=day.extras||[]).push(Object.assign({n:q.n,k:q.k,p:q.p},quickNu(q)));persist(docId);renderEat();}
   }else if(act==="rmquick"){ensureQuick().splice(+b.dataset.i,1);persist("settings");renderEat();
   }else if(act==="rmfood"){const day=ensureDay(k);day.extras.splice(+b.dataset.i,1);persist(docId);renderEat();}
   else if(act==="addbuy"){
@@ -2798,10 +2866,16 @@ const INGR=[
   ["Fats and nuts","Cacao nibs",603,13,10,53,30],["Fats and nuts","Tahini",600,17,10,54,9.3],
   ["Other","Whey protein powder",380,78,6,6,0],["Other","Date syrup",300,1.3,71,0.4,1],["Other","Honey",304,0.3,82,0,0.2],["Other","Zaziki (tzatziki)",127,6.9,3.7,9.4,0.2],["Other","Ketchup",100,1,23,0.1,0.3]
 ];
-function allIngr(){return INGR.map(x=>({c:x[0],n:x[1],k:x[2],p:x[3],cb:x[4],f:x[5],fb:x[6]||0})).concat((store.settings.ingredients||[]).map(x=>({c:"Mine",n:x.n,k:+x.k||0,p:+x.p||0,cb:+x.cb||0,f:+x.f||0,fb:+x.fb||0,mine:1})));}
+const MICRO={"Chicken breast, raw": [334, 28, 5, 0.4, 4, 20, 0.35], "Chicken thigh, skinless, raw": [269, 23, 7, 0.8, 4, 30, 0.35], "Turkey breast, raw": [300, 30, 8, 0.6, 4, 20, 0.35], "Beef mince 5% fat, raw": [350, 22, 6, 2.3, 3, 15, 0.45], "Beef mince 10% fat, raw": [320, 20, 10, 2.2, 3, 15, 0.45], "Beef mince 20% fat, raw": [270, 17, 18, 1.9, 4, 20, 0.4], "Beef steak (rump), raw": [330, 23, 5, 1.9, 3, 15, 0.45], "Lamb mince, raw": [270, 21, 16, 1.6, 4, 40, 0.4], "Salmon, raw": [363, 27, 9, 0.3, 440, 2000, 0.45], "Tuna in water, drained": [237, 27, 11, 1.6, 50, 270, 0.4], "Cod, raw": [413, 32, 16, 0.4, 36, 180, 0.3], "Shrimp, raw": [113, 22, 64, 0.2, 2, 270, 0], "Egg, whole": [138, 12, 56, 1.8, 82, 75, 0], "Egg whites": [163, 11, 7, 0.1, 0, 0, 0], "Quark, Magerstufe (fat-free quark, a soft fresh cheese)": [160, 12, 90, 0.3, 0, 0, 0], "Skyr": [150, 11, 150, 0.1, 0, 0, 0], "Cottage cheese (Hüttenkäse)": [104, 8, 83, 0.1, 3, 0, 0], "Cottage cheese, light": [86, 7, 61, 0.2, 0, 0, 0], "Greek yogurt 2%": [141, 11, 115, 0.1, 0, 0, 0], "High protein yogurt": [160, 12, 120, 0.1, 0, 0, 0], "Protein milk": [190, 14, 160, 0.1, 0, 0, 0], "Milk 1.5%": [150, 11, 120, 0, 2, 0, 0], "Whole milk 3.5%": [150, 10, 113, 0, 4, 0, 0], "Light mozzarella": [95, 20, 500, 0.2, 0, 0, 0], "Halloumi": [80, 30, 700, 0.2, 0, 0, 0], "Parmesan": [92, 44, 1184, 0.8, 21, 0, 0], "White rice, dry": [115, 25, 28, 0.8, 0, 0, 0], "Rice, cooked": [35, 12, 10, 0.2, 0, 0, 0], "Pasta, dry": [223, 53, 21, 1.3, 0, 0, 0], "Pasta, cooked": [44, 18, 7, 0.5, 0, 0, 0], "Potatoes, raw": [425, 23, 12, 0.8, 0, 0, 0], "Sweet potato, raw": [337, 25, 30, 0.6, 0, 0, 0], "Oats": [429, 177, 54, 4.7, 0, 0, 0], "Bulgur, dry": [410, 164, 35, 2.5, 0, 0, 0], "Couscous, dry": [166, 44, 24, 1.1, 0, 0, 0], "Vollkornbrot (whole grain bread)": [250, 60, 30, 2.5, 0, 0, 0], "Tortilla wrap": [130, 25, 60, 2, 0, 0, 0], "Schoko Müsli (chocolate muesli)": [400, 100, 60, 3.5, 0, 0, 0], "Red lentils, dry": [578, 59, 48, 7.4, 0, 0, 0], "Chickpeas, drained": [172, 29, 45, 1.5, 0, 0, 0], "Kidney beans, drained": [300, 40, 35, 2, 0, 0, 0], "Hummus": [228, 71, 38, 2.4, 0, 0, 0], "Broccoli": [316, 21, 47, 0.7, 0, 0, 0], "Spinach": [558, 79, 99, 2.7, 0, 0, 0], "Mushrooms": [318, 9, 3, 0.5, 7, 0, 0], "Zucchini": [261, 18, 16, 0.4, 0, 0, 0], "Cucumber": [147, 13, 16, 0.3, 0, 0, 0], "Tomato": [237, 11, 10, 0.3, 0, 0, 0], "Bell pepper": [211, 12, 7, 0.4, 0, 0, 0], "Carrot": [320, 12, 33, 0.3, 0, 0, 0], "Onion": [146, 10, 23, 0.2, 0, 0, 0], "Green beans": [211, 25, 37, 1, 0, 0, 0], "Cauliflower": [299, 15, 22, 0.4, 0, 0, 0], "Salad mix": [250, 15, 40, 0.9, 0, 0, 0], "Rote Bete (beetroot), drained": [150, 17, 15, 0.8, 0, 0, 0], "Rotkohl (red cabbage)": [200, 12, 40, 0.5, 0, 0, 0], "Sauerkraut": [170, 13, 30, 1.5, 0, 0, 0], "Banana": [358, 27, 5, 0.3, 0, 0, 0], "Apple": [107, 5, 6, 0.1, 0, 0, 0], "Orange": [181, 10, 40, 0.1, 0, 0, 0], "Berries, frozen": [150, 15, 20, 0.6, 0, 0, 0], "Dates": [656, 54, 64, 0.9, 0, 0, 0], "Olive oil": [1, 0, 1, 0.6, 0, 0, 0], "Butter": [24, 2, 24, 0, 60, 0, 0], "Light butter": [40, 2, 30, 0, 30, 0, 0], "Peanuts": [705, 168, 92, 4.6, 0, 0, 0], "Almonds": [733, 270, 269, 3.7, 0, 0, 0], "Pecans": [410, 121, 70, 2.5, 0, 0, 0], "Avocado": [485, 29, 12, 0.6, 0, 0, 0], "Peanut butter": [558, 168, 49, 1.7, 0, 0, 0], "Cacao nibs": [830, 270, 70, 3.6, 0, 0, 0], "Tahini": [414, 95, 426, 8.9, 0, 0, 0], "Whey protein powder": [450, 80, 450, 1, 0, 0, 0], "Date syrup": [600, 40, 50, 1, 0, 0, 0], "Honey": [52, 2, 6, 0.4, 0, 0, 0], "Zaziki (tzatziki)": [150, 12, 100, 0.1, 0, 0, 0], "Ketchup": [315, 13, 15, 0.4, 0, 0, 0]};
+function allIngr(){return INGR.map(x=>({c:x[0],n:x[1],k:x[2],p:x[3],cb:x[4],f:x[5],fb:x[6]||0,mi:MICRO[x[1]]||null})).concat((store.settings.ingredients||[]).map(x=>({c:"Mine",n:x.n,k:+x.k||0,p:+x.p||0,cb:+x.cb||0,f:+x.f||0,fb:+x.fb||0,mine:1})));}
 let fcCat="",fcQ="",fcPick=null,mb=[];
 const r1=v=>Math.round(v*10)/10;
-function macrosFor(it,g){const m=g/100;return {k:it.k*m,p:it.p*m,cb:it.cb*m,f:it.f*m,fb:(it.fb||0)*m};}
+function macrosFor(it,g){const m=g/100;return {k:it.k*m,p:it.p*m,cb:it.cb*m,f:it.f*m,fb:(it.fb||0)*m,nu:it.mi?nuScale(it.mi,m):(it.nu?nuMul(it.nu,m*100/(it.g||100)):null)};}
+// micronutrients carried on logged food: k, mg, ca, fe (mg), d (IU), o3 (mg), cr (g)
+const NUK=["k","mg","ca","fe","d","o3","cr"];
+function nuScale(arr,m){const o={};NUK.forEach((key,i)=>{const v=(arr[i]||0)*m;if(v)o[key]=Math.round(v*10)/10;});return o;}
+function nuMul(nu,m){const o={};for(const key of NUK)if(nu&&nu[key])o[key]=Math.round(nu[key]*m*10)/10;return o;}
+function nuAdd(a,b){const o=Object.assign({},a||{});for(const key of NUK)if(b&&b[key])o[key]=Math.round(((o[key]||0)+b[key])*10)/10;return o;}
 function fcList(){
   const q=fcQ.trim().toLowerCase(),all=allIngr().filter(x=>(!fcCat||x.c===fcCat)&&(!q||x.n.toLowerCase().includes(q)));
   if(!all.length)return `<p class="note">No matches. Add it as your own ingredient below.</p>`;
@@ -2810,7 +2884,7 @@ function fcList(){
 function fcOut(it,g){const m=macrosFor(it,g);return `<b>${fmt(m.k)} kcal</b> · ${r1(m.p)} g protein · ${r1(m.cb)} g carbs · ${r1(m.f)} g fat · ${r1(m.fb)} g fibre`;}
 let mbServ=1;
 function mbPerHtml(){const t=mbTotals(),n=num(mbServ)>0?num(mbServ):1;return n===1?`<span class="of">Cooking a batch? Enter how many portions it makes to see one serving.</span>`:`<b>One serving:</b> ${fcOut({k:t.k/n,p:t.p/n,cb:t.cb/n,f:t.f/n,fb:t.fb/n},100)}`;}
-function mbTotals(){return mb.reduce((a,x)=>{const m=macrosFor(x,x.g);a.k+=m.k;a.p+=m.p;a.cb+=m.cb;a.f+=m.f;a.fb+=m.fb;return a;},{k:0,p:0,cb:0,f:0,fb:0});}
+function mbTotals(){return mb.reduce((a,x)=>{const m=macrosFor(x,x.g);a.k+=m.k;a.p+=m.p;a.cb+=m.cb;a.f+=m.f;a.fb+=m.fb;a.nu=nuAdd(a.nu,m.nu);return a;},{k:0,p:0,cb:0,f:0,fb:0,nu:{}});}
 function foodCalcHtml(){
   const it=fcPick&&allIngr().find(x=>x.n===fcPick);
   let h=`<h2 class="sec-title">Food calculator</h2><div class="card">
@@ -2919,6 +2993,19 @@ function snap(ids){
   return ()=>{for(const [d,j] of s){const v=JSON.parse(j);if(d==="settings"){for(const key of Object.keys(store.settings))delete store.settings[key];Object.assign(store.settings,v);}else store.days[d.slice(4)]=v;persist(d);}render();};
 }
 const sheetEl=document.createElement("dialog");sheetEl.className="sheet";document.body.appendChild(sheetEl);
+sheetEl.addEventListener("input",e=>{if(sheetEl._kind!=="addfood")return;if(e.target.id==="afQ"){afQ=e.target.value;$("afRes").innerHTML=afList();}
+  else if(e.target.id==="afG"&&afPick){const o=$("afOut");if(o)o.innerHTML=fcOut(afPick,num(e.target.value));}});
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="addfood")return;const b=e.target.closest("[data-af]");if(!b)return;const a=b.dataset.af;
+  if(a==="manual"){const sl=afSlot;closeSheet();quickAdd(sl);return;}
+  if(a==="pick"){const x=afItems()[+b.dataset.i];if(!x)return;
+    if(x.t==="ingr"){afPick=x.it;$("afSel").innerHTML=afSelHtml(x.it);const g=$("afG");if(g){g.focus();g.select();}return;}
+    if(x.t==="meal"){const o=x.o;afLog({n:o.n,k:Math.round(o.k),p:r1(o.p),fb:o.fb||undefined,nu:o.nu||undefined},o.n);}
+    else if(x.t==="recipe"){const r=x.r;afLog({n:r.n+", 1 serving",k:Math.round(num(r.k)),p:r1(num(r.p)),fb:num(r.fb)||undefined,nu:r.nu||undefined},"1 serving of "+r.n);}
+    else if(x.t==="quick"){const q=quick()[x.i];afLog(Object.assign({n:q.n,k:q.k,p:q.p},quickNu(q)),q.n);}
+    b.classList.add("added");setTimeout(()=>b.classList.remove("added"),600);return;}
+  if(a==="addingr"&&afPick){const g=num($("afG").value);if(!(g>0)){$("afG").focus();return;}const m=macrosFor(afPick,g);
+    afLog({n:afPick.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),fb:r1(m.fb)||undefined,nu:m.nu||undefined},r1(g)+" g "+afPick.n.split(/[,(]/)[0].trim().toLowerCase());
+    afPick=null;$("afSel").innerHTML="";const q=$("afQ");if(q){q.value="";afQ="";$("afRes").innerHTML=afList();}}});
 sheetEl.addEventListener("click",e=>{const b=e.target.closest("[data-qsave]");if(b)b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));});
 
 sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="cheat")return;const b=e.target.closest("[data-cheat]");if(!b)return;const a=b.dataset.cheat,k=sel,day=ensureDay(k),u=snap(["day-"+k]),S=store.settings;
@@ -3135,16 +3222,16 @@ $("panel").addEventListener("click",e=>{
   else if(act==="fccat"){fcCat=b.dataset.c;renderEat();}
   else if(act==="fcpick"){fcPick=b.dataset.n;renderEat();const g=$("fcG");if(g){g.focus();g.select();}}
   else if(act==="fcadd"||act==="fcmb"){const it=allIngr().find(x=>x.n===fcPick);if(!it)return;const g=num($("fcG").value);if(!(g>0)){$("fcG").focus();return;}
-    if(act==="fcadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]),m=macrosFor(it,g);(day.extras=day.extras||[]).push({n:it.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),fb:r1(m.fb)});persist("day-"+k);renderEat();toast("Added to today",u);}
+    if(act==="fcadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]),m=macrosFor(it,g);(day.extras=day.extras||[]).push({n:it.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),fb:r1(m.fb),nu:m.nu||undefined});persist("day-"+k);renderEat();toast("Added to today",u);}
     else{mb.push(Object.assign({},it,{g}));fcPick=null;renderEat();}}
   else if(act==="mbrm"){mb.splice(+b.dataset.i,1);renderEat();}
   else if(act==="mbclear"){mb=[];renderEat();}
   else if(act==="mbrecipe"){if(!mb.length)return;const t=mbTotals(),sv=num(mbServ)||1,n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", "),u=snap(["settings"]),id=Date.now().toString(36);
-    ensureRecipes().push({id,n,k:Math.round(t.k/sv),p:r1(t.p/sv),s:sv,ing:mb.map(x=>r1(x.g)+" g "+x.n.replace(/, (raw|dry|drained)$/,"").toLowerCase()),steps:[]});persist("settings");mb=[];mbServ=1;openRec.add(id);renderEat();toast("Recipe saved",u);}
+    ensureRecipes().push({id,n,k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv),s:sv,ing:mb.map(x=>r1(x.g)+" g "+x.n.replace(/, (raw|dry|drained)$/,"").toLowerCase()),steps:[]});persist("settings");mb=[];mbServ=1;openRec.add(id);renderEat();toast("Recipe saved",u);}
   else if(act==="mbadd"||act==="mbsave"){if(!mb.length)return;const t=mbTotals(),n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", ");
     const sv=num(mbServ)>0?num(mbServ):1;
-    if(act==="mbadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:sv>1?n+", 1 of "+sv+" servings":n,k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv)});persist("day-"+k);mb=[];mbServ=1;renderEat();toast(sv>1?"One serving added to today":"Meal added to today",u);}
-    else{const S=store.settings,u=snap(["settings"]),sl=$("mbSl").value;S.myMeals=myMeals().concat([{id:Date.now().toString(36),slot:sl,n,d:mb.map(x=>r1(x.g)+" g "+x.n.split(",")[0].toLowerCase()).join(", "),k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv)}]);persist("settings");mb=[];mbServ=1;renderEat();toast("Saved under "+SLOTS.find(x=>x.id===sl).name,u);}}
+    if(act==="mbadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:sv>1?n+", 1 of "+sv+" servings":n,k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv)});persist("day-"+k);mb=[];mbServ=1;renderEat();toast(sv>1?"One serving added to today":"Meal added to today",u);}
+    else{const S=store.settings,u=snap(["settings"]),sl=$("mbSl").value;S.myMeals=myMeals().concat([{id:Date.now().toString(36),slot:sl,n,d:mb.map(x=>r1(x.g)+" g "+x.n.split(",")[0].toLowerCase()).join(", "),k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv)}]);persist("settings");mb=[];mbServ=1;renderEat();toast("Saved under "+SLOTS.find(x=>x.id===sl).name,u);}}
   else if(act==="niadd"){const n=$("niN").value.trim(),k=num($("niK").value);if(!n){$("niN").focus();return;}if(!(k>=0)||$("niK").value.trim()===""){$("niK").focus();return;}
     const S=store.settings,u=snap(["settings"]);S.ingredients=(S.ingredients||[]).concat([{n,k,p:num($("niP").value),cb:num($("niC").value),f:num($("niF").value),fb:num(($("niB")||{}).value)}]);persist("settings");fcCat="Mine";fcPick=n;renderEat();toast("Ingredient saved",u);}
   else if(act==="usetargets"){const r=calcTargets(Object.assign({sex:"m",act:1.55,goal:-550},profile()));if(!r)return;const S=store.settings,u=snap(["settings"]);S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;persist("settings");render();toast("Targets set to "+fmt(S.kcal)+" kcal and "+S.protein+" g protein",u);}
@@ -3327,7 +3414,7 @@ $("panel").addEventListener("click",e=>{
   if(a==="recopen"){const id=b.dataset.id;if(openRec.has(id))openRec.delete(id);else openRec.add(id);renderEat();}
   else if(a==="reclog"){const r=allRecipes().find(x=>x.id===b.dataset.id);if(!r)return;const P=portionOf(r),k=sel,day=ensureDay(k),u=snap(["day-"+k]),lab=P.n===1?"1 serving":r1(P.n)+" servings";
     {const box=document.querySelector(`#rpOut-${CSS.escape(r.id)}`),twI=box&&box.closest(".portion").querySelector('[data-pf2="tw"]');if(twI&&num(twI.value)>0){store.settings.recTw=Object.assign({},store.settings.recTw,{[r.id]:num(twI.value)});persist("settings");}}
-    (day.extras=day.extras||[]).push({n:r.n+", "+lab,k:Math.round(num(r.k)*P.n),p:r1(num(r.p)*P.n)});persist("day-"+k);renderEat();toast("Logged "+lab+" of "+r.n,u);}
+    (day.extras=day.extras||[]).push({n:r.n+", "+lab,k:Math.round(num(r.k)*P.n),p:r1(num(r.p)*P.n),fb:r1(num(r.fb)*P.n)||undefined,nu:r.nu?nuMul(r.nu,P.n):undefined});persist("day-"+k);renderEat();toast("Logged "+lab+" of "+r.n,u);}
   else if(a==="recedit")editRecipe(+b.dataset.i);
   else if(a==="reccopy"){const r=RECIPES.find(x=>x.id===b.dataset.id);if(!r)return;ensureRecipes().push({id:r.id,n:r.n,k:r.k,p:r.p,s:r.s,ing:r.ing.slice(),steps:r.steps.slice(),note:r.note});persist("settings");renderEat();toast("Saved your own copy. Change anything with Edit");}
 });
@@ -3575,8 +3662,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.5";
+const APP_VERSION="3.6";
 const CHANGELOG=[
+  {v:"3.6",d:"9 October 2026",t:"Track more than calories",items:["The + on a meal opens a search across your meals, recipes, quick picks and every ingredient. Pick an ingredient and enter the grams. You can still type numbers in yourself","Track fibre, water, creatine, omega-3, vitamin D, magnesium, potassium, calcium and iron on the Eat tab. Choose which in Settings → Preferences → Nutrients to track","Every ingredient now has its minerals, vitamin D, omega-3 and creatine worked out, and they add up as you log food","Supplements count automatically when you tick them, using the amount in their name, like 5 g creatine. Adding a supplement turns on tracking for it","Water has a +250 ml button"]},
   {v:"3.5",d:"9 October 2026",t:"English food names",items:["German foods in the food calculator and quick add now show their English name too, like Rote Bete (beetroot) and Rotkohl (red cabbage), so you can search in either language"]},
   {v:"3.4",d:"9 October 2026",t:"Works wherever you live",items:["New region setting, guessed from your phone's time zone: Germany, Austria and Switzerland, the rest of Europe, the UK and Ireland, the US and Canada, Australia and New Zealand, or elsewhere","Vitamin D, calcium, potassium, magnesium, fibre and iron follow the official guidelines for your region","Vitamin D advice follows your season: October to March in the north, April to September in the south, and only if you're mostly indoors near the equator","Height and body measurements in feet and inches if you prefer"]},
   {v:"3.3",d:"9 October 2026",t:"Easier eating and resting",items:["Eat is now a grid of big tiles. Tap one to open it, or + to add food to that meal in seconds","Cheat meal: don't count it, add a rough guess, take a free day, or set different targets for just one day. Those days are left out of your averages","Tap any target, like your calories or protein, to see what it means for you: a ceiling, a minimum, or a number to hit","Suggested nutrients are worked out for you, like your water in litres and your fibre from your calories","Rest timer: tap the time on an exercise to start resting. Hold it to change the time, with a small vibration on phones that support it","The birthday field no longer spills out of its box on iPhone","Single serving calculator: tell the meal builder how many portions a batch makes, log part of a recipe by servings or by weighing your portion, and save a batch as a recipe"]},
@@ -3667,6 +3755,7 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["training","Training",`${lv} · rep style ${(STYLES[S.repDefault]||["as planned"])[0].toLowerCase()}`,()=>`<div class="card">${trainingSettingsHtml()}</div>`],
     ["personal","Personal details",(()=>{const pf=profile(),a=pf.dob?ageOn(pf.dob):num(pf.a);return [a?a+" years":"",num(pf.h)?fmt1(num(pf.h))+" cm":"",pf.west?"weight is a guess":""].filter(Boolean).join(" · ")||"Birthday, height and weight";})(),()=>personalHtml()],
     ["units","Units and region",`${U()} · ${LEN()==="in"?"ft and in":"cm"} · ${curCode()} · ${RG().src}`,()=>`<div class="card">${unitsHtml()}</div>`],
+    ["nutrients","Nutrients to track",(()=>{const n=nutOn().length;return n?n+" tracked on the Eat tab":"Fibre, water, creatine and more";})(),()=>`<div class="card">${nutSettingsHtml()}</div>`],
     ["health","Health tracking",(()=>{const H=hcfg();return [H.intake?"Daily intake":"",H.labs?"Blood tests":""].filter(Boolean).join(" and ")||"Off";})(),()=>`<div class="card">${healthSettingsHtml()}</div>`],
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
     ...(isLocalMode()?[["backup","Backup","Save or restore all your data",()=>`<div class="card">${backupHtml()}</div>`]]:[]),
@@ -3679,11 +3768,13 @@ function renderSettings(){
   const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
   if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="${libFrom||"help"}">‹ ${libFrom==="school"?"Training guide":"Help"}</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
   else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
-  else{const G=[["App settings",["appearance","tabs","units","backup"]],["Preferences",["personal","training","health","timer"]],["Learn and help",["school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
+  else{const G=[["App settings",["appearance","tabs","units","backup"]],["Preferences",["personal","training","nutrients","health","timer"]],["Learn and help",["school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
     h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 6px">Body Builder, version ${APP_VERSION}</p>`+G.map(([t,ids])=>{const xs=ids.map(id=>P.find(x=>x[0]===id)).filter(Boolean);return xs.length?`${t?`<p class="setgroup">${t}</p>`:`<div style="height:14px"></div>`}<div class="card setnav">${xs.map(row).join("")}</div>`:"";}).join("")+`
   <p class="note">${isLocalMode()?"Your data is saved on this device only. Download a backup now and then, and before you clear your browser data.":"Changes save to your account and show up on all your devices."}</p>`;}
   $("panel").innerHTML=h+`</section>`;
 }
+$("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-nset]");if(!b)return;const S=store.settings,id=b.dataset.nset;
+  if(id==="__auto"){S.suppAutoTrack=S.suppAutoTrack===false?true:false;if(S.suppAutoTrack)delete S.suppAutoTrack;}else{const on=nutOn(),off=Array.isArray(S.nutOff)?S.nutOff:[];if(on.includes(id)){S.extrasOn=(S.extrasOn||[]).filter(x=>x!==id);S.nutOff=off.concat([id]);}else{S.extrasOn=(S.extrasOn||[]).concat([id]);S.nutOff=off.filter(x=>x!==id);}}persist("settings");renderSettings();});
 $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-hset]");if(!b)return;const S=store.settings,H=S.health=S.health||{},k=b.dataset.hset,cur=hcfg()[k];H[k]=!cur;persist("settings");renderSettings();});
 $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-sp]");if(!b)return;if(b.dataset.sp==="library")libFrom=setPage==="school"?"school":"help";setPage=b.dataset.sp||null;renderSettings();window.scrollTo(0,0);});
 $("panel").addEventListener("click",e=>{
