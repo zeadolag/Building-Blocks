@@ -533,6 +533,9 @@ body.touring{overflow:hidden}
 
 /* ---------- Settings, help, school ---------- */
 .setnav{padding:0;overflow:hidden}
+.bday{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--blue) 10%,var(--surface));border-color:color-mix(in srgb,var(--blue) 35%,var(--line))}
+.bday strong{font-size:16px;font-weight:600}
+.bdayic{font-size:28px;line-height:1}
 .setgroup{margin:18px 2px 6px;font-size:13px;font-weight:500;color:var(--muted)}
 .setrowbtn{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:12px 14px;min-height:54px}
 .setrowbtn:first-child{border-top:0}
@@ -676,24 +679,24 @@ const PLANS2={
   full:{name:"Full body",color:"#7C3AED",on:"#fff",
     rest:"Rest about 2 min between exercises. Leave 2–3 reps in the tank while you learn the movements.",
     ex:[["squat","Back squat",3,"8–10"],["bench","Bench press",3,"8–10"],["csrow","Chest-supported row",3,"8–12"],["rdl","Romanian deadlift",2,"8–10"],["pulldown","Lat pulldown",2,"10–12"],["ohp","Overhead press",2,"8–10"],["splank","Side plank",2,"20–30 s per side","time"]]},
-  hylow:{name:"Lower + intervals",color:"#0EA5E9",on:"#fff",
-    rest:"Rest 2–3 min between strength sets, 60–90 s between the 400 m runs.",
-    ex:[["rdl","Romanian deadlift",3,"6–8"],["legpress","Leg press",3,"8–10"],["runint","Run intervals, 400 m",5,"400 m","run"]]},
-  hyup:{name:"Upper + erg",color:"#F97316",on:"#fff",
-    rest:"Rest 2 min between strength sets, 90 s between erg intervals.",
-    ex:[["fullpull","Pull-ups",4,"5–8","bw"],["sled","Sled push",4,"25 m","dist"],["kbpress","Kettlebell strict press",3,"8–10 per arm"],["ergint","SkiErg or row intervals",7,"500 m","run"]]},
+  hylow:{name:"Lower + SkiErg",color:"#0EA5E9",on:"#fff",
+    rest:"Rest 2–3 min between strength sets, 90 s between SkiErg intervals.",
+    ex:[["slegcurl","Seated leg curl",2,"10"],["legpress","Leg press",2,"6–8"],["skiint","SkiErg intervals",7,"500 m","run"]]},
+  hyup:{name:"Upper + row erg",color:"#F97316",on:"#fff",
+    rest:"Rest about 2 min between strength sets. Finish with a 2.4 km row.",
+    ex:[["fullpull","Pull-ups",2,"5","bw"],["dips","Dips",2,"7","bw"],["sled","Sled push",1,"50 m","dist"],["kbpress","Kettlebell strict press",2,"10–11 per arm"],["rowerg","Row erg",1,"2400 m","run"]]},
   hysim:{name:"Hyrox simulation",color:"#E11D48",on:"#fff",
-    rest:"Alternate a run of 600–1000 m with each station. Keep moving, rest only when you need to.",
-    ex:[["comprun","Compromised run, 600–1000 m after each station",4,"600–1000 m","run"],["sblunge","Sandbag walking lunges",1,"50 m","dist"],["wallball","Wall balls",1,"30"],["bbj","Burpee broad jumps",1,"40 m","dist"],["sled","Sled push",1,"25 m","dist"],["farmer","Farmer's carry",4,"30–40 m","dist"]]},
-  hyfull:{name:"Full body power",color:"#8B5CF6",on:"#fff",
-    rest:"Rest 90–120 s between power cleans and 60–90 s between complex rounds.",
-    ex:[["pclean","Power clean",5,"3"],["kbcomplex","Kettlebell complex: swing, clean, squat, press",3,"6 each"]]},
+    rest:"Alternate a run with each station. Make the runs longer over the weeks: 1 km, then 1.25 km, then 1.5 km. Log your total time at the end.",
+    ex:[["comprun","Compromised run, after each station",5,"1–1.5 km","run"],["sblunge","Sandbag walking lunges, 20 kg",1,"50 m","dist"],["wallball","Wall balls, 6 kg",1,"30"],["bbj","Burpee broad jumps",1,"40 m","dist"],["sled","Sled push",1,"25 m","dist"],["farmer","Farmer's carry, 2 × 24 kg",1,"100 m","dist"],["hyroxsim","Whole session, total time",1,"total","run"]]},
+  hyfull:{name:"Full body strength",color:"#8B5CF6",on:"#fff",
+    rest:"Rest 90 s to 2 min between sets. Mostly machines, so push close to failure with good form.",
+    ex:[["lat","Lateral raise",2,"10"],["pulldown","Lat pulldown",2,"6–8"],["mfly","Machine chest fly",2,"6–8"],["mrow","Seated machine row",2,"8–10"],["incmpress","Incline machine chest press",2,"6–8"],["curl","Biceps curl machine",2,"6–8"],["ohext","Overhead cable triceps extension",2,"6–8"],["backext45","Weighted back extension",2,"10"]]},
   recov:{name:"Recovery",color:"#14B8A6",on:"#fff",
-    rest:"Mobility, walking and light stretching. Nothing should feel hard today.",
-    ex:[["lightcore","Light core work",1,"10 min","time"]]},
-  hyrun:{name:"Long run",color:"#64748B",on:"#fff",
-    rest:"45–60 min at an easy to moderate pace. Or take it as a rest day if you need it.",
-    ex:[["longrun","Long easy run",1,"45–60 min","run"]]},
+    rest:"A walk and light stretching. Nothing should feel hard today.",
+    ex:[["walkrec","Easy walk",1,"30–45 min","run"]]},
+  hyrun:{name:"Easy run + core",color:"#64748B",on:"#fff",
+    rest:"45–60 min at an easy to moderate pace, then 10 min of light core. Or rest if you need it.",
+    ex:[["longrun","Long easy run",1,"45–60 min","run"],["lightcore","Light core work",1,"10 min","time"]]},
   dyn:{name:"Dynamic",color:"var(--muted)",on:"#fff",rest:"Choose which workout to do today.",ex:[]},
   rest:{name:"Rest",color:"var(--line)",on:"var(--ink)",rest:"",ex:[]}
 };
@@ -717,7 +720,7 @@ const WARMUP={
   hylow:["Easy row or SkiErg, 3 min","Leg swings, 10 each","Hip circles, 10 each way","Bodyweight squats, 10","1–2 light warm-up sets of your first exercise"],
   hyup:["Easy row or SkiErg, 3 min","Arm circles, 10 each way","Band pull-aparts, 15","Scapular pull-ups, 8","1–2 light warm-up sets of your first exercise"],
   hysim:["Easy jog, 5 min","Leg swings, 10 each","Walking lunges, 6 per leg","High knees and butt kicks, 20 s each","Bodyweight squats, 10"],
-  hyfull:["Easy row or SkiErg, 3 min","Hip circles, 10 each way","Bodyweight squats, 10","Empty bar: deadlift, hang clean and front squat, 5 each"],
+  hyfull:["Easy row or SkiErg, 3 min","Arm circles, 10 each way","Band pull-aparts, 15","Scapular push-ups, 10","1–2 light warm-up sets of your first exercise"],
   recov:["Brisk walk, 3–5 min","Cat-cow","Hip circles, 10 each way"],
   hyrun:["Brisk walk, 3–5 min","Leg swings, 10 each","High knees and butt kicks, 20 s each"]
 };
@@ -739,6 +742,8 @@ const STRETCH={
 };
 // m: main muscles, s: helpers, c: cues, x: common mistake
 const INFO={
+  incmpress:{m:["chest"],s:["fdelt","triceps"],c:["Set the seat so the handles start at upper-chest height.","Shoulder blades back and down against the pad.","Press up and out, stop just short of locking out, then lower slowly."],x:"Letting your shoulders roll forward at the end."},
+  walkrec:{m:["quads","calves"],s:["glutes"],c:["Easy pace. You should be able to talk the whole time.","Great for recovery between hard days."],x:"Turning it into a power walk on a recovery day."},
   pclean:{m:["glutes","hams","traps"],s:["quads","calves","fdelt"],c:["Bar over the middle of your feet, flat back, arms long.","Push the floor away, then jump hard with your hips once the bar passes your knees.","Pull yourself under, catching the bar on your shoulders with elbows high.","Stand up tall. Reset before each rep."],x:"Pulling with your arms early instead of using your hips."},
   kbcomplex:{m:["glutes","quads","fdelt"],s:["hams","abs","traps"],c:["6 swings, then 6 cleans, 6 squats and 6 presses without putting the kettlebell down.","Use a light weight. The goal is smooth, crisp reps.","Rest 60–90 s between rounds."],x:"Going too heavy, so the presses fall apart."},
   kbpress:{m:["fdelt"],s:["triceps","abs"],c:["Kettlebell in the rack position, resting on your forearm.","Squeeze your glutes and abs, then press straight up.","Lower slowly back to the rack."],x:"Leaning back to push it up."},
@@ -1192,6 +1197,8 @@ const LIBX=[
   ["ergint","SkiErg or row intervals",7,"500 m","run","Hyrox and hybrid",["lats","quads"],["triceps","midback","abs"]],
   ["lightcore","Light core work",1,"10 min","time","Core",["abs"],["obliques","lowback"]],
   ["longrun","Long easy run",1,"45–60 min","run","Hyrox and hybrid",["quads","calves"],["glutes","hams"]],
+  ["incmpress","Incline machine chest press",3,"8–12","","Chest",["chest"],["fdelt","triceps"]],
+  ["walkrec","Easy walk",1,"30–45 min","run","Full body and cardio",["quads","calves"],["glutes"]],
   ["hyroxsim","Hyrox simulation",1,"8 × 1 km run plus stations","run","Hyrox and hybrid",["quads","glutes"],["lats","fdelt","calves"]]
 ];
 // Calisthenics: next step once you hit the top of the rep range on every set
@@ -1232,7 +1239,7 @@ const DIFFN={1:"Beginner",2:"Intermediate",3:"Advanced"};
 const WEQ={"Easy row or SkiErg, 3 min":["cardio"],"Band pull-aparts or light face pulls, 15":["band"],"Band pull-aparts, 15":["band"],"Scapular pull-ups, 8":["pullup"],"Dead hang, 20–30 s":["pullup"]};
 const WDIFF={"Marching on the spot, 1–2 min":1,"Shoulder rolls, 10 each way":1,"Wall slides, 10":1,"Assisted hang, feet on the floor, 20 s":1,"Wall pushups, 10":1,"Supported squats, holding a door frame, 10":1,"Standing good mornings, 10":1,"Knees to chest stretch":1,"Seated chest opener":1,"Seated side stretch":1,"Dead hang, 20–30 s":3,"Scapular pull-ups, 8":3,"Scapular push-ups, 10":2,"World's greatest stretch":2,"Walking lunges with a twist, 6 per leg":2,"Walking lunges, 6 per leg":2,"High knees and butt kicks, 20 s each":2};
 // coaching tips: what good lifters focus on
-const TIPS={pclean:"Think jump, not pull. The bar moves because your hips snap forward, and your arms only guide it.",kbcomplex:"Pick a weight you could press about 10 times. The press is the weakest link.",sled:"Low hips and short, fast steps move the sled better than big strides. In a race, don't stop: slow steps beat standing still.",sledpull:"Sit low and use your hips. Your arms tire fast, your legs don't.",bbj:"Find a rhythm you can hold for all 80 m. Small, steady jumps beat big ones you can't repeat.",wallball:"Catch the ball high and go straight down into the squat, then use your legs to throw. Breaking 100 into sets of 15–25 early saves you later.",skierg:"Use your whole body: big hip hinge, arms just finish the pull.",rowerg:"Legs, body, arms on the pull. Arms, body, legs on the way back. Most of your power comes from your legs.",farmer:"Grip hard, shoulders down, and walk fast. The faster you walk, the less time you hold the weight.",sblunge:"Keep a steady rhythm and breathe out as you stand up. Don't rush: no-reps cost more time.",comprun:"The first few hundred metres after a station feel awful. Short steps and steady breathing, and your legs come back.",easyz2:"If you can't hold a conversation, slow down. Easy runs build the engine that makes the hard days possible.",runint:"Even pacing beats a fast first rep. Aim for every rep within a few seconds of each other.",hyroxsim:"Pace the first run slower than you want to. The race is won in the second half.",
+const TIPS={incmpress:"Find your seat height once and write it in a note with the pen. Same setup every time makes progress easier to track.",pclean:"Think jump, not pull. The bar moves because your hips snap forward, and your arms only guide it.",kbcomplex:"Pick a weight you could press about 10 times. The press is the weakest link.",sled:"Low hips and short, fast steps move the sled better than big strides. In a race, don't stop: slow steps beat standing still.",sledpull:"Sit low and use your hips. Your arms tire fast, your legs don't.",bbj:"Find a rhythm you can hold for all 80 m. Small, steady jumps beat big ones you can't repeat.",wallball:"Catch the ball high and go straight down into the squat, then use your legs to throw. Breaking 100 into sets of 15–25 early saves you later.",skierg:"Use your whole body: big hip hinge, arms just finish the pull.",rowerg:"Legs, body, arms on the pull. Arms, body, legs on the way back. Most of your power comes from your legs.",farmer:"Grip hard, shoulders down, and walk fast. The faster you walk, the less time you hold the weight.",sblunge:"Keep a steady rhythm and breathe out as you stand up. Don't rush: no-reps cost more time.",comprun:"The first few hundred metres after a station feel awful. Short steps and steady breathing, and your legs come back.",easyz2:"If you can't hold a conversation, slow down. Easy runs build the engine that makes the hard days possible.",runint:"Even pacing beats a fast first rep. Aim for every rep within a few seconds of each other.",hyroxsim:"Pace the first run slower than you want to. The race is won in the second half.",
   bench:"Squeeze your shoulder blades together and down before you unrack, and keep them there. Lower the bar to your lower chest and drive your feet into the floor as you press.",
   incdb:"Think about bringing your upper arms towards each other over your chest, not just pushing the dumbbells up. A bench angle of 30° hits the upper chest without turning it into a shoulder press.",
   dbbench:"Let the dumbbells come down a little wider and deeper than a barbell allows for a better chest stretch, then press up and slightly in.",
@@ -1327,8 +1334,8 @@ function bestAlt(id,opt={}){
     if(sc>bs){bs=sc;best=x;}}
   return best;
 }
-const EQX={"pclean":["bar"],"kbcomplex":["kb"],"kbpress":["kb"],"ergint":["cardio"],"longrun":["run"],"run1k":["run"],"runint":["run"],"easyz2":["run"],"tempo":["run"],"comprun":["run"],"shuttle":["run"],"skierg":["cardio"],"skiint":["cardio"],"rowerg":["cardio"],"rowint":["cardio"],"sledpull":["gym"],"bbj":["bw"],"sblunge":["gym"],"sbcarry":["gym"],"sleddrag":["gym"],"kbrack":["kb"],"bearcrawl":["bw"],"devil":["db"],"dbsnatch":["db"],"medslam":["gym"],"hyroxsim":["gym","cardio"],"bench":["bar","bench"],"inbench":["bar","bench"],"declbench":["bar","bench"],"hipthrust":["bar","bench"],"skull":["bar","bench"],"cgbench":["bar","bench"],"preacher":["bar","bench"],"sealrow":["bar","bench"],"jmpress":["bar","bench"],"ohp":["bar"],"squat":["bar"],"rdl":["bar"],"landmine":["bar"],"deadlift":["bar"],"rackpull":["bar"],"tbar":["bar"],"row":["bar"],"pendlay":["bar"],"meadows":["bar"],"invrow":["bar"],"bbcurl":["bar"],"revcurl":["bar"],"frontsquat":["bar"],"sldl":["bar"],"goodmorning":["bar"],"sumo":["bar"],"csrow":["machine"],"legcurl":["machine"],"add":["machine"],"calf":["machine"],"mcpress":["machine"],"pulldown":["machine"],"curl":["machine"],"legpress":["machine"],"backext":["machine"],"legext":["machine"],"slegcurl":["machine"],"abd":["machine"],"scalf":["machine"],"pecdeck":["machine"],"mrow":["machine"],"widepd":["machine"],"cgpd":["machine"],"revpd":["machine"],"pullover":["machine"],"apull":["machine"],"mshoulder":["machine"],"mlat":["machine"],"revfly":["machine"],"mpreacher":["machine"],"hacksquat":["machine"],"smithsquat":["machine"],"pendulum":["machine"],"ghr":["machine"],"mhipthrust":["machine"],"donkey":["machine"],"lpcalf":["machine"],"mcrunch":["machine"],"captain":["machine"],"mfly":["machine"],"backext45":["machine"],"mdip":["machine"],"beltsquat":["machine"],"stlegcurl":["machine"],"revhyper":["machine"],"smithinc":["machine","bench"],"smithbench":["machine","bench"],"sapd":["cable"],"fly":["cable"],"pushdown":["cable"],"ohext":["cable"],"sacpd":["cable"],"facepull":["cable"],"ccrunch":["cable"],"chop":["cable"],"lowfly":["cable"],"highfly":["cable"],"cablerow":["cable"],"cablelat":["cable"],"uprow":["cable"],"rdcable":["cable"],"cablecurl":["cable"],"bayes":["cable"],"kickback":["cable"],"sapush":["cable"],"pullthru":["cable"],"gkick":["cable"],"pallof":["cable"],"kprow":["cable"],"cableabd":["cable"],"lat":["db"],"hammer":["db"],"shrug":["db"],"arnold":["db"],"frontraise":["db"],"conc":["db"],"dboh":["db"],"wristcurl":["db"],"revwrist":["db"],"farmer":["db"],"goblet":["db"],"revlunge":["db"],"slrdl":["db"],"sidebend":["db"],"svend":["db"],"luraise":["db"],"cuban":["db"],"zottman":["db"],"dbcurl":["db"],"thruster":["db"],"incdb":["db","bench"],"dbsp":["db","bench"],"bss":["db","bench"],"dbbench":["db","bench"],"dbfly":["db","bench"],"dbrow":["db","bench"],"yraise":["db","bench"],"incurl":["db","bench"],"spider":["db","bench"],"stepup":["db","bench"],"csdbrow":["db","bench"],"lunge":["bw"],"splank":["bw"],"pushups":["bw"],"bwsquat":["bw"],"incpush":["bw"],"declpush":["bw"],"superman":["bw"],"diamond":["bw"],"wallsit":["bw"],"nordic":["bw"],"slhip":["bw"],"bridge":["bw"],"slcalf":["bw"],"tib":["bw"],"plank":["bw"],"crunch":["bw"],"deadbug":["bw"],"hollow":["bw"],"bicycle":["bw"],"russian":["bw"],"mclimb":["bw"],"sissy":["bw"],"wallpush":["bw"],"kneepush":["bw"],"fullpush":["bw"],"archerpush":["bw"],"pppush":["bw"],"onepush":["bw"],"airsquat":["bw"],"splitsq":["bw"],"bwbss":["bw"],"boxpistol":["bw"],"pistol":["bw"],"shrimp":["bw"],"tucklsit":["bw"],"lsit":["bw"],"pike":["bw"],"elevpike":["bw"],"wallhs":["bw"],"hspu":["bw"],"skinplank":["bw"],"burpee":["bw"],"pullup":["pullup"],"hlr":["pullup"],"chinup":["pullup"],"wpull":["pullup"],"hang":["pullup"],"scappull":["pullup"],"negpull":["pullup"],"fullpull":["pullup"],"archerpull":["pullup"],"lpull":["pullup"],"muscleup":["pullup"],"kneeraise":["pullup"],"legraise":["pullup"],"t2b":["pullup"],"tucklever":["pullup"],"bandpull":["pullup","band"],"dips":["dip"],"negdip":["dip"],"pdip":["dip"],"ringdip":["dip"],"benchdip":["bench"],"declcrunch":["bench"],"kbswing":["kb"],"incwalk":["cardio"],"stairs":["cardio"],"elliptical":["cardio"],"cycling":["cardio"],"rower":["cardio"],"bike":["cardio"],"wallball":["gym"],"boxjump":["gym"],"sled":["gym"],"ropes":["gym"],"jumprope":["gym"],"abwheel":["gym"]};
-const DIFF={"pclean":3,"lightcore":1,"longrun":1,"easyz2":1,"sleddrag":1,"bearcrawl":1,"bbj":3,"hyroxsim":3,"devil":3,"comprun":3,"csrow":1,"legcurl":1,"add":1,"calf":1,"mcpress":1,"pulldown":1,"curl":1,"legpress":1,"legext":1,"slegcurl":1,"abd":1,"scalf":1,"pecdeck":1,"mrow":1,"widepd":1,"cgpd":1,"revpd":1,"apull":1,"mshoulder":1,"mlat":1,"revfly":1,"mpreacher":1,"mfly":1,"lpcalf":1,"mcrunch":1,"captain":1,"cablecurl":1,"pushdown":1,"facepull":1,"fly":1,"cablelat":1,"cablerow":1,"ccrunch":1,"lat":1,"hammer":1,"dbcurl":1,"frontraise":1,"conc":1,"shrug":1,"goblet":1,"wallpush":1,"kneepush":1,"incpush":1,"airsquat":1,"bwsquat":1,"bridge":1,"plank":1,"crunch":1,"deadbug":1,"splank":1,"wallsit":1,"superman":1,"slcalf":1,"tib":1,"bicycle":1,"mclimb":1,"scappull":1,"incwalk":1,"stairs":1,"elliptical":1,"cycling":1,"rower":1,"bike":1,"hacksquat":1,"smithsquat":1,"beltsquat":1,"mhipthrust":1,"stlegcurl":1,"deadlift":3,"sumo":3,"frontsquat":3,"goodmorning":3,"pendlay":3,"nordic":3,"ghr":3,"pistol":3,"shrimp":3,"archerpush":3,"pppush":3,"onepush":3,"archerpull":3,"lpull":3,"muscleup":3,"ringdip":3,"t2b":3,"lsit":3,"hspu":3,"tucklever":3,"wpull":3,"rackpull":3};
+const EQX={"incmpress":["machine"],"walkrec":["run"],"pclean":["bar"],"kbcomplex":["kb"],"kbpress":["kb"],"ergint":["cardio"],"longrun":["run"],"run1k":["run"],"runint":["run"],"easyz2":["run"],"tempo":["run"],"comprun":["run"],"shuttle":["run"],"skierg":["cardio"],"skiint":["cardio"],"rowerg":["cardio"],"rowint":["cardio"],"sledpull":["gym"],"bbj":["bw"],"sblunge":["gym"],"sbcarry":["gym"],"sleddrag":["gym"],"kbrack":["kb"],"bearcrawl":["bw"],"devil":["db"],"dbsnatch":["db"],"medslam":["gym"],"hyroxsim":["gym","cardio"],"bench":["bar","bench"],"inbench":["bar","bench"],"declbench":["bar","bench"],"hipthrust":["bar","bench"],"skull":["bar","bench"],"cgbench":["bar","bench"],"preacher":["bar","bench"],"sealrow":["bar","bench"],"jmpress":["bar","bench"],"ohp":["bar"],"squat":["bar"],"rdl":["bar"],"landmine":["bar"],"deadlift":["bar"],"rackpull":["bar"],"tbar":["bar"],"row":["bar"],"pendlay":["bar"],"meadows":["bar"],"invrow":["bar"],"bbcurl":["bar"],"revcurl":["bar"],"frontsquat":["bar"],"sldl":["bar"],"goodmorning":["bar"],"sumo":["bar"],"csrow":["machine"],"legcurl":["machine"],"add":["machine"],"calf":["machine"],"mcpress":["machine"],"pulldown":["machine"],"curl":["machine"],"legpress":["machine"],"backext":["machine"],"legext":["machine"],"slegcurl":["machine"],"abd":["machine"],"scalf":["machine"],"pecdeck":["machine"],"mrow":["machine"],"widepd":["machine"],"cgpd":["machine"],"revpd":["machine"],"pullover":["machine"],"apull":["machine"],"mshoulder":["machine"],"mlat":["machine"],"revfly":["machine"],"mpreacher":["machine"],"hacksquat":["machine"],"smithsquat":["machine"],"pendulum":["machine"],"ghr":["machine"],"mhipthrust":["machine"],"donkey":["machine"],"lpcalf":["machine"],"mcrunch":["machine"],"captain":["machine"],"mfly":["machine"],"backext45":["machine"],"mdip":["machine"],"beltsquat":["machine"],"stlegcurl":["machine"],"revhyper":["machine"],"smithinc":["machine","bench"],"smithbench":["machine","bench"],"sapd":["cable"],"fly":["cable"],"pushdown":["cable"],"ohext":["cable"],"sacpd":["cable"],"facepull":["cable"],"ccrunch":["cable"],"chop":["cable"],"lowfly":["cable"],"highfly":["cable"],"cablerow":["cable"],"cablelat":["cable"],"uprow":["cable"],"rdcable":["cable"],"cablecurl":["cable"],"bayes":["cable"],"kickback":["cable"],"sapush":["cable"],"pullthru":["cable"],"gkick":["cable"],"pallof":["cable"],"kprow":["cable"],"cableabd":["cable"],"lat":["db"],"hammer":["db"],"shrug":["db"],"arnold":["db"],"frontraise":["db"],"conc":["db"],"dboh":["db"],"wristcurl":["db"],"revwrist":["db"],"farmer":["db"],"goblet":["db"],"revlunge":["db"],"slrdl":["db"],"sidebend":["db"],"svend":["db"],"luraise":["db"],"cuban":["db"],"zottman":["db"],"dbcurl":["db"],"thruster":["db"],"incdb":["db","bench"],"dbsp":["db","bench"],"bss":["db","bench"],"dbbench":["db","bench"],"dbfly":["db","bench"],"dbrow":["db","bench"],"yraise":["db","bench"],"incurl":["db","bench"],"spider":["db","bench"],"stepup":["db","bench"],"csdbrow":["db","bench"],"lunge":["bw"],"splank":["bw"],"pushups":["bw"],"bwsquat":["bw"],"incpush":["bw"],"declpush":["bw"],"superman":["bw"],"diamond":["bw"],"wallsit":["bw"],"nordic":["bw"],"slhip":["bw"],"bridge":["bw"],"slcalf":["bw"],"tib":["bw"],"plank":["bw"],"crunch":["bw"],"deadbug":["bw"],"hollow":["bw"],"bicycle":["bw"],"russian":["bw"],"mclimb":["bw"],"sissy":["bw"],"wallpush":["bw"],"kneepush":["bw"],"fullpush":["bw"],"archerpush":["bw"],"pppush":["bw"],"onepush":["bw"],"airsquat":["bw"],"splitsq":["bw"],"bwbss":["bw"],"boxpistol":["bw"],"pistol":["bw"],"shrimp":["bw"],"tucklsit":["bw"],"lsit":["bw"],"pike":["bw"],"elevpike":["bw"],"wallhs":["bw"],"hspu":["bw"],"skinplank":["bw"],"burpee":["bw"],"pullup":["pullup"],"hlr":["pullup"],"chinup":["pullup"],"wpull":["pullup"],"hang":["pullup"],"scappull":["pullup"],"negpull":["pullup"],"fullpull":["pullup"],"archerpull":["pullup"],"lpull":["pullup"],"muscleup":["pullup"],"kneeraise":["pullup"],"legraise":["pullup"],"t2b":["pullup"],"tucklever":["pullup"],"bandpull":["pullup","band"],"dips":["dip"],"negdip":["dip"],"pdip":["dip"],"ringdip":["dip"],"benchdip":["bench"],"declcrunch":["bench"],"kbswing":["kb"],"incwalk":["cardio"],"stairs":["cardio"],"elliptical":["cardio"],"cycling":["cardio"],"rower":["cardio"],"bike":["cardio"],"wallball":["gym"],"boxjump":["gym"],"sled":["gym"],"ropes":["gym"],"jumprope":["gym"],"abwheel":["gym"]};
+const DIFF={"incmpress":1,"walkrec":1,"pclean":3,"lightcore":1,"longrun":1,"easyz2":1,"sleddrag":1,"bearcrawl":1,"bbj":3,"hyroxsim":3,"devil":3,"comprun":3,"csrow":1,"legcurl":1,"add":1,"calf":1,"mcpress":1,"pulldown":1,"curl":1,"legpress":1,"legext":1,"slegcurl":1,"abd":1,"scalf":1,"pecdeck":1,"mrow":1,"widepd":1,"cgpd":1,"revpd":1,"apull":1,"mshoulder":1,"mlat":1,"revfly":1,"mpreacher":1,"mfly":1,"lpcalf":1,"mcrunch":1,"captain":1,"cablecurl":1,"pushdown":1,"facepull":1,"fly":1,"cablelat":1,"cablerow":1,"ccrunch":1,"lat":1,"hammer":1,"dbcurl":1,"frontraise":1,"conc":1,"shrug":1,"goblet":1,"wallpush":1,"kneepush":1,"incpush":1,"airsquat":1,"bwsquat":1,"bridge":1,"plank":1,"crunch":1,"deadbug":1,"splank":1,"wallsit":1,"superman":1,"slcalf":1,"tib":1,"bicycle":1,"mclimb":1,"scappull":1,"incwalk":1,"stairs":1,"elliptical":1,"cycling":1,"rower":1,"bike":1,"hacksquat":1,"smithsquat":1,"beltsquat":1,"mhipthrust":1,"stlegcurl":1,"deadlift":3,"sumo":3,"frontsquat":3,"goodmorning":3,"pendlay":3,"nordic":3,"ghr":3,"pistol":3,"shrimp":3,"archerpush":3,"pppush":3,"onepush":3,"archerpull":3,"lpull":3,"muscleup":3,"ringdip":3,"t2b":3,"lsit":3,"hspu":3,"tucklever":3,"wpull":3,"rackpull":3};
 const LIB={};
 (function(){
   const add=(e,g,m,s)=>{if(!LIB[e[0]])LIB[e[0]]={id:e[0],n:e[1].replace(/, assisted if needed/,""),sets:e[2],t:e[3],f:e[4]||"",d:e[5]?1:0,g:g||GRP[e[0]]||"Other",m:m||[],s:s||[]};};
@@ -1853,8 +1860,9 @@ function secWork({k,p,P,v2,day}){
   }
   const nSkip=Object.keys(day.skip||{}).filter(x=>day.skip[x]).length;
   if(nSkip)h+=`<p class="note">${nSkip} exercise${nSkip>1?"s":""} removed for today. <button class="linkbtn" style="padding:0" data-act="unskip">Bring ${nSkip>1?"them":"it"} back</button></p>`;
-  return h+summaryHtml(k,list);
+  sumList=list;return h+`<div id="sumBox">${summaryHtml(k,list)}</div>`;
 }
+let sumList=[];function refreshSummary(k){const x=$("sumBox");if(x)x.innerHTML=summaryHtml(k,sumList);}
 function summaryHtml(k,list){
   const day=store.days[k]||{};let sets=0,vol=0,first=0,lastAt=0;const recs=[];
   for(const [id,rows] of Object.entries(day.sets||{})){const e=libArr(id);for(const r of rows){if(!r.d)continue;sets++;if(!["run","dist","time"].includes(e[4]))vol+=num(r.w)*num(r.r);if(r.at){first=first?Math.min(first,r.at):r.at;lastAt=Math.max(lastAt,r.at);}}
@@ -1907,6 +1915,7 @@ function renderTrain(){
   if(stg==="split"||splitOpen){if(!splitDraft)draftInit();h+=splitHtml(stg==="split")+`</section>`;$("panel").innerHTML=h;return;}
   const sp=store.settings.split;
   if(sp&&sp.until&&todayKey()>sp.until)h+=`<div class="card notice"><strong>Your split ended on ${shortDate(sp.until)}</strong><p class="note" style="margin:4px 0 10px">Keep going with the same week, or set up a new split.</p><div class="pair"><button class="btn ghost" style="margin:0" data-act="splitkeep">Keep it going</button><button class="btn" style="margin:0" data-act="splitnew">New split</button></div></div>`;
+  if(isBirthday()&&store.settings.bdayShown!==todayKey().slice(0,4)&&sel===todayKey()){const a=ageOn(profile().dob);h+=`<div class="card bday"><span class="bdayic" aria-hidden="true">🎂</span><div><strong>Happy birthday!</strong><p class="note" style="margin:2px 0 8px">${a?`${a} today. `:""}Enjoy your day, rest or train, your call. Your calorie targets now use your new age.</p><button class="btn sm" data-act="bdayok">Thanks</button></div></div>`;}
   {const L=v2&&!editPlan?eqIssues():[];if(L.length)h+=`<div class="card notice"><strong>${L.length} exercise${L.length>1?"s":""} in your plan need${L.length>1?"":"s"} equipment you don't have</strong><p class="note" style="margin:4px 0 10px">Swap ${L.length>1?"them":"it"} for something you can do, or keep ${L.length>1?"them":"it"}.</p><button class="btn ghost sm" data-act="eqreview">Review swaps</button></div>`;}
   if(store.settings.presetNote)h+=`<div class="card notice"><strong>This is a suggested plan</strong><p class="note" style="margin:4px 0 10px">It was picked for your experience level. Change any exercise, any day, or the whole split whenever you like with the <b>Edit</b> button above.</p><button class="btn ghost sm" data-act="presetok">Got it</button></div>`;
   {const ex=dayExercises(k,p);let tot=0,dn=0;for(const e of ex){const R=rowsInfo(day,e);tot+=R.rc;for(let i=0;i<R.rc;i++)if(R.rws[i]&&R.rws[i].d)dn++;}
@@ -2259,7 +2268,7 @@ function renderBody(){
   const k=sel,day=store.days[k]||{},S=store.settings;
   const d=parseKey(k),mon=addDays(k,-((d.getDay()+6)%7)),cur=weekAvg(mon),prev=weekAvg(addDays(mon,-7));
   let h=`<section><div class="card"><label><span class="lbl">Morning weight (${U()})</span><input class="field" data-body="weight" inputmode="decimal" placeholder="e.g. 84.6" value="${esc(day.weight)}"></label>
-    <p class="note" style="font-size:13px">After the bathroom, before eating. Watch the weekly average, not single days.</p></div>`;
+    <p class="note" style="font-size:13px">After the bathroom, before eating. Watch the weekly average, not single days.</p>${(S.profile||{}).west&&!latestWeight()?`<p class="note warnline" style="font-size:13px">Your weight from setup was a guess. Weighing in is strongly recommended so your targets and progress are accurate.</p>`:""}</div>`;
   const {pts,avg}=weightSeries(k);
   h+=`<h2 class="sec-title">Progress</h2><div class="card"><div class="seg seg3" role="group" aria-label="Time range">${[["1m","1 month"],["3m","3 months"],["all","All"]].map(([v,l])=>`<button type="button" data-act="brange" data-v="${v}" aria-pressed="${bodyRange===v}">${l}</button>`).join("")}</div>`;
   if(cur!=null){h+=`<div><span class="big">${cur.toFixed(1)} ${U()}</span> <span class="of">average this week</span></div>`;
@@ -2461,7 +2470,7 @@ $("panel").addEventListener("click",e=>{
   if(act==="tick"||act==="addset"||act==="adddrop"||act==="settype"){
     const exEl=b.closest("[data-ex]"),id=exEl.dataset.ex,ex=exLookup(k,id);
     const day=ensureDay(k);
-    if(act==="tick"){const i=+b.dataset.i,rows=rowsFor(day,id,Math.max(rowCount(day,ex),i+1));rows[i].d=!rows[i].d;b.setAttribute("aria-pressed",String(rows[i].d));b.closest(".set").classList.toggle("is-done",rows[i].d);persist(docId);renderWeek();if(rows[i].d){afterTick(k,id,i,b);const ss=b.closest(".ss[data-g]"),grp=ss?ss.dataset.g:null,ids=grp?Array.from(ss.querySelectorAll(".ssx[data-ex]")).map(x=>x.dataset.ex):[id];
+    if(act==="tick"){const i=+b.dataset.i,rows=rowsFor(day,id,Math.max(rowCount(day,ex),i+1));rows[i].d=!rows[i].d;b.setAttribute("aria-pressed",String(rows[i].d));b.closest(".set").classList.toggle("is-done",rows[i].d);persist(docId);renderWeek();refreshSummary(k);if(rows[i].d){afterTick(k,id,i,b);const ss=b.closest(".ss[data-g]"),grp=ss?ss.dataset.g:null,ids=grp?Array.from(ss.querySelectorAll(".ssx[data-ex]")).map(x=>x.dataset.ex):[id];
         const fin=ids.every(x=>{const e2=exLookup(k,x),R=rowsInfo(day,e2);return R.rc>0&&Array.from({length:R.rc},(_,j)=>R.rws[j]&&R.rws[j].d).every(Boolean);});
         if(fin){delete exState[k+":"+(grp||id)];setTimeout(()=>{if(tab!=="train"||sel!==k)return;renderTrain();const nx=document.querySelector("#panel article.ex.isopen");if(nx){const r=nx.getBoundingClientRect();scrollTo({top:scrollY+r.top-90,behavior:"smooth"});}},650);}
         else{const w=b.closest("article.ex");if(w){const rg=w.querySelector(".exhead .pring");if(rg&&!ss){const R=rowsInfo(day,ex),dn=Array.from({length:R.rc},(_,j)=>R.rws[j]&&R.rws[j].d).filter(Boolean).length;rg.outerHTML=ring(dn/R.rc,false);}}}}
@@ -2521,6 +2530,7 @@ $("panel").addEventListener("input",e=>{
     const day=ensureDay(k),rows=rowsFor(day,id,Math.max(rowCount(day,ex),i+1));rows[i][t.dataset.f]=t.value.trim();persist(docId);
   }else if(t.dataset.body){
     const day=ensureDay(k),v=t.value.replace(",",".").trim();day[t.dataset.body]=v===""?"":(Number(v)>0?Number(v):day[t.dataset.body]);persist(docId);
+    if(t.dataset.body==="weight"&&Number(v)>0&&store.settings.profile&&store.settings.profile.west){delete store.settings.profile.west;persist("settings");}
   }else if(t.dataset.price!==undefined){
     const ps=ensurePrices(),i=+t.dataset.price,f=t.dataset.pf;
     if(f==="n")ps[i].n=t.value;else if(t.value.trim()!==""&&num(t.value)>=0)ps[i][f]=num(t.value);
@@ -2579,11 +2589,13 @@ $("panel").addEventListener("click",e=>{
   else if(act==="welcome"){S.welcomed=true;persist("settings");renderTrain();}
   else if(act==="welcomeskip"||act==="welcomecalc"){welcomeManual=act==="welcomeskip";renderTrain();}
   else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).length)S.fresh=true;afterTargets();}
+  else if(act==="west"){S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile.west=!S.profile.west;if(!S.profile.west)delete S.profile.west;persist("settings");
+    const box=b.closest(".tcalc,.personal");if(box&&box.classList.contains("welcome"))renderTrain();else render();}
   else if(act==="welcomego"){const pf=Object.assign({sex:"m",act:1.55,goal:-550},S.profile||{});
     if(!S.profile&&latestWeight())pf.w=latestWeight();
-    const r=calcTargets(pf);if(!r){toast("Fill in your age, height and weight");const f=document.querySelector('.welcome [data-pf="a"]');if(f&&!f.value)f.focus();return;}
+    const r=calcTargets(pf);if(!r){toast("Fill in your birthday, height and weight");const f=["dob","h","w"].map(x=>document.querySelector(`.welcome [data-pf="${x}"]`)).find(f=>f&&!f.value);if(f)f.focus();return;}
     S.profile=pf;S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).filter(k=>k!==todayKey()).length)S.fresh=true;
-    const t=todayKey();if(!latestWeight()&&num(pf.w)>0){ensureDay(t).weight=String(pf.w);persist("day-"+t);}
+    const t=todayKey();if(!latestWeight()&&num(pf.w)>0&&!pf.west){ensureDay(t).weight=String(pf.w).replace(",",".");persist("day-"+t);}
     afterTargets();toast("Your targets: "+fmt(S.kcal)+" kcal and "+S.protein+" g protein a day");}
   else if(act==="rmmeal"){
     const id=b.dataset.opt;
@@ -2610,7 +2622,7 @@ $("panel").addEventListener("input",e=>{
   else if(t.id==="fcQ"){fcQ=t.value;const r=$("fcRes");if(r)r.innerHTML=fcList();}
   else if(t.id==="fcG"){const it=allIngr().find(x=>x.n===fcPick),o=$("fcOut");if(it&&o)o.innerHTML=fcOut(it,num(t.value));}
   else if(t.dataset.mbg!==undefined){const x=mb[+t.dataset.mbg];if(x){x.g=num(t.value);const tt=mbTotals(),o=$("mbTot");if(o)o.innerHTML="Total: "+fcOut({k:tt.k,p:tt.p,cb:tt.cb,f:tt.f},100);}}
-  else if(t.dataset.pf&&t.closest(".tcalc")){const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");tUpdate(S.profile);}
+  else if(t.dataset.pf&&t.closest(".tcalc")){if(t.dataset.pf==="dob"&&t.value&&!ageOn(t.value)){return;}const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");tUpdate(S.profile);}
   else if(t.dataset.ed==="name"){const {P}=curPlanEdit();P.name=t.value.slice(0,40)||"Workout";persist("settings");}
   else if(t.dataset.exI!==undefined){const {P}=curPlanEdit(),i=+t.dataset.exI,f=+t.dataset.exF;if(!P.ex[i])return;if(f===2){const v=Math.round(num(t.value));if(v>0&&v<=10)P.ex[i][2]=v;}else P.ex[i][3]=t.value.slice(0,24);persist("settings");}
   else if(t.dataset.note){S.notes=S.notes||{};const v=t.value.slice(0,140);if(v)S.notes[t.dataset.note]=v;else delete S.notes[t.dataset.note];persist("settings");}
@@ -2695,9 +2707,11 @@ function tUpdate(pf){const g=safeGoal(pf);if(g!==num(pf.goal)){pf.goal=g;persist
   document.querySelectorAll('select[data-pf="goal"]').forEach(sel=>{sel.innerHTML=goalOpts(pf);});const o=$("tOut");if(o)o.innerHTML=targetsOut(pf);}
 function goalOpts(pf){const G=goalsFor(pf),g=safeGoal(pf);return G.map(([v,l])=>`<option value="${v}"${g===v?" selected":""}>${l}</option>`).join("");}
 function profile(){return store.settings.profile||{};}
+function ageOn(dob,k){const d=String(dob||"").split("-").map(Number);if(d.length<3||!d[0])return 0;const t=parseKey(k||todayKey());let a=t.getFullYear()-d[0];if(t.getMonth()+1<d[1]||(t.getMonth()+1===d[1]&&t.getDate()<d[2]))a--;return a>0&&a<120?a:0;}
+function isBirthday(){const d=String((profile()||{}).dob||"").split("-");if(d.length<3)return false;const t=todayKey().split("-");return d[1]===t[1]&&d[2]===t[2];}
 function latestWeight(){const ks=Object.keys(store.days).sort().reverse();for(const k of ks){const w=Number(store.days[k].weight);if(w>0)return w;}return "";}
 function calcTargets(pf){
-  const w=toKg(pf.w),h=num(pf.h),a=num(pf.a),bf=num(pf.bf),act=num(pf.act)||1.55,goal=num(pf.goal);
+  const w=toKg(pf.w),h=num(pf.h),a=pf.dob?ageOn(pf.dob):num(pf.a),bf=num(pf.bf),act=num(pf.act)||1.55,goal=num(pf.goal);
   if(!(w>0&&h>0&&a>0))return null;
   const lbm=bf>0&&bf<60?w*(1-bf/100):0;
   const bmr=lbm?370+21.6*lbm:10*w+6.25*h-5*a+(pf.sex==="f"?-161:5);
@@ -2715,6 +2729,7 @@ function calcTargets(pf){
 function targetsOut(pf){
   const r=calcTargets(pf);if(!r)return `<p class="note">Fill in age, height and weight to see your numbers.</p>`;
   return `<div class="tgrid"><div><span class="big">${fmt(r.kc)}</span><span class="of">kcal a day</span></div><div><span class="big">${fmt(r.prot)}</span><span class="of">g protein</span></div><div><span class="big">${fmt(r.carbs)}</span><span class="of">g carbs</span></div><div><span class="big">${fmt(r.fat)}</span><span class="of">g fat</span></div></div>
+  ${pf.west?`<p class="note warnline">Your weight is a guess, so calories could be off by about ±${fmt(Math.round(2.5*10*(num(pf.act)||1.55)/5)*5)} kcal and protein by about ±${Math.round(2.5*2.2)} g. Weigh yourself and update it in Settings → Personal details.</p>`:""}
   <p class="note">Resting burn (BMR) about ${fmt(r.bmr)} kcal. Maintenance about ${fmt(r.tdee)} kcal. Protein is ${r.pBasis}.${r.clamped?` That goal would put you below ${fmt(r.floor)} kcal, which is too low to sustain, so it's capped there.`:""} These are estimates: check your weekly average weight after 2–3 weeks and adjust by 100–200 kcal.</p>`;
 }
 function targetsCalcHtml(){
@@ -2722,9 +2737,14 @@ function targetsCalcHtml(){
   return `<h2 class="sec-title">Calculate your targets</h2><div class="card tcalc">${profileFields(pf)}
   <button class="btn" data-act="usetargets">Use as my daily targets</button></div>`;
 }
+function weightGuessHtml(pf){const w=num(pf.w),d=U()==="lb"?5.5:2.5;
+  return `<button type="button" class="toggle mini-t" style="margin-top:8px;width:100%" data-act="west" aria-pressed="${!!pf.west}"><span class="box">✓</span><span class="txt"><strong>I'm not sure, or haven't weighed in a while</strong><small>Enter your best guess and it's treated as ±${d} ${U()}</small></span></button>
+  ${pf.west?`<p class="note warnline" style="margin-top:6px">${w>0?`Using ${fmt1(w)} ${U()}, somewhere between ${fmt1(w-d)} and ${fmt1(w+d)} ${U()}. `:""}Weighing yourself is strongly recommended: your targets and progress are only as accurate as your weight. Your guess won't be added to your progress chart.</p>`:`<p class="note" style="margin-top:6px;font-size:13px">Use a scale if you can. In the morning, after the bathroom, is most accurate.</p>`}`;}
+function fmt1(v){return (Math.round(v*10)/10).toString();}
 function profileFields(pf){
-  return `<div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label><label><span class="lbl">Age</span><input class="field" data-pf="a" inputmode="numeric" value="${esc(pf.a||"")}"></label></div>
-  <div class="pair" style="margin-top:8px"><label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="numeric" value="${esc(pf.h||"")}"></label><label><span class="lbl">Weight (${U()})</span><input class="field" data-pf="w" inputmode="decimal" value="${esc(pf.w||"")}"></label></div>
+  return `<div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label><label><span class="lbl">Birthday</span><input class="field" type="date" data-pf="dob" max="${todayKey()}" value="${esc(pf.dob||"")}" aria-label="Birthday">${!pf.dob&&num(pf.a)?`<small class="of">Age ${esc(pf.a)} for now. Add your birthday to keep it up to date.</small>`:""}</label></div>
+  <div class="pair" style="margin-top:8px"><label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="decimal" placeholder="e.g. 184.5" value="${esc(pf.h||"")}"></label><label><span class="lbl">${pf.west?"Rough weight":"Weight"} (${U()})</span><input class="field" data-pf="w" inputmode="decimal" placeholder="e.g. 86.4" value="${esc(pf.w||"")}"></label></div>
+  ${weightGuessHtml(pf)}
   <label class="sfld"><span class="lbl">Activity</span><select class="field" data-pf="act">${ACTS.map(([v,l])=>`<option value="${v}"${num(pf.act)===v?" selected":""}>${l}</option>`).join("")}</select></label>
   <label class="sfld"><span class="lbl">Goal</span><select class="field" data-pf="goal">${goalOpts(pf)}</select></label>
   <p class="note" style="margin-top:4px">Faster weight loss is only offered when your activity level and maintenance calories make it safe.</p>
@@ -3118,6 +3138,7 @@ sheetEl.addEventListener("click",e=>{
 $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b||tab!=="train")return;const a=b.dataset.act,S=store.settings;
   if(a==="exmenu"){exMenu(b.closest("[data-ex]").dataset.ex);}
+  else if(a==="bdayok"){S.bdayShown=todayKey().slice(0,4);persist("settings");renderTrain();}
   else if(a==="dayinfo"){const p=planOf(sel),P=plansFor(sel)[p],ex=dayExercises(sel,p);
     openSheet(P.name,`${p==="rest"?`<p style="margin-top:0">Recovery day. Aim for 7–10k steps and an easy stretch.</p>`:`<p style="margin-top:0">${kw(esc(P.rest||""))}</p>`}${ex.length?`<p class="note">${ex.length} exercises, ${ex.reduce((a,e)=>a+e[2],0)} sets in total.</p>`:""}<p class="note">Tap the workout's name to switch to a different one for this day. Use <b>Edit</b> to change its exercises, the page layout or your weekly split.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
   else if(a==="seccol"){secOpen[sel+":"+b.dataset.s]=b.dataset.c==="1";renderTrain();}
@@ -3253,7 +3274,7 @@ const SPLIT_TPL=[["full3","Full body, 3 days","Mon, Wed, Fri. The best place to 
   ["ul4","Upper and Lower","4 days: Mon, Tue, Thu, Fri.",["rest","upper","lower","rest","upper","lower","rest"]],
   ["ulppl","Upper, Lower, Push, Pull, Legs","5 days plus an easy run.",["rest","upper","lower","run","push","pull","legs"]],
   ["ppl6","Push, Pull, Legs twice","6 days a week.",["rest","push","pull","legs","push","pull","legs"]],
-  ["hybrid","Hybrid and Hyrox","Strength, intervals, a Hyrox day and a long run.",["hyrun","hylow","hyup","rest","hysim","hyfull","recov"]],
+  ["hybrid","Hyrox race prep","A real Hyrox athlete's week: strength, ergs, a Hyrox day and a long run. Not for beginners.",["hyrun","hylow","hyup","rest","hysim","recov","hyfull"],"nobeg"],
   ["empty","Start empty","Set every day yourself.",["rest","rest","rest","rest","rest","rest","rest"]]];
 const DAYNAMES=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],DAYORDER=[1,2,3,4,5,6,0],UNITS=[["days","days"],["weeks","weeks"],["months","months"],["years","years"]];
 let splitDraft=null,splitOpen=false;
@@ -3271,7 +3292,7 @@ function splitHtml(onb){
   const days=D.week.filter(x=>x!=="rest").length;
   return `<div class="card welcome">${onb?`<p class="stepl">Step 4 of 4</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
   <p class="note" style="margin:6px 0 12px">Pick a ready-made week, then change any day you like. ${onb?"You can change all of this later.":""}</p>
-  <p class="lbl">Start from</p><div class="tplgrid">${SPLIT_TPL.map(t=>`<button type="button" class="tpl" data-act="spltpl" data-v="${t[0]}" aria-pressed="${D.tpl===t[0]}"><strong>${t[1]}</strong><small>${t[2]}</small></button>`).join("")}</div>
+  <p class="lbl">Start from</p><div class="tplgrid">${SPLIT_TPL.filter(t=>t[4]!=="nobeg"||store.settings.level!=="new"||D.tpl===t[0]).map(t=>`<button type="button" class="tpl" data-act="spltpl" data-v="${t[0]}" aria-pressed="${D.tpl===t[0]}"><strong>${t[1]}</strong><small>${t[2]}</small></button>`).join("")}</div>
   <p class="lbl" style="margin-top:14px">Each day <span style="float:right">${days} training day${days===1?"":"s"}</span></p>
   ${DAYORDER.map(i=>`<label class="wkrow"><span>${DAYNAMES[i]}</span><select class="field" data-spl="day" data-i="${i}" aria-label="${DAYNAMES[i]}">${opts(D.week[i])}</select></label>`).join("")}
   <p class="note">Dynamic days start empty, and you pick Push, Pull, Legs or any other workout on the day itself.</p>
@@ -3364,10 +3385,33 @@ function trainingSettingsHtml(){const S=store.settings,sw=(key,lab,sub)=>{const 
   <div>${sw("oneOpen","Open one exercise at a time","Opening an exercise folds the one that was open, so only one shows at a time.")}${sw("swapBtn","Swap buttons on warm-ups and stretches","Hide them for a cleaner look. You can still swipe an item to the right to swap it.")}${sw("tips","Beginner tips and starting weights","Shows suggested starting weights and a reminder to focus on form. Only for New and Some experience.")}${sw("keywords","Explain keywords","Words like drop set and superset get underlined. Tap one to see what it means.")}</div>`;}
 $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-trset]");if(!b)return;const [k,v]=b.dataset.trset.split(":"),S=store.settings;
   if(k==="level")S.level=v;else if(k==="dayChange"){if(v==="ask")delete S.dayChange;else S.dayChange=v;}else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
+// ---------- Personal details ----------
+function firstWeigh(){const ks=Object.keys(store.days).filter(k=>num(store.days[k].weight)>0).sort();return ks.length?{k:ks[0],w:num(store.days[ks[0]].weight)}:null;}
+function personalHtml(){
+  const pf=Object.assign({sex:"m",act:1.55,goal:-550},profile()),F=firstWeigh(),L=latestWeight(),a=pf.dob?ageOn(pf.dob):num(pf.a);
+  return `<div class="card tcalc personal"><div class="pair"><label><span class="lbl">Sex</span><select class="field" data-pf="sex"><option value="m"${pf.sex!=="f"?" selected":""}>Male</option><option value="f"${pf.sex==="f"?" selected":""}>Female</option></select></label>
+   <label><span class="lbl">Birthday</span><input class="field" type="date" data-pf="dob" max="${todayKey()}" value="${esc(pf.dob||"")}">${a?`<small class="of">${a} years old</small>`:""}</label></div>
+   <div class="pair" style="margin-top:8px"><label><span class="lbl">Height (cm)</span><input class="field" data-pf="h" inputmode="decimal" value="${esc(pf.h||"")}"></label><label><span class="lbl">Body fat % (optional)</span><input class="field" data-pf="bf" inputmode="decimal" value="${esc(pf.bf||"")}"></label></div></div>
+  <p class="sec-title" style="margin-top:18px">Weight</p><div class="card personal">
+   ${L?`<div><span class="big">${fmt1(num(L))} ${U()}</span> <span class="of">latest weigh-in</span></div>${F?`<p class="note" style="margin-top:2px">Your progress starts at ${fmt1(F.w)} ${U()} on ${shortDate(F.k)}.</p>`:""}`:`<div><span class="big">${num(pf.w)?fmt1(num(pf.w))+" "+U():"Not set"}</span> <span class="of">${pf.west?"your guess":"from setup"}</span></div>`}
+   ${pf.west?`<p class="note warnline">This is a guess (±${U()==="lb"?5.5:2.5} ${U()}). Weighing yourself is strongly recommended, so your targets and charts are accurate.</p>`:`<p class="note">Weighing in regularly is strongly recommended. It's what makes your targets, maintenance and progress chart accurate.</p>`}
+   <button class="btn" data-act="pweigh">Log today's weight</button>
+   <button class="btn ghost" data-act="pfix">My starting weight was wrong</button>
+   <p class="note" style="font-size:13px">Use this only if the first number was a mistake or a guess. It replaces your starting weight without adding a new point to your progress chart. If your weight has really changed, log a new weigh-in instead.</p></div>`;
+}
+$("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,S=store.settings;
+  if(a==="pweigh"){openSheet("Today's weight",fld(`Weight (${U()})`,"pwW","","decimal")+`<p class="note">In the morning, after the bathroom and before eating, is most accurate.</p>`,[{label:"Save",fn:()=>{const v=num($("pwW").value);if(!(v>0))return false;const t=todayKey(),u=snap(["day-"+t,"settings"]);ensureDay(t).weight=String(v);persist("day-"+t);
+      if(S.profile){S.profile.w=String(v);delete S.profile.west;persist("settings");}renderSettings();toast("Weigh-in saved",u);}},{label:"Cancel",cls:"btn ghost"}]);}
+  else if(a==="pfix"){const F=firstWeigh(),cur=F?F.w:num((S.profile||{}).w);
+    openSheet("Correct your starting weight",`<p class="note" style="margin-top:0">${F?`Your progress currently starts at <b>${fmt1(F.w)} ${U()}</b> on ${shortDate(F.k)}. The corrected number replaces it, and your chart and maintenance are worked out from the new value.`:`There are no weigh-ins yet, so this updates the weight from setup.`}</p>`+fld(`Correct weight (${U()})`,"pfW",cur?fmt1(cur):"","decimal"),
+      [{label:"Replace starting weight",fn:()=>{const v=num($("pfW").value);if(!(v>0))return false;const keys=F?["day-"+F.k,"settings"]:["settings"],u=snap(keys);
+        if(F){store.days[F.k].weight=String(v);persist("day-"+F.k);}S.profile=Object.assign({},S.profile||{});if(!F||num(S.profile.w)===F.w||S.profile.west)S.profile.w=String(v);delete S.profile.west;persist("settings");renderSettings();toast("Starting weight corrected to "+fmt1(v)+" "+U(),u);}},{label:"Cancel",cls:"btn ghost"}]);}
+});
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.1";
+const APP_VERSION="3.2";
 const CHANGELOG=[
+  {v:"3.2",d:"9 October 2026",t:"Personal details",items:["Hyrox race prep split template, based on a real Hyrox athlete's week. Only offered if you're not new to the gym","New exercises: incline machine chest press and easy walk","Setup asks for your birthday instead of your age, so your age stays up to date. On your birthday the app says happy birthday","Height, weight and body fat take decimals","Not sure of your weight? Tick the box and your guess is treated as ±2.5 kg. It isn't added to your progress chart, and the app reminds you that weighing in is strongly recommended","New Settings → Preferences → Personal details: change your birthday, height and body fat, log a weigh-in, or correct a starting weight that was wrong without adding a new point to your chart"]},
   {v:"3.1",d:"9 October 2026",t:"Smoother changes",items:["Changing a day's workout asks how: just that day, shift the rest of the week so nothing is lost, or every week from now on. Pick a default in Settings → Preferences → Training","Workout changes show up in History","Opening an exercise folds the one that was open. You can turn this off in Settings → Preferences → Training","The section bar on the right is rebuilt: it no longer misses touches or drifts off centre, the marker moves smoothly as you scroll, and the label uses your accent colour","Ticking a meal no longer folds it and jumps the page","Settings are grouped into App settings, Preferences and Learn and help. School is now called Training guide"]},
   {v:"3.0",d:"9 October 2026",t:"Simpler, cleaner, faster",items:["Full redesign in the shadcn style, with fewer words on screen","Train: tap the workout's name to change it, and tap ? for the details. The logo now only shows in Settings","Warm-up, stretches and every exercise are folded into one line with a progress circle. The one you're on opens by itself, then folds with a tick when you finish and the next one opens","A bar on the right edge shows where you are on long pages. Hold and slide it to jump between sections","Slide along the tab bar, and along any 1 month / 3 months / All style switch, to change it","Hyrox and hybrid exercises: SkiErg, sled push and pull, burpee broad jumps, sandbag lunges, carries, intervals and more, with metres and minutes for runs and stations","New Hybrid and Hyrox split template","Calories burned are worked out per exercise, using your weight and how far, how long or how many sets you did","Eat: meals and sections fold, Evening is now Dinner, and fibre is shown for every ingredient","Supplements: pick from common ones with what they're for, when to take them and what to watch out for, plus your own notes","Body: track deficiencies like iron or vitamin D by daily intake, blood test results or both (Settings → Health tracking)","Body: suggested nutrients like fibre, omega-3 and magnesium, with why they might help. All optional","Training guide in Settings: compound and isolation exercises, every muscle and what trains it, splits, Hyrox and nutrition","The calculator no longer offers losing 1 kg a week unless your activity level makes it safe","Keywords are shown in your accent colour instead of underlined"]},
   {v:"2.9",d:"9 October 2026",t:"Clearer swaps",items:["The best swap is marked Closest match. If nothing is close enough, there is no mark","Swap sheets say matches are based on the muscles each exercise works","Just today or From now on is now at the top of every swap sheet, so it's easy to spot","Ramp-up sets are now called light warm-up sets, with a line explaining what they are"]},
@@ -3452,6 +3496,7 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["appearance","Appearance",`${{system:"System",light:"Light",dark:"Dark"}[T.mode||"system"]} theme`,()=>`<div class="card">${settingsBody()}</div>`],
     ["tabs","Tab bar",hidden.length?`${hidden.length} hidden: ${hidden.map(t=>TABDEF[t][0]).join(", ")}`:"All tabs shown",()=>`<div class="card">${tabsSettingsHtml()}</div>`],
     ["training","Training",`${lv} · rep style ${(STYLES[S.repDefault]||["as planned"])[0].toLowerCase()}`,()=>`<div class="card">${trainingSettingsHtml()}</div>`],
+    ["personal","Personal details",(()=>{const pf=profile(),a=pf.dob?ageOn(pf.dob):num(pf.a);return [a?a+" years":"",num(pf.h)?fmt1(num(pf.h))+" cm":"",pf.west?"weight is a guess":""].filter(Boolean).join(" · ")||"Birthday, height and weight";})(),()=>personalHtml()],
     ["units","Units and currency",`${U()} · ${curCode()}`,()=>`<div class="card">${unitsHtml()}</div>`],
     ["health","Health tracking",(()=>{const H=hcfg();return [H.intake?"Daily intake":"",H.labs?"Blood tests":""].filter(Boolean).join(" and ")||"Off";})(),()=>`<div class="card">${healthSettingsHtml()}</div>`],
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
@@ -3465,7 +3510,7 @@ function renderSettings(){
   const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
   if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="${libFrom||"help"}">‹ ${libFrom==="school"?"Training guide":"Help"}</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
   else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
-  else{const G=[["App settings",["appearance","tabs","units","backup"]],["Preferences",["training","health","timer"]],["Learn and help",["school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
+  else{const G=[["App settings",["appearance","tabs","units","backup"]],["Preferences",["personal","training","health","timer"]],["Learn and help",["school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
     h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 6px">Body Builder, version ${APP_VERSION}</p>`+G.map(([t,ids])=>{const xs=ids.map(id=>P.find(x=>x[0]===id)).filter(Boolean);return xs.length?`${t?`<p class="setgroup">${t}</p>`:`<div style="height:14px"></div>`}<div class="card setnav">${xs.map(row).join("")}</div>`:"";}).join("")+`
   <p class="note">${isLocalMode()?"Your data is saved on this device only. Download a backup now and then, and before you clear your browser data.":"Changes save to your account and show up on all your devices."}</p>`;}
   $("panel").innerHTML=h+`</section>`;
