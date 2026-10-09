@@ -533,6 +533,7 @@ body.touring{overflow:hidden}
 
 /* ---------- Settings, help, school ---------- */
 .setnav{padding:0;overflow:hidden}
+.setgroup{margin:18px 2px 6px;font-size:13px;font-weight:500;color:var(--muted)}
 .setrowbtn{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:12px 14px;min-height:54px}
 .setrowbtn:first-child{border-top:0}
 .setrowbtn span{flex:1;min-width:0}
@@ -596,18 +597,18 @@ body.touring{overflow:hidden}
 .itab[aria-current="page"]{color:var(--blue)}
 
 /* ---------- Section rail ---------- */
-#rail{position:fixed;right:2px;top:50%;transform:translateY(-50%);height:min(46vh,340px);width:24px;z-index:35;display:none;touch-action:none}
+#rail{cursor:pointer;position:fixed;right:0;top:calc(env(safe-area-inset-top,0px) + 96px);bottom:calc(env(safe-area-inset-bottom,0px) + 104px);width:16px;z-index:35;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
 #rail.on{display:block}
-#rail .rtrack{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding:4px 4px 4px 0}
-#rail .rmark{flex:1;width:24px;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:flex-end}
-#rail .rmark i{display:block;width:8px;height:3px;border-radius:2px;background:color-mix(in srgb,var(--muted) 45%,transparent);transition:width .15s,background .15s}
-#rail .rmark.cur i{width:16px;background:var(--blue)}
-#rail .rbubble{position:fixed;right:34px;transform:translateY(-50%);background:var(--ink);color:var(--paper);font-size:13px;font-weight:500;padding:6px 10px;border-radius:8px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s}
+#rail .rtrack{position:absolute;top:10px;bottom:10px;right:5px;width:4px}
+#rail .rline{position:absolute;inset:0;border-radius:999px;background:color-mix(in srgb,var(--muted) 18%,transparent);transition:background .15s}
+#rail .rticks i{position:absolute;left:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:color-mix(in srgb,var(--muted) 55%,transparent)}
+#rail .rthumb{position:absolute;left:-1px;right:-1px;height:28px;top:calc(var(--rp,0) * (100% - 28px));border-radius:999px;background:var(--blue);box-shadow:0 0 0 2px var(--paper);transition:top .08s linear}
+#rail.dragging .rtrack{width:6px;right:4px}
+#rail.dragging .rline{background:color-mix(in srgb,var(--muted) 30%,transparent)}
+#rail.dragging .rthumb{transition:top .12s ease-out}
+#rail .rbubble{position:fixed;right:26px;transform:translateY(-50%);background:var(--blue);color:#fff;font-size:13px;font-weight:500;padding:6px 11px;border-radius:8px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .15s}
 #rail.dragging .rbubble{opacity:1}
-#rail.dragging .rmark i{width:12px}
-#rail.dragging .rmark.cur i{width:20px}
 body.touring #rail{display:none}
-
 @media (prefers-reduced-motion: reduce){.sw,.swr,#toast,#rt,#rt .ring .fg,.switch i,.ithumb,.seg.hasthumb::before,#tour .tspot,#tour .tcard{transition:none}}
 </style>
 </head>
@@ -1411,9 +1412,10 @@ function renderHistory(){
     const p=planOf(k),P=plansFor(k)[p],pr=progress(k,p),et=eatTotals(day);
     const sets=Object.values(day.sets||{}).reduce((a,r)=>a+r.filter(x=>x.d).length,0);
     const buys=(day.buys||[]).reduce((a,b)=>a+num(b.e),0),cm=(day.cardioLog||[]).reduce((a,c)=>a+(Number(c.m)||0),0);
-    if(!(sets||et.k||day.steps||day.weight||buys||cm))continue;
+    if(!(sets||et.k||day.steps||day.weight||buys||cm||(day.planLog||[]).length))continue;
     if(et.k){kcalSum+=et.k;protSum+=et.p;kcalN++;}if(sets)workouts++;spent+=buys;if(Number(day.weight)>0)weights.push({k,w:Number(day.weight)});
     const bits=[];
+    for(const L of day.planLog||[]){const PL0=plansFor(k);bits.push(`<span class="of">Changed ${esc((PL0[L.from]||{name:L.from}).name)} to ${esc((PL0[L.to]||{name:L.to}).name)}${L.how==="shift"?", shifted the rest of the week":L.how==="week"?", every week from then on":", that day only"}</span>`);}
     if(sets)bits.push(`${esc(P?P.name:"Workout")}, ${sets} sets${p!=="rest"&&p!=="run"?" ("+Math.round(pr*100)+"%)":""}`);
     if(cm)bits.push(`${fmt(cm)} min cardio`);
     if(et.k)bits.push(`${fmt(et.k)} kcal, ${Math.round(et.p)} g protein`);
@@ -1979,7 +1981,7 @@ function renderEat(){
   {const SU=supps(),ds=day.supps||{},n=SU.filter(x=>ds[x]).length;
    h+=eatSec("supps","Supplements",SU.length?`${n} of ${SU.length} taken`:"None yet",SU.length?n/SU.length:"empty",SU.length>0&&n>=SU.length,suppsHtml(day)+`<button class="btn ghost" data-act="suppadd">${IC.plus||"+"} Add a supplement</button>`);}
   // tools
-  h+=eatSec("calc","Food calculator","Any ingredient, with fibre",`<span class="secic">${IC.search}</span>`,false,foodCalcHtml().replace(/^<h2 class="sec-title">Food calculator<\/h2>/,""));
+  h+=eatSec("calc","Food calculator","Any ingredient",`<span class="secic">${IC.search}</span>`,false,foodCalcHtml().replace(/^<h2 class="sec-title">Food calculator<\/h2>/,""));
   {const nh=hiddenMeals().length;
    h+=eatSec("mine","Add your own meal","Save meals you eat often",`<span class="secic">+</span>`,false,`<div class="card"><p class="note" style="margin:0 0 10px">Already know the calories? Save it as an option under any meal.</p>
     <select class="field" id="mSl" aria-label="Which meal">${SLOTS.map(x=>`<option value="${x.id}">${x.name}</option>`).join("")}</select>
@@ -2479,7 +2481,7 @@ $("panel").addEventListener("click",e=>{
   }else if(act==="stretch"){const day=ensureDay(k),i=+b.dataset.i;day.stretch=day.stretch||{};day.stretch[i]=!day.stretch[i];if(!day.stretch[i])delete day.stretch[i];persist(docId);b.setAttribute("aria-pressed",String(!!day.stretch[i]));
     {const P=plansFor(k)[planOf(k)],L=stretchList(planOf(k),P,k>=NEWPLAN);if(L.every((_,j)=>day.stretch[j])){delete secOpen[k+":stretch"];setTimeout(()=>{if(tab==="train")renderTrain();},500);}}
   }else if(act==="rmcardio"){const day=ensureDay(k);(day.cardioLog||[]).splice(+b.dataset.i,1);persist(docId);renderTrain();}
-  else if(act==="pick"){const day=ensureDay(k);day.meals=day.meals||{};const sl=SLOTS.find(x=>x.id===b.dataset.slot),cur=chosen(sl,day);if(cur&&cur.id===b.dataset.opt)delete day.meals[sl.id];else{day.meals[sl.id]=b.dataset.opt;b.setAttribute("aria-pressed","true");setTimeout(()=>{delete secOpen[k+":eat-"+sl.id];if(tab==="eat")renderEat();},450);persist(docId);return;}persist(docId);renderEat();}
+  else if(act==="pick"){const day=ensureDay(k);day.meals=day.meals||{};const sl=SLOTS.find(x=>x.id===b.dataset.slot),cur=chosen(sl,day);if(cur&&cur.id===b.dataset.opt)delete day.meals[sl.id];else day.meals[sl.id]=b.dataset.opt;persist(docId);renderEat();}
   else if(act==="rice"){const day=ensureDay(k);day.meals=day.meals||{};day.meals.rice=!day.meals.rice;if(!day.meals.rice)delete day.meals.rice;persist(docId);renderEat();}
   else if(act==="supp"){const day=ensureDay(k),n=supps()[+b.dataset.i];day.supps=day.supps||{};day.supps[n]=!day.supps[n];if(!day.supps[n])delete day.supps[n];persist(docId);renderEat();}
   else if(act==="suppinfo"&&tab==="eat"){const n=b.dataset.n;if(openSupp.has(n))openSupp.delete(n);else openSupp.add(n);renderEat();}
@@ -2532,7 +2534,7 @@ $("panel").addEventListener("input",e=>{
 });
 $("panel").addEventListener("change",e=>{
   const t=e.target;
-  if(t.dataset.act==="plan"){const day=ensureDay(sel);if(t.value===weekFor(sel)[parseKey(sel).getDay()])delete day.plan;else day.plan=t.value;persist("day-"+sel);render();}
+  if(t.dataset.act==="plan"){planChange(sel,t.value);}
   else if(t.dataset.body){renderBody();}
   else if(t.dataset.price!==undefined||t.dataset.ch){renderSpend();}
 });
@@ -3119,7 +3121,9 @@ $("panel").addEventListener("click",e=>{
   else if(a==="dayinfo"){const p=planOf(sel),P=plansFor(sel)[p],ex=dayExercises(sel,p);
     openSheet(P.name,`${p==="rest"?`<p style="margin-top:0">Recovery day. Aim for 7–10k steps and an easy stretch.</p>`:`<p style="margin-top:0">${kw(esc(P.rest||""))}</p>`}${ex.length?`<p class="note">${ex.length} exercises, ${ex.reduce((a,e)=>a+e[2],0)} sets in total.</p>`:""}<p class="note">Tap the workout's name to switch to a different one for this day. Use <b>Edit</b> to change its exercises, the page layout or your weekly split.</p>`,[{label:"Got it",cls:"btn ghost"}]);}
   else if(a==="seccol"){secOpen[sel+":"+b.dataset.s]=b.dataset.c==="1";renderTrain();}
-  else if(a==="exexp"||a==="excol"){const c=b.closest("[data-g]")||b.closest("[data-ex]"),id=c.dataset.g||c.dataset.ex;exState[sel+":"+id]=a==="exexp";renderTrain();
+  else if(a==="exexp"||a==="excol"){const c=b.closest("[data-g]")||b.closest("[data-ex]"),id=c.dataset.g||c.dataset.ex;
+    if(a==="exexp"&&S.oneOpen!==false)document.querySelectorAll("#panel article.ex").forEach(x=>{const xid=x.dataset.g||x.dataset.ex;if(xid&&xid!==id)exState[sel+":"+xid]=false;});
+    exState[sel+":"+id]=a==="exexp";renderTrain();
     if(a==="exexp")requestAnimationFrame(()=>{const el=document.querySelector(`#panel [data-${c.dataset.g?"g":"ex"}="${CSS.escape(id)}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<80||r.top>innerHeight*0.6)scrollTo({top:scrollY+r.top-80,behavior:"smooth"});}});}
   else if(a==="edsec"){const id=b.dataset.s;if(edOpen.has(id))edOpen.delete(id);else edOpen.add(id);renderTrain();}
   else if(a==="note"){noteSheet(b.closest("[data-ex]").dataset.ex);}
@@ -3149,6 +3153,41 @@ $("panel").addEventListener("click",e=>{
   else if(a==="recedit")editRecipe(+b.dataset.i);
   else if(a==="reccopy"){const r=RECIPES.find(x=>x.id===b.dataset.id);if(!r)return;ensureRecipes().push({id:r.id,n:r.n,k:r.k,p:r.p,s:r.s,ing:r.ing.slice(),steps:r.steps.slice(),note:r.note});persist("settings");renderEat();toast("Saved your own copy. Change anything with Edit");}
 });
+// ---------- Changing a day's workout ----------
+function weekDays(k){const mon=addDays(k,-((parseKey(k).getDay()+6)%7));return Array.from({length:7},(_,i)=>addDays(mon,i));}
+function setDayPlan(x,p){const d=ensureDay(x);if(p===weekFor(x)[parseKey(x).getDay()])delete d.plan;else d.plan=p;persist("day-"+x);}
+// Plan for the rest of this week if today becomes `to`: the workout it replaced moves to the next training day, and so on
+function shiftPreview(k,to){
+  const from=planOf(k),slots=weekDays(k).filter(x=>x>k&&!["rest","dyn"].includes(planOf(x)));
+  const seq=[from].concat(slots.map(planOf)),i=seq.indexOf(to,1);let dropped=null;
+  if(i>0)seq.splice(i,1);else dropped=seq.pop();
+  return {slots,seq:seq.slice(0,slots.length),dropped};}
+function dayName(x){return parseKey(x).toLocaleDateString(undefined,{weekday:"long"});}
+function logPlan(k,from,to,how){const d=ensureDay(k);d.planLog=(d.planLog||[]).concat([{at:Date.now(),from,to,how}]);persist("day-"+k);}
+function applyPlanChange(k,to,how){
+  const from=planOf(k),PL=plansFor(k),u=snap(weekDays(k).map(x=>"day-"+x).concat(["settings"]));
+  if(how==="shift"){const P=shiftPreview(k,to);setDayPlan(k,to);P.slots.forEach((x,i)=>setDayPlan(x,P.seq[i]));}
+  else if(how==="week"){const S=store.settings,c=S.custom||(S.custom={}),wk=weekFor(k).slice(),di=parseKey(k).getDay(),j=wk.indexOf(to);
+    if(j>=0&&j!==di)wk[j]=wk[di];wk[di]=to;c.weeks=(Array.isArray(c.weeks)?c.weeks:[]).filter(e=>e.from!==k).concat([{from:k,week:wk}]);persist("settings");
+    weekDays(k).filter(x=>x>=k).forEach(x=>{const d=store.days[x];if(d&&d.plan){delete d.plan;persist("day-"+x);}});}
+  else setDayPlan(k,to);
+  logPlan(k,from,to,how);render();
+  toast(how==="shift"?"Moved the rest of this week along":how==="week"?"Changed every week from now on":"Changed for "+(k===todayKey()?"today":dayName(k)),u);}
+function planChange(k,to){
+  const from=planOf(k);if(to===from)return;const PL=plansFor(k),mode=store.settings.dayChange||"ask";
+  if(mode!=="ask"||["rest","dyn"].includes(to)&&["rest","dyn"].includes(from)){applyPlanChange(k,to,mode==="ask"?"today":mode);return;}
+  const P=shiftPreview(k,to),nm=x=>esc((PL[x]||{name:x}).name),wk=weekFor(k),di=parseKey(k).getDay(),j=wk.indexOf(to);
+  const shiftTxt=P.slots.length?P.slots.map((x,i)=>`${dayName(x)}: ${nm(P.seq[i])}`).join(", ")+(P.dropped&&P.dropped!==to?`. ${nm(P.dropped)} drops off this week.`:"."):"There are no training days left this week.";
+  openSheet(`${nm(from)} → ${nm(to)}`,`<p class="note" style="margin-top:0">How should the change work? You can pick a default in Settings → Preferences → Training.</p>
+   <div class="menulist">
+    <button type="button" class="menuitem" data-pch="today"><strong>Just ${k===todayKey()?"today":dayName(k)}</strong><small>The rest of the week stays the same</small></button>
+    ${P.slots.length?`<button type="button" class="menuitem" data-pch="shift"><strong>Shift the rest of this week</strong><small style="white-space:normal">${shiftTxt}</small></button>`:""}
+    <button type="button" class="menuitem" data-pch="week"><strong>Every ${dayName(k)} from now on</strong><small style="white-space:normal">${j>=0&&j!==di?`${nm(from)} moves to ${DAYNAMES[j]} in your weekly split`:`Changes your weekly split`}</small></button>
+   </div>`,[{label:"Cancel",cls:"btn ghost",fn:()=>{render();}}]);
+  sheetEl._kind="planchange";sheetEl._pk=k;sheetEl._pto=to;
+}
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="planchange")return;const b=e.target.closest("[data-pch]");if(!b)return;const k=sheetEl._pk,to=sheetEl._pto;closeSheet();applyPlanChange(k,to,b.dataset.pch);});
+sheetEl.addEventListener("close",()=>{if(sheetEl._kind==="planchange"&&tab==="train"){sheetEl._kind=null;render();}});
 // ---------- Equipment setup and swap suggestions ----------
 function fitRow(e,alt){return [alt.id,alt.n,e[2],alt.f?alt.t:e[3],alt.f,alt.f?0:(e[5]||0),e[6]===undefined?null:e[6],e[7]===undefined?null:e[7]];}
 function fitEx(list){const used=new Set(list.filter(e=>canDo(e[0])).map(e=>e[0]));const out=[];
@@ -3321,14 +3360,16 @@ function trainingSettingsHtml(){const S=store.settings,sw=(key,lab,sub)=>{const 
   <p class="lbl">Default rep style</p><div class="seg seg4" role="group" aria-label="Default rep style">${[["","As planned"],["light","Light"],["avg","Medium"],["heavy","Heavy"]].map(([v,l])=>`<button type="button" data-trset="repDefault:${v}" aria-pressed="${(S.repDefault||"")===v}">${l}</button>`).join("")}</div>
   <p class="note" style="margin:-4px 0 10px">Heavy is 4–6 reps, Medium 8–12, Light 12–20. Change it for one exercise by tapping its name on the Train tab.</p>
   <p class="lbl" style="margin-top:14px">Your equipment</p>${equipHtml(false).replace(/^<div class="card">/,"<div>")}
-  <div>${sw("swapBtn","Swap buttons on warm-ups and stretches","Hide them for a cleaner look. You can still swipe an item to the right to swap it.")}${sw("tips","Beginner tips and starting weights","Shows suggested starting weights and a reminder to focus on form. Only for New and Some experience.")}${sw("keywords","Explain keywords","Words like drop set and superset get underlined. Tap one to see what it means.")}</div>`;}
+  <p class="lbl" style="margin-top:14px">When you change a day's workout</p><div class="seg seg3" role="group" aria-label="When you change a day's workout">${[["ask","Ask me"],["today","Just that day"],["shift","Shift the week"]].map(([v,l])=>`<button type="button" data-trset="dayChange:${v}" aria-pressed="${(S.dayChange||"ask")===v}">${l}</button>`).join("")}</div>
+  <div>${sw("oneOpen","Open one exercise at a time","Opening an exercise folds the one that was open, so only one shows at a time.")}${sw("swapBtn","Swap buttons on warm-ups and stretches","Hide them for a cleaner look. You can still swipe an item to the right to swap it.")}${sw("tips","Beginner tips and starting weights","Shows suggested starting weights and a reminder to focus on form. Only for New and Some experience.")}${sw("keywords","Explain keywords","Words like drop set and superset get underlined. Tap one to see what it means.")}</div>`;}
 $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-trset]");if(!b)return;const [k,v]=b.dataset.trset.split(":"),S=store.settings;
-  if(k==="level")S.level=v;else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
+  if(k==="level")S.level=v;else if(k==="dayChange"){if(v==="ask")delete S.dayChange;else S.dayChange=v;}else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.0";
+const APP_VERSION="3.1";
 const CHANGELOG=[
-  {v:"3.0",d:"9 October 2026",t:"Simpler, cleaner, faster",items:["Full redesign in the shadcn style, with fewer words on screen","Train: tap the workout's name to change it, and tap ? for the details. The logo now only shows in Settings","Warm-up, stretches and every exercise are folded into one line with a progress circle. The one you're on opens by itself, then folds with a tick when you finish and the next one opens","A bar on the right edge shows where you are on long pages. Hold and slide it to jump between sections","Slide along the tab bar, and along any 1 month / 3 months / All style switch, to change it","Hyrox and hybrid exercises: SkiErg, sled push and pull, burpee broad jumps, sandbag lunges, carries, intervals and more, with metres and minutes for runs and stations","New Hybrid and Hyrox split template","Calories burned are worked out per exercise, using your weight and how far, how long or how many sets you did","Eat: meals and sections fold, Evening is now Dinner, and fibre is shown for every ingredient","Supplements: pick from common ones with what they're for, when to take them and what to watch out for, plus your own notes","Body: track deficiencies like iron or vitamin D by daily intake, blood test results or both (Settings → Health tracking)","Body: suggested nutrients like fibre, omega-3 and magnesium, with why they might help. All optional","School in Settings: compound and isolation exercises, every muscle and what trains it, splits, Hyrox and nutrition","The calculator no longer offers losing 1 kg a week unless your activity level makes it safe","Keywords are shown in your accent colour instead of underlined"]},
+  {v:"3.1",d:"9 October 2026",t:"Smoother changes",items:["Changing a day's workout asks how: just that day, shift the rest of the week so nothing is lost, or every week from now on. Pick a default in Settings → Preferences → Training","Workout changes show up in History","Opening an exercise folds the one that was open. You can turn this off in Settings → Preferences → Training","The section bar on the right is rebuilt: it no longer misses touches or drifts off centre, the marker moves smoothly as you scroll, and the label uses your accent colour","Ticking a meal no longer folds it and jumps the page","Settings are grouped into App settings, Preferences and Learn and help. School is now called Training guide"]},
+  {v:"3.0",d:"9 October 2026",t:"Simpler, cleaner, faster",items:["Full redesign in the shadcn style, with fewer words on screen","Train: tap the workout's name to change it, and tap ? for the details. The logo now only shows in Settings","Warm-up, stretches and every exercise are folded into one line with a progress circle. The one you're on opens by itself, then folds with a tick when you finish and the next one opens","A bar on the right edge shows where you are on long pages. Hold and slide it to jump between sections","Slide along the tab bar, and along any 1 month / 3 months / All style switch, to change it","Hyrox and hybrid exercises: SkiErg, sled push and pull, burpee broad jumps, sandbag lunges, carries, intervals and more, with metres and minutes for runs and stations","New Hybrid and Hyrox split template","Calories burned are worked out per exercise, using your weight and how far, how long or how many sets you did","Eat: meals and sections fold, Evening is now Dinner, and fibre is shown for every ingredient","Supplements: pick from common ones with what they're for, when to take them and what to watch out for, plus your own notes","Body: track deficiencies like iron or vitamin D by daily intake, blood test results or both (Settings → Health tracking)","Body: suggested nutrients like fibre, omega-3 and magnesium, with why they might help. All optional","Training guide in Settings: compound and isolation exercises, every muscle and what trains it, splits, Hyrox and nutrition","The calculator no longer offers losing 1 kg a week unless your activity level makes it safe","Keywords are shown in your accent colour instead of underlined"]},
   {v:"2.9",d:"9 October 2026",t:"Clearer swaps",items:["The best swap is marked Closest match. If nothing is close enough, there is no mark","Swap sheets say matches are based on the muscles each exercise works","Just today or From now on is now at the top of every swap sheet, so it's easy to spot","Ramp-up sets are now called light warm-up sets, with a line explaining what they are"]},
   {v:"2.8",d:"9 October 2026",t:"Equipment, swaps and exercise library",items:["Setup asks what equipment you have (full gym, home with dumbbells, bodyweight only or your own list) and fills your plan with exercises you can do","Change your equipment in Settings → Training. The app then suggests swaps, and you choose Swap or Keep for each","Exercises and warm-ups that need equipment you don't have are marked, but you can still pick them","Swap lists show the closest match first: same main muscles, then easier options, each marked with type and difficulty","Swap warm-ups and stretches for easier ones with the swap button or by swiping right, just for today or every time. A switch in Settings → Training hides the swap buttons","New easier warm-ups and stretches, like an assisted hang with your feet on the floor","Exercise library in Help: search all exercises, filter by type (bodyweight, machine, barbell, dumbbells, cable and more) and muscle group","Coach tips on exercises, like bringing your wrists together at the end of a chest fly"]},
   {v:"2.7",d:"9 October 2026",t:"Install as an app",items:["New Settings page with steps to install Body Builder on iPhone, Android and computers","Android phones get an Install button that opens the phone's own install prompt","Explains offline use, and adds a Share the link button for friends"]},
@@ -3416,15 +3457,16 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
     ...(isLocalMode()?[["backup","Backup","Save or restore all your data",()=>`<div class="card">${backupHtml()}</div>`]]:[]),
     ["install","Install as an app",isLocalMode()&&isInstalled()?"Installed":"Home screen, offline use and sharing",()=>installHtml()],
-    ["school","School","Compound and isolation, muscles, splits, Hyrox and nutrition",()=>schoolHtml()],
+    ["school","Training guide","Compound and isolation, muscles, splits, Hyrox and nutrition",()=>schoolHtml()],
     ["help","Help","Exercise library, how to use the app, training basics",()=>`<button type="button" class="setrowbtn card" style="border:1px solid var(--line);margin-bottom:12px" data-sp="library"><span><strong>Exercise library</strong><small>Look up any of the ${Object.keys(LIB).length} exercises by type, muscle and difficulty</small></span>${IC.chev}</button>`+guideHtml()],
     ["changelog","Change log",`Version ${APP_VERSION}`,()=>changelogHtml()]
   ];}
 function renderSettings(){
   const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
-  if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="${libFrom||"help"}">‹ ${libFrom==="school"?"School":"Help"}</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
+  if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="${libFrom||"help"}">‹ ${libFrom==="school"?"Training guide":"Help"}</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
   else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
-  else{h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 12px">Body Builder, version ${APP_VERSION}</p><div class="card setnav">${P.map(x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`).join("")}</div>
+  else{const G=[["App settings",["appearance","tabs","units","backup"]],["Preferences",["training","health","timer"]],["Learn and help",["school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
+    h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 6px">Body Builder, version ${APP_VERSION}</p>`+G.map(([t,ids])=>{const xs=ids.map(id=>P.find(x=>x[0]===id)).filter(Boolean);return xs.length?`${t?`<p class="setgroup">${t}</p>`:`<div style="height:14px"></div>`}<div class="card setnav">${xs.map(row).join("")}</div>`:"";}).join("")+`
   <p class="note">${isLocalMode()?"Your data is saved on this device only. Download a backup now and then, and before you clear your browser data.":"Changes save to your account and show up on all your devices."}</p>`;}
   $("panel").innerHTML=h+`</section>`;
 }
@@ -3671,31 +3713,38 @@ function timerSettingsHtml(){
   <p class="note">Tap the ⏱ time on any exercise to set its own rest time.${n?` You've set ${n}. <button type="button" class="linkbtn" data-rtset="clear:1">Clear them</button>`:""}</p>`;
 }
 
-// ---------- Section rail: a fixed-size index on the right edge ----------
-const railEl=document.createElement("nav");railEl.id="rail";railEl.setAttribute("aria-label","Jump to a section");document.body.appendChild(railEl);
-let railItems=[],railCur=-1;const railS={on:false};
-function railLabel(e){if(e.dataset.rail)return e.dataset.rail;const c=e.cloneNode(true);c.querySelectorAll("small,.pring,svg").forEach(x=>x.remove());return c.textContent.trim();}
+// ---------- Section rail: a scrubber on the right edge ----------
+// Spans the space between the header and the tab bar. Its size never depends on page length:
+// every section gets an equal share, the thumb shows where you are, and dragging jumps between sections.
+const railEl=document.createElement("nav");railEl.id="rail";railEl.setAttribute("aria-label","Jump to a section");
+railEl.innerHTML=`<div class="rtrack"><span class="rline"></span><span class="rticks"></span><span class="rthumb"></span></div><div class="rbubble" aria-hidden="true"></div>`;
+document.body.appendChild(railEl);railEl.addEventListener("click",e=>e.preventDefault());
+let railItems=[],railSig="";const railS={on:false,i:-1};
+function railLabel(e){if(e.dataset.rail)return e.dataset.rail;const c=e.cloneNode(true);c.querySelectorAll("small,.pring,.secic,svg").forEach(x=>x.remove());return c.textContent.trim();}
 function railBuild(){
-  const els=[...document.querySelectorAll("#panel [data-rail], #panel h2.sec-title:not([data-rail]), #panel h2.gtitle")].filter(e=>e.getClientRects().length);
-  railItems=els;railCur=-1;
-  const show=els.length>=3&&document.documentElement.scrollHeight>innerHeight*1.5&&!document.body.classList.contains("onboarding");
-  railEl.classList.toggle("on",show);
-  if(!show){railEl.innerHTML="";return;}
-  railEl.innerHTML=`<div class="rtrack">${els.map((e,i)=>`<button type="button" class="rmark" data-ri="${i}" aria-label="${esc(railLabel(e))}" tabindex="-1"><i></i></button>`).join("")}</div><div class="rbubble" aria-hidden="true"></div>`;
+  if(railS.on)return;
+  const els=[...document.querySelectorAll("#panel [data-rail], #panel h2.sec-title:not([data-rail]), #panel h2.gtitle:not([data-rail])")].filter(e=>e.getClientRects().length);
+  const show=els.length>=3&&document.documentElement.scrollHeight>innerHeight*1.6&&!document.body.classList.contains("onboarding")&&!document.body.classList.contains("touring");
+  railItems=show?els:[];railEl.classList.toggle("on",show);
+  const sig=show?els.length+"|"+els.map(railLabel).join("|"):"";
+  if(sig!==railSig){railSig=sig;railEl.querySelector(".rticks").innerHTML=els.map((_,i)=>`<i style="top:${els.length>1?i/(els.length-1)*100:50}%"></i>`).join("");}
   railSync();
 }
-function railSync(){if(!railItems.length)return;let cur=0;const y=innerHeight*0.35;railItems.forEach((e,i)=>{if(e.getBoundingClientRect().top<=y)cur=i;});
-  if(innerHeight+scrollY>=document.documentElement.scrollHeight-4)cur=railItems.length-1;
-  if(cur!==railCur){railCur=cur;railEl.querySelectorAll(".rmark").forEach((m,i)=>m.classList.toggle("cur",i===cur));}}
-function railGo(i){const e=railItems[i];if(!e)return;const r=e.getBoundingClientRect();scrollTo({top:Math.max(0,scrollY+r.top-72),behavior:"auto"});}
-function railAt(y){const t=railEl.querySelector(".rtrack");if(!t)return -1;const r=t.getBoundingClientRect(),n=railItems.length;return Math.max(0,Math.min(n-1,Math.floor((y-r.top)/r.height*n)));}
-function railShow(i,y){const bb=railEl.querySelector(".rbubble");if(!bb)return;bb.textContent=railLabel(railItems[i]);bb.style.top=y+"px";railEl.classList.add("dragging");
-  railEl.querySelectorAll(".rmark").forEach((m,j)=>m.classList.toggle("cur",j===i));railCur=i;}
-railEl.addEventListener("pointerdown",e=>{if(!railItems.length)return;e.preventDefault();railS.on=true;try{railEl.setPointerCapture(e.pointerId);}catch(_){}const i=railAt(e.clientY);railS.i=i;railShow(i,e.clientY);railGo(i);});
-railEl.addEventListener("pointermove",e=>{if(!railS.on)return;const i=railAt(e.clientY);railEl.querySelector(".rbubble").style.top=e.clientY+"px";if(i!==railS.i){railS.i=i;railShow(i,e.clientY);railGo(i);if(navigator.vibrate)try{navigator.vibrate(3);}catch(_){}}});
-function railEnd(){if(!railS.on)return;railS.on=false;setTimeout(()=>railEl.classList.remove("dragging"),500);}
-railEl.addEventListener("pointerup",railEnd);railEl.addEventListener("pointercancel",railEnd);
-addEventListener("scroll",()=>{if(!railS.on)railSync();},{passive:true});
+// Where we are, as a fraction between sections, so the thumb moves smoothly while scrolling
+function railPos(){const n=railItems.length;if(n<2)return 0;const y=innerHeight*0.32,tops=railItems.map(e=>e.getBoundingClientRect().top);
+  if(innerHeight+scrollY>=document.documentElement.scrollHeight-4)return n-1;
+  if(tops[0]>y)return 0;for(let i=0;i<n-1;i++)if(tops[i+1]>y)return i+(y-tops[i])/Math.max(1,tops[i+1]-tops[i]);return n-1;}
+function railSync(){if(!railItems.length)return;const n=railItems.length,p=railS.on?railS.i:railPos();railEl.style.setProperty("--rp",(n>1?p/(n-1):0).toFixed(4));
+  const cur=Math.round(p);railEl.querySelectorAll(".rticks i").forEach((t,i)=>t.classList.toggle("cur",i===cur));}
+function railGo(i){const e=railItems[i];if(!e)return;const r=e.getBoundingClientRect();scrollTo({top:Math.max(0,scrollY+r.top-innerHeight*0.32+4),behavior:"auto"});}
+function railAt(y){const t=railEl.querySelector(".rtrack").getBoundingClientRect(),n=railItems.length;return Math.max(0,Math.min(n-1,Math.round((y-t.top)/Math.max(1,t.height)*(n-1))));}
+function railShow(i){const bb=railEl.querySelector(".rbubble"),t=railEl.querySelector(".rtrack").getBoundingClientRect(),n=railItems.length;
+  bb.textContent=railLabel(railItems[i]);bb.style.top=(t.top+(n>1?i/(n-1):0.5)*t.height)+"px";railS.i=i;railSync();}
+railEl.addEventListener("pointerdown",e=>{if(!railItems.length)return;e.preventDefault();railS.on=true;railEl.classList.add("dragging");try{railEl.setPointerCapture(e.pointerId);}catch(_){}const i=railAt(e.clientY);railShow(i);railGo(i);});
+railEl.addEventListener("pointermove",e=>{if(!railS.on)return;const i=railAt(e.clientY);if(i!==railS.i){railShow(i);railGo(i);if(navigator.vibrate)try{navigator.vibrate(3);}catch(_){}}});
+function railEnd(){if(!railS.on)return;railS.on=false;setTimeout(()=>{if(!railS.on)railEl.classList.remove("dragging");railSync();},450);}
+railEl.addEventListener("pointerup",railEnd);railEl.addEventListener("pointercancel",railEnd);railEl.addEventListener("lostpointercapture",railEnd);
+let railQ=0;addEventListener("scroll",()=>{if(railS.on||railQ)return;railQ=requestAnimationFrame(()=>{railQ=0;railSync();});},{passive:true});
 addEventListener("resize",()=>requestAnimationFrame(railBuild));
 // ---------- Segmented controls: sliding thumb, swipe to change ----------
 function segSync(root){(root||document).querySelectorAll(".seg").forEach(sg=>{const bs=[...sg.querySelectorAll(":scope>button")];if(!bs.length)return;const i=bs.findIndex(b=>b.getAttribute("aria-pressed")==="true");
