@@ -547,6 +547,11 @@ textarea.field.area{height:auto;min-height:96px;padding:10px;resize:vertical;lin
 .ritem>.swr{border-radius:0;overflow:hidden}
 .ritem .sw.rrow{padding:2px 0}
 .rrow .icob{width:34px;height:34px}
+.closest{display:inline-block;font-size:10.5px;font-weight:600;color:#fff;background:var(--blue);border-radius:5px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+.scopeseg{margin:0 0 4px}
+.scopenote{display:none;margin:0 0 10px;font-size:12.5px}
+.scopeseg:has([data-scope="plan"][aria-pressed="true"])+.scopenote{display:block}
+.scopeseg:not(:has([data-scope="plan"][aria-pressed="true"])){margin-bottom:12px}
 /* ---- tab island ---- */
 .island{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;gap:2px;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--surface) 80%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40}
 .itab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;border-radius:999px;padding:7px 2px 6px;color:var(--muted);font-size:11px;font-weight:500;line-height:1.1}
@@ -1095,7 +1100,7 @@ const GLOSS={
   "reps in reserve":"How many more reps you could have done when you stop a set. Leaving 1–3 in reserve builds muscle almost as well as going to failure, with less fatigue and lower injury risk.",
   "negatives":"Only doing the lowering part of a move, slowly (3–5 seconds). You can lower more than you can lift, so negatives build strength for moves like pull-ups before you can do a full rep.",
   "warm-up sets":"Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you.",
-  "ramp-up sets":"Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you.",
+  "ramp-up sets":"Same as light warm-up sets. Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you.",
   "round":"In a superset, one round means one set of each exercise in the pair.",
   "progressive overload":"Slowly asking more of your muscles over time: a bit more weight, one more rep, or one more set. It's the main reason you keep getting stronger.",
   "per side":"Do the reps for one side, then the same number for the other side. That counts as one set.",
@@ -1522,12 +1527,12 @@ const SINFO={
   "Walking lunges, 6 per leg":{r:"Mobility drills",m:["quads","glutes"],s:["hams"],c:["Long steps, back knee close to the floor, torso upright."]},
   "Glute bridges, 10":{r:"Mobility drills",m:["glutes"],s:["hams"],c:["Lie on your back, feet flat, and drive your hips up.","Squeeze your glutes for a second at the top."]},
   "High knees and butt kicks, 20 s each":{r:"Mobility drills",m:["quads","hams"],s:["calves"],c:["Jog on the spot bringing your knees up to hip height, then kick your heels to your glutes."]},
-  "2–3 light warm-up sets of bench press":{r:"Ramp-up sets",m:["chest"],s:["fdelt","triceps"],c:["Empty bar for 10, then about 50% and 75% of your working weight for 5 and 3.","Don't tire yourself out, it's practice for the real sets."]},
-  "2–3 light warm-up sets of squats":{r:"Ramp-up sets",m:["quads","glutes"],s:[],c:["Empty bar for 10, then about 50% and 75% of your working weight for 5 and 3."]},
-  "1–2 light warm-up sets of incline press":{r:"Ramp-up sets",m:["chest"],s:["fdelt"],c:["About half your working weight for 10, then about 75% for 5."]},
-  "1–2 light warm-up sets of lat pulldown":{r:"Ramp-up sets",m:["lats"],s:["biceps"],c:["About half your working weight for 10, then about 75% for 5."]},
-  "1–2 light warm-up sets of leg press":{r:"Ramp-up sets",m:["quads","glutes"],s:[],c:["Empty sled or light plates for 10, then about 75% of your working weight for 5."]},
-  "1–2 light warm-up sets of your first exercise":{r:"Ramp-up sets",m:[],s:[],c:["About half your working weight for 10, then about 75% for 5."]},
+  "2–3 light warm-up sets of bench press":{r:"Light warm-up sets",m:["chest"],s:["fdelt","triceps"],c:["Empty bar for 10, then about 50% and 75% of your working weight for 5 and 3.","Don't tire yourself out, it's practice for the real sets."]},
+  "2–3 light warm-up sets of squats":{r:"Light warm-up sets",m:["quads","glutes"],s:[],c:["Empty bar for 10, then about 50% and 75% of your working weight for 5 and 3."]},
+  "1–2 light warm-up sets of incline press":{r:"Light warm-up sets",m:["chest"],s:["fdelt"],c:["About half your working weight for 10, then about 75% for 5."]},
+  "1–2 light warm-up sets of lat pulldown":{r:"Light warm-up sets",m:["lats"],s:["biceps"],c:["About half your working weight for 10, then about 75% for 5."]},
+  "1–2 light warm-up sets of leg press":{r:"Light warm-up sets",m:["quads","glutes"],s:[],c:["Empty sled or light plates for 10, then about 75% of your working weight for 5."]},
+  "1–2 light warm-up sets of your first exercise":{r:"Light warm-up sets",m:[],s:[],c:["About half your working weight for 10, then about 75% for 5."]},
   "Doorway chest stretch":{r:"Upper body",hold:"30–45 s per side",m:["chest"],s:["fdelt"],c:["Forearm against a door frame, elbow at shoulder height.","Step through gently until you feel a stretch across your chest."]},
   "Lat stretch":{r:"Upper body",hold:"30–45 s per side",m:["lats"],s:["midback"],c:["Hold a post or rack at waist height with one hand.","Sit your hips back and away so your side and armpit stretch."]},
   "Cross-body shoulder stretch":{r:"Upper body",hold:"30 s per side",m:["rdelt"],s:["midback"],c:["Bring one arm across your chest and pull it closer with the other hand at the elbow."]},
@@ -1565,7 +1570,7 @@ function routineHtml(kind,items,done){
     h+=`<p class="lbl rhead">${esc(g.r)}</p><div class="card routine">`;
     h+=g.list.map(([n,i])=>{const I=sinfo(n),key=kind+i,open=openHow.has(key),has=(I.c.length||I.m.length)&&!/walk|light cardio/i.test(n);
       const nd=needsOf(WEQ[n]);
-      return `<div class="ritem"><div class="swr" data-sw="routine" data-k="${kind}" data-i="${i}">${swbg("Swap","")}<div class="sw rrow"><button class="rtick" data-act="${kind==="w"?"warm":"stretch"}" data-i="${i}" aria-pressed="${!!done[i]}" aria-label="Mark ${esc(n)} done">✓</button><span class="rname">${esc(n)}${I.hold?`<small>Hold ${esc(I.hold)}</small>`:""}${nd.length?`<small class="needs">${needsText(nd)}</small>`:""}</span>${holdSecs(I.hold)?`<button type="button" class="holdbtn" data-act="hold" data-n="${esc(n)}" aria-label="Start a ${holdSecs(I.hold)} second timer for ${esc(n)}">▶ ${holdSecs(I.hold)} s</button>`:""}${has?`<button class="icob rhow" data-act="rhow" data-k="${key}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="${open?"Hide":"Show"} how to do ${esc(n)}">${IC.search}</button>`:""}${store.settings.swapBtn!==false?`<button type="button" class="icob" data-act="rswap" data-k="${kind}" data-i="${i}" aria-label="Swap ${esc(n)} for something else">${IC.swap}</button>`:""}</div></div>${open?`<div class="howto">${I.m.length?bodyMap(I.m,I.s):""}${I.c.length?`<ol>${I.c.map(c=>`<li>${esc(c)}</li>`).join("")}</ol>`:""}</div>`:""}</div>`;}).join("");
+      return `<div class="ritem"><div class="swr" data-sw="routine" data-k="${kind}" data-i="${i}">${swbg("Swap","")}<div class="sw rrow"><button class="rtick" data-act="${kind==="w"?"warm":"stretch"}" data-i="${i}" aria-pressed="${!!done[i]}" aria-label="Mark ${esc(n)} done">✓</button><span class="rname">${esc(n)}${I.hold?`<small>Hold ${esc(I.hold)}</small>`:""}${I.r==="Light warm-up sets"?`<small>Before your real sets, do the same exercise with a much lighter weight. It gets your joints and muscles ready.</small>`:""}${nd.length?`<small class="needs">${needsText(nd)}</small>`:""}</span>${holdSecs(I.hold)?`<button type="button" class="holdbtn" data-act="hold" data-n="${esc(n)}" aria-label="Start a ${holdSecs(I.hold)} second timer for ${esc(n)}">▶ ${holdSecs(I.hold)} s</button>`:""}${has?`<button class="icob rhow" data-act="rhow" data-k="${key}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="${open?"Hide":"Show"} how to do ${esc(n)}">${IC.search}</button>`:""}${store.settings.swapBtn!==false?`<button type="button" class="icob" data-act="rswap" data-k="${kind}" data-i="${i}" aria-label="Swap ${esc(n)} for something else">${IC.swap}</button>`:""}</div></div>${open?`<div class="howto">${I.m.length?bodyMap(I.m,I.s):""}${I.c.length?`<ol>${I.c.map(c=>`<li>${esc(c)}</li>`).join("")}</ol>`:""}</div>`:""}</div>`;}).join("");
     h+=`</div>`;
   }
   return h;
@@ -2486,14 +2491,17 @@ function libPickList(q,exclude){
   q=q.trim().toLowerCase();const o=LIB[exclude]||{m:[],s:[]},first=o.g,om=new Set(o.m),dCur=diffOf(exclude);
   const all=Object.values(LIB).filter(x=>x.id!==exclude&&(!q||x.n.toLowerCase().includes(q)||x.g.toLowerCase().includes(q)||typeOf(x.id).toLowerCase().includes(q)||x.m.some(m=>(MNAME[m]||"").includes(q))));
   if(!all.length)return `<p class="note">No matches.</p>`;
-  const score=x=>x.m.filter(m=>om.has(m)).length*3+x.s.filter(m=>om.has(m)).length;
+  const os=new Set(o.s||[]),w=(m,a,b,c)=>om.has(m)?a:os.has(m)?b:c,score=x=>x.m.reduce((t,m)=>t+w(m,3,0.5,-1.5),0)+x.s.reduce((t,m)=>t+w(m,1,0.5,0),0)-Math.abs(x.m.length-om.size)*0.5+nameSim(x),tCur=typeOf(exclude);
+  const tok=n=>String(n).toLowerCase().split(/[^a-z]+/).filter(t=>t.length>=3&&!["machine","with","the","and","seated","standing","dumbbell","barbell","cable"].includes(t)),ct=tok(o.n||""),nameSim=x=>{const xt=tok(x.n);return ct.filter(t=>xt.some(u=>u.startsWith(t)||t.startsWith(u))).length*0.4;};
   const groups=[first].concat(GROUPS,["Other"]).filter((g,i,a)=>g&&a.indexOf(g)===i);
   const anyNo=all.some(x=>!canDo(x.id));
+  const sameG=all.filter(x=>x.g===first);let best=null;
+  if(om.size){const fit=x=>score(x)-Math.max(0,diffOf(x.id)-Math.max(levelMax(),dCur))*2,top=sameG.slice().sort((a,b)=>fit(b)-fit(a)||(canDo(b.id)-canDo(a.id))||Math.abs(diffOf(a.id)-dCur)-Math.abs(diffOf(b.id)-dCur)||((typeOf(b.id)===tCur)-(typeOf(a.id)===tCur))||a.n.localeCompare(b.n))[0];if(top&&top.m.filter(m=>om.has(m)).length/om.size>=0.5)best=top.id;}
   return (anyNo?`<p class="note eqnote">Exercises marked <span class="needs">Needs …</span> use equipment that isn't in your setup. You can still pick them.</p>`:"")+groups.map(g=>{const xs=all.filter(x=>x.g===g).sort((a,b)=>score(b)-score(a)||(canDo(b.id)-canDo(a.id))||diffOf(a.id)-diffOf(b.id)||a.n.localeCompare(b.n));if(!xs.length)return "";
-    return `<p class="libhead">${esc(g)}${g===first?` <small>same muscle group · closest match first</small>`:""}</p>`+libItems(xs,g===first?dCur:0);}).join("");
+    return `<p class="libhead">${esc(g)}${g===first?` <small>same muscle group</small>`:""}</p>`+libItems(best&&g===first?[LIB[best]].concat(xs.filter(x=>x.id!==best)):xs,g===first?dCur:0,best);}).join("");
 }
-function libItems(xs,dCur){
-  return xs.map(x=>`<button type="button" class="libitem${canDo(x.id)?"":" cant"}" data-pick="${x.id}" aria-pressed="${sheetEl._pick===x.id}"><span><strong>${esc(x.n)}${dCur&&diffOf(x.id)<dCur?` <span class="easier">Easier</span>`:""}</strong><small>${x.m.length?x.m.map(m=>MNAME[m]).join(", ").replace(/^./,c=>c.toUpperCase()):esc(x.g)} · ${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}</small>${needsBadge(x.id)}</span><span class="chk">✓</span></button>`).join("");
+function libItems(xs,dCur,best){
+  return xs.map(x=>`<button type="button" class="libitem${canDo(x.id)?"":" cant"}" data-pick="${x.id}" aria-pressed="${sheetEl._pick===x.id}"><span><strong>${esc(x.n)}${x.id===best?` <span class="closest">Closest match</span>`:""}${dCur&&diffOf(x.id)<dCur?` <span class="easier">Easier</span>`:""}</strong><small>${x.m.length?x.m.map(m=>MNAME[m]).join(", ").replace(/^./,c=>c.toUpperCase()):esc(x.g)} · ${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}</small>${needsBadge(x.id)}</span><span class="chk">✓</span></button>`).join("");
 }
 sheetEl.addEventListener("input",e=>{if(e.target.id==="swQ"){const r=sheetEl.querySelector("#swRes");if(r)r.innerHTML=libPickList(e.target.value,sheetEl._exclude);}});
 
@@ -2511,10 +2519,10 @@ function editEx(id){
   const orig=origOf(day,id),canPlan=k>=NEWPLAN;
   sheetEl._exclude=id;
   openSheet("Swap "+cur[1],
-    `<p class="note" style="margin-top:0">Pick an exercise to do instead. Sets and reps stay the same, and anything you've logged moves over.</p>
+    `${canPlan?scopeSeg(P.name):""}<p class="note" style="margin-top:0">Pick an exercise to do instead. Sets and reps stay the same, and anything you've logged moves over. Matches are based on the muscles each exercise works, so some swaps are closer than others.</p>
      <input class="field" id="swQ" data-nofocus="1" placeholder="Search, like row or chest" aria-label="Search exercises">
      <div id="swRes" class="swres">${libPickList("",id)}</div>
-     ${canPlan?`<div class="seg" style="margin:12px 0 0"><button type="button" data-scope="today" aria-pressed="true">Just today</button><button type="button" data-scope="plan" aria-pressed="false">Every ${esc(P.name)}</button></div>`:""}`,
+`,
     [{label:"Swap exercise",fn:()=>{const n=sheetEl._pick;if(!n)return false;
         const u=snap(["day-"+k,"settings"]),scope=canPlan?sheetEl._scope:"today";
         if(day.sets&&day.sets[id]&&!day.sets[n]){day.sets[n]=day.sets[id];delete day.sets[id];}
@@ -2522,7 +2530,7 @@ function editEx(id){
         day.swap=day.swap||{};
         if(scope==="plan"){const PE=ensureEditable(p);const ix=PE?PE.ex.findIndex(x=>x[0]===orig):-1;if(ix>=0){const o=PE.ex[ix],L0=libArr(n);PE.ex[ix]=[L0[0],L0[1],o[2],o[3],L0[4],o[5],o[6],o[7]];}delete day.swap[orig];persist("settings");}
         else{if(n===orig)delete day.swap[orig];else day.swap[orig]=n;}
-        persist("day-"+k);render();toast((scope==="plan"?"Swapped in your plan":"Swapped for today")+(canDo(n)?"":". Heads up: it "+needsText(needs(n)).toLowerCase()+", which isn't in your equipment"),u);}},
+        persist("day-"+k);render();toast((scope==="plan"?"Swapped from now on":"Swapped for today")+(canDo(n)?"":". Heads up: it "+needsText(needs(n)).toLowerCase()+", which isn't in your equipment"),u);}},
      {label:"Remove for today",cls:"btn danger",fn:()=>skipEx(id)},
      {label:"Cancel",cls:"btn ghost"}]);
 }
@@ -2881,19 +2889,20 @@ function openEqReview(){const L=eqIssues();openSheet("Swaps for your equipment",
 sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="eqreview")return;const b=e.target.closest("[data-eqs]");if(!b)return;const [a,i]=b.dataset.eqs.split(":"),x=eqIssues()[+i],S=store.settings;if(!x)return;
   if(a==="swap")eqApply(x);else if(a==="rm"){const PE=ensureEditable(x.p);if(PE)PE.ex=PE.ex.filter(r=>r[0]!==x.e[0]);}else S.eqKeep=(S.eqKeep||[]).concat([x.p+":"+x.e[0]]);persist("settings");sheetEl.querySelector(".sheet-b").innerHTML=eqReviewBody();render();});
 // warm-up and stretch swaps
+function scopeSeg(pn){return `<div class="seg scopeseg" role="group" aria-label="How long to swap"><button type="button" data-scope="today" aria-pressed="true">Just today</button><button type="button" data-scope="plan" aria-pressed="false">From now on</button></div><p class="note scopenote">From now on changes every ${esc(pn)} day from today. Past days stay as they were.</p>`;}
 function routineSwap(kind,i){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],list=routineFor(kind,k,p,P,k>=NEWPLAN),cur=list[i];if(!cur)return;
   const reg=sinfo(cur).r,opts=Object.keys(SINFO).filter(n=>n!==cur&&sinfo(n).r===reg&&!/^Stretch each muscle|^Walk to the gym/.test(n))
     .sort((a,b)=>(needsOf(WEQ[a]).length-needsOf(WEQ[b]).length)||((WDIFF[a]||1)-(WDIFF[b]||1))||a.localeCompare(b));
   const anyNo=opts.some(n=>needsOf(WEQ[n]).length);
   sheetEl._pick=null;
-  openSheet("Swap "+cur,`<p class="note" style="margin-top:0">Pick something to do instead. Easiest options are at the top.${anyNo?` Items marked <span class="needs">Needs …</span> use equipment that isn't in your setup, but you can still pick them.`:""}</p>
+  openSheet("Swap "+cur,`${scopeSeg(P.name)}<p class="note" style="margin-top:0">Pick something to do instead. Easiest options are at the top.${anyNo?` Items marked <span class="needs">Needs …</span> use equipment that isn't in your setup, but you can still pick them.`:""}</p>
     <div class="swres">${opts.map(n=>{const nd=needsOf(WEQ[n]);return `<button type="button" class="libitem${nd.length?" cant":""}" data-pick="${esc(n)}" aria-pressed="false"><span><strong>${esc(n)}${(WDIFF[n]||1)<(WDIFF[cur]||1)?` <span class="easier">Easier</span>`:""}</strong><small>${sinfo(n).hold?"Hold "+esc(sinfo(n).hold):esc(reg)}</small>${nd.length?`<span class="needs">${needsText(nd)}</span>`:""}</span><span class="chk">✓</span></button>`;}).join("")}</div>
-    <div class="seg" style="margin:12px 0 0"><button type="button" data-scope="today" aria-pressed="true">Just today</button><button type="button" data-scope="plan" aria-pressed="false">Every ${esc(P.name)}</button></div>`,
+`,
     [{label:"Swap",fn:()=>{const n=sheetEl._pick;if(!n)return false;const u=snap(["day-"+k,"settings"]),day=ensureDay(k);
       if(sheetEl._scope==="plan"){ensureRoutine(kind,p,P)[i]=n;if(day.rswap&&day.rswap[kind])delete day.rswap[kind][i];persist("settings");}
       else{day.rswap=day.rswap||{};day.rswap[kind]=day.rswap[kind]||{};day.rswap[kind][i]=n;}
-      persist("day-"+k);renderTrain();toast((sheetEl._scope==="plan"?"Swapped every "+P.name:"Swapped for today")+(needsOf(WEQ[n]).length?". Heads up: it "+needsText(needsOf(WEQ[n])).toLowerCase():""),u);}},
+      persist("day-"+k);renderTrain();toast((sheetEl._scope==="plan"?"Swapped from now on":"Swapped for today")+(needsOf(WEQ[n]).length?". Heads up: it "+needsText(needsOf(WEQ[n])).toLowerCase():""),u);}},
      {label:"Cancel",cls:"btn ghost"}]);
 }
 $("panel").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
@@ -3026,8 +3035,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
   if(k==="level")S.level=v;else if(k==="repDefault"){if(v)S.repDefault=v;else delete S.repDefault;}else{if(v==="on")delete S[k];else S[k]=false;}persist("settings");renderSettings();});
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="2.8";
+const APP_VERSION="2.9";
 const CHANGELOG=[
+  {v:"2.9",d:"9 October 2026",t:"Clearer swaps",items:["The best swap is marked Closest match. If nothing is close enough, there is no mark","Swap sheets say matches are based on the muscles each exercise works","Just today or From now on is now at the top of every swap sheet, so it's easy to spot","Ramp-up sets are now called light warm-up sets, with a line explaining what they are"]},
   {v:"2.8",d:"9 October 2026",t:"Equipment, swaps and exercise library",items:["Setup asks what equipment you have (full gym, home with dumbbells, bodyweight only or your own list) and fills your plan with exercises you can do","Change your equipment in Settings → Training. The app then suggests swaps, and you choose Swap or Keep for each","Exercises and warm-ups that need equipment you don't have are marked, but you can still pick them","Swap lists show the closest match first: same main muscles, then easier options, each marked with type and difficulty","Swap warm-ups and stretches for easier ones with the swap button or by swiping right, just for today or every time. A switch in Settings → Training hides the swap buttons","New easier warm-ups and stretches, like an assisted hang with your feet on the floor","Exercise library in Help: search all exercises, filter by type (bodyweight, machine, barbell, dumbbells, cable and more) and muscle group","Coach tips on exercises, like bringing your wrists together at the end of a chest fly"]},
   {v:"2.7",d:"9 October 2026",t:"Install as an app",items:["New Settings page with steps to install Body Builder on iPhone, Android and computers","Android phones get an Install button that opens the phone's own install prompt","Explains offline use, and adds a Share the link button for friends"]},
   {v:"2.6",d:"9 October 2026",t:"Less scrolling",items:["Settings is now a short menu. Each section opens on its own page, with Change log always last","Warm-up and stretches fold away once everything is ticked, and Cardio stays folded until you use it. Tap a section title to open or close it","Exercises fold into one line once every set is done. Tap to open them again","On the Edit page, layout, warm-up and stretches are folded until you open them"]},
