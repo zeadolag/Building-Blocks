@@ -26,7 +26,6 @@
   --shadow:0 1px 2px 0 rgb(0 0 0 / .05); --shadow-sm:0 1px 3px 0 rgb(0 0 0 / .08),0 1px 2px -1px rgb(0 0 0 / .08);
   --red:#DC2626; --blue:#2563EB; --dayblue:#2563EB; --yellow:#EAB308; --green:#16A34A; --black:#3F3F46; --amber:#B45309;
   color-scheme:light; box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -50,7 +49,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--ring);outline-offset:2px}
 h1,h2,h3{font-family:inherit;margin:0;font-weight:600;letter-spacing:-.02em;line-height:1.2}
-.wrap{max-width:560px;margin:0 auto;padding:10px 16px 116px}
+.wrap{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 116px}
 
 /* ---------- App bar (Settings only), date and week ---------- */
 .appbar{display:none;align-items:center;justify-content:space-between;min-height:40px;margin-bottom:4px}
@@ -170,9 +169,9 @@ textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertica
 .icob[aria-pressed="true"],.icob.has{color:var(--ink);border-color:var(--ink)}
 .iconbtn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0;color:var(--ink)}
 .rm{border:0;background:none;color:var(--muted);width:34px;height:34px;font-size:18px}
-.tgt{border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left;cursor:help;text-decoration:underline dotted color-mix(in srgb,var(--blue) 60%,transparent);text-underline-offset:3px;text-decoration-thickness:1.5px}
+.tgt{border:0;background:none;padding:0;font:inherit;font-weight:500;color:var(--blue);text-align:left;cursor:help}
 .tgt .big,.tgt .of{display:block}
-.tgrid .tgt{text-decoration:none;display:block}.tgrid .tgt .of{text-decoration:underline dotted color-mix(in srgb,var(--blue) 60%,transparent);text-underline-offset:3px}
+.tgrid .tgt{display:block;color:inherit}.tgrid .tgt .of{color:var(--blue);font-weight:500}
 .kw{border:0;background:none;padding:0;font:inherit;font-weight:500;color:var(--blue);cursor:help}
 /* progress bars */
 .meters{display:grid;gap:14px}
@@ -420,6 +419,11 @@ details.mine summary{cursor:pointer;color:var(--blue);font-weight:500}
 .histday .hb{color:var(--muted)}
 .servrow{display:grid;gap:4px;margin-top:8px}
 .portion .field:disabled{opacity:.5}
+.macros{gap:14px}
+.mini-m .meter-top{font-size:13px}
+.mini-m .of{font-size:13px}.mini-m .of b{color:var(--ink);font-weight:600}
+.bar.sm{height:6px;margin-top:4px}
+.qa3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .nutcard{padding:12px 14px}
 .nuthd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .nuthd strong{font-weight:600;font-size:15px}
@@ -1993,28 +1997,35 @@ function myMeals(){return Array.isArray(store.settings.myMeals)?store.settings.m
 function slotOpts(slot){
   const hid=hiddenMeals();
   const os=store.settings.fresh?[]:slot.opts.filter(o=>!hid.includes(o.id));
-  for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,fb:Number(mm.fb)||0,nu:mm.nu||null,mine:1});
+  for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,cb:mm.cb,f:mm.f,fb:Number(mm.fb)||0,nu:mm.nu||null,mine:1});
   if(slot.recipes)for(const r of allRecipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0});
   return os;
 }
 function chosen(slot,day){const v=(day.meals||{})[slot.id];if(!v)return null;const os=slotOpts(slot);if(v===true)return os[0];return os.find(o=>o.id===v)||null;}
 // Grams from a quick item's name, matched to an ingredient, so fibre and minerals can be estimated
 function quickNu(q){const g=num((String(q.n).match(/(\d+(?:[.,]\d+)?)\s*g\b/)||[])[1]);let grams=g;if(!grams&&/egg/i.test(q.n)){const c=num((String(q.n).match(/(\d+)/)||[])[1])||1;grams=c*55;}
-  const w=String(q.n).toLowerCase().split(/[ ,]+/)[0];if(!grams||!w)return {};const it=allIngr().find(x=>x.n.toLowerCase().startsWith(w));if(!it)return {};const m=macrosFor(it,grams);return {fb:r1(m.fb)||undefined,nu:m.nu||undefined};}
+  const w=String(q.n).toLowerCase().split(/[ ,]+/)[0];if(!grams||!w)return {};const it=allIngr().find(x=>x.n.toLowerCase().startsWith(w));if(!it)return {};const m=macrosFor(it,grams);return {cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb)||undefined,nu:m.nu||undefined};}
 // Supplements count towards what they contain: amount from the name if given, else a typical dose
 const SUPPNU={creatine:["cr",5,"g"],vitd:["d",1000,"IU"],omega3:["o3",500,"mg"],magnesium:["mg",300,"mg"],iron:["fe",14,"mg"],calcium:["ca",500,"mg"]};
 function suppNu(n){const I=suppInfo(n);if(!I||!SUPPNU[I.id])return null;const [key,def,unit]=SUPPNU[I.id];
   const m=String(n).replace(/(\d),(\d{3})/g,"$1$2").match(/(\d+(?:[.,]\d+)?)\s*(mg|g|iu|ie|µg|mcg|ug)\b/i);let v=def;
   if(m){let x=num(m[1]);const u=m[2].toLowerCase();if(key==="d")v=u==="iu"||u==="ie"?x:x*40;else if(key==="cr")v=u==="g"?x:x/1000;else v=u==="g"?x*1000:u==="mg"?x:x/1000;}
   return {[key]:v};}
+// Carb and fat targets for a calorie target, the same way the calculator works them out
+function macroTargets(kc,prot){const pf=store.settings.profile||{},w=toKg(pf.w)||myKg(),h=num(pf.h)/100,refW=w&&h&&w/(h*h)>30?27*h*h:w;
+  const fat=Math.round(Math.max(refW?0.8*refW:0,kc*0.25/9)),carbs=Math.max(0,Math.round((kc-prot*4-fat*9)/4));return {cb:carbs,f:fat};}
+function splitUnknown(kcal,p){const S=store.settings,T=macroTargets(num(S.kcal),num(S.protein)),ck=T.cb*4,fk=T.f*9,rest=Math.max(0,kcal-p*4),share=ck+fk?ck/(ck+fk):0.55;return {cb:rest*share/4,f:rest*(1-share)/9};}
 function eatTotals(day){
-  let k=0,p=0,fb=0,nu={};
-  for(const s of SLOTS){const o=chosen(s,day);if(o){k+=o.k;p+=o.p;fb+=Number(o.fb)||0;nu=nuAdd(nu,o.nu);}}
-  if((day.meals||{}).rice){k+=RICE.k;p+=RICE.p;fb+=0.5;}
-  for(const e of day.extras||[]){k+=Number(e.k)||0;p+=Number(e.p)||0;fb+=Number(e.fb)||0;nu=nuAdd(nu,e.nu);}
+  let k=0,p=0,fb=0,nu={},cb=0,f=0,est=0;
+  const mac=(o,kk,pp)=>{if(o&&o.cb!=null&&o.f!=null){cb+=num(o.cb);f+=num(o.f);}else{const x=splitUnknown(kk,pp);cb+=x.cb;f+=x.f;if(kk>0)est++;}};
+  for(const s of SLOTS){const o=chosen(s,day);if(o){k+=o.k;p+=o.p;fb+=Number(o.fb)||0;nu=nuAdd(nu,o.nu);mac(o,o.k,o.p);}}
+  if((day.meals||{}).rice){k+=RICE.k;p+=RICE.p;fb+=0.5;cb+=27;f+=0.2;}
+  for(const e of day.extras||[]){k+=Number(e.k)||0;p+=Number(e.p)||0;fb+=Number(e.fb)||0;nu=nuAdd(nu,e.nu);mac(e,num(e.k),num(e.p));}
   for(const n of Object.keys(day.supps||{}))if(day.supps[n])nu=nuAdd(nu,suppNu(n));
-  return {k,p,fb,nu,water:num(day.water)};
+  return {k,p,fb,nu,water:num(day.water),cb,f,est};
 }
+function miniMeter(kind,label,val,target){const pct=target?Math.min(100,val/target*100):0;
+  return `<div class="mini-m"><div class="meter-top"><span>${tg(kind,label)}</span><span class="of"><b>${fmt(val)}</b>/${fmt(target)} g</span></div><div class="bar sm"><span style="width:${pct}%"></span></div></div>`;}
 function meter(label,val,target,unit){
   const pct=target?Math.min(100,val/target*100):0,over=val>target;
   const diff=Math.abs(target-val);
@@ -2052,11 +2063,12 @@ function foodRow(e,i){return `<div class="swr li" data-sw="food" data-i="${i}">$
 function quickAdd(slot){
   const sl=SLOTS.find(x=>x.id===slot);
   openSheet(sl?"Quick add to "+sl.name:"Quick add food",`<input class="field" id="qkN" placeholder="What did you eat?" aria-label="Food name">
-   <div class="qa" style="margin-top:8px"><input class="field" id="qkK" inputmode="decimal" placeholder="kcal" aria-label="Calories"><input class="field" id="qkP" inputmode="decimal" placeholder="protein g" aria-label="Protein"><input class="field" id="qkF" inputmode="decimal" placeholder="fibre g" aria-label="Fibre (optional)"></div>
+   <div class="pair" style="margin-top:8px"><input class="field" id="qkK" inputmode="decimal" placeholder="kcal" aria-label="Calories"><input class="field" id="qkP" inputmode="decimal" placeholder="protein g" aria-label="Protein"></div>
+   <div class="qa3" style="margin-top:8px"><input class="field" id="qkC" inputmode="decimal" placeholder="carbs g" aria-label="Carbs (optional)"><input class="field" id="qkT" inputmode="decimal" placeholder="fat g" aria-label="Fat (optional)"><input class="field" id="qkF" inputmode="decimal" placeholder="fibre g" aria-label="Fibre (optional)"></div>
    ${sl?`<button type="button" class="toggle mini-t" style="margin-top:8px;width:100%" data-qsave aria-pressed="false"><span class="box">✓</span><span class="txt"><strong>Also save it as a ${sl.name.toLowerCase()} option</strong></span></button>`:""}
    <p class="note">Don't know the numbers? Use the food calculator, or log a rough cheat meal instead.</p>`,
    [{label:"Add to "+(sel===todayKey()?"today":shortDate(sel)),fn:()=>{const n=$("qkN").value.trim(),kc=num($("qkK").value);if(!(kc>0)){$("qkK").focus();return false;}
-      const k=sel,day=ensureDay(k),u=snap(["day-"+k,"settings"]),e={n:n||(sl?sl.name:"Food"),k:Math.round(kc),p:r1(num($("qkP").value))};const fb=num($("qkF").value);if(fb>0)e.fb=r1(fb);if(sl)e.slot=slot;
+      const k=sel,day=ensureDay(k),u=snap(["day-"+k,"settings"]),e={n:n||(sl?sl.name:"Food"),k:Math.round(kc),p:r1(num($("qkP").value))};const fb=num($("qkF").value);if(fb>0)e.fb=r1(fb);if($("qkC").value.trim()!=="")e.cb=r1(num($("qkC").value));if($("qkT").value.trim()!=="")e.f=r1(num($("qkT").value));if(sl)e.slot=slot;
       (day.extras=day.extras||[]).push(e);persist("day-"+k);
       const sv=sheetEl.querySelector("[data-qsave]");if(sl&&sv&&sv.getAttribute("aria-pressed")==="true"){store.settings.myMeals=myMeals().concat([{id:Date.now().toString(36),slot,n:e.n,d:"Your meal",k:e.k,p:e.p,fb:e.fb||0}]);persist("settings");}
       renderEat();toast("Added "+e.n,u);}},{label:"Cancel",cls:"btn ghost"}]);
@@ -2075,7 +2087,7 @@ function renderEat(){
   const k=sel,day=store.days[k]||{},m=day.meals||{},lifting=!["rest","run"].includes(planOf(k)),t=eatTotals(day),S=store.settings,T=dayTargets(day),c=cheatOf(day),ex=day.extras||[];
   let h=`<section>`;
   if(c&&c.type==="free")h+=`<div class="card meters freeday"><strong>Free day</strong><p class="note" style="margin:2px 0 0">No targets today${t.k?`, ${fmt(t.k)} kcal logged anyway`:""}. Back on plan tomorrow.</p></div>`;
-  else{h+=`<div class="card meters">${c&&c.type==="skip"?`<p class="cheatnote">Cheat meal today. Calories aren't counted, so this day is marked as over your target.</p>`:""}${meter("",t.k,T.k,"kcal")}${meter("protein",t.p,T.p,"g")}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}</div>`;}
+  else{h+=`<div class="card meters">${c&&c.type==="skip"?`<p class="cheatnote">Cheat meal today. Calories aren't counted, so this day is marked as over your target.</p>`:""}${meter("",t.k,T.k,"kcal")}${meter("protein",t.p,T.p,"g")}${(()=>{const M=macroTargets(T.k,T.p);return `<div class="pair macros">${miniMeter("carbs","Carbs",t.cb,M.cb)}${miniMeter("fat","Fat",t.f,M.f)}</div>${t.est&&t.k?`<p class="note" style="margin:-6px 0 0;font-size:12px">Some foods have no carb and fat values, so part of this is estimated.</p>`:""}`;})()}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}</div>`;}
   if(!(c&&c.type==="free"))h+=nutCard(k,t);
   if(!S.tipSwipe)h+=`<p class="note tip">Tap a tile to open it, or <b>+</b> to add something fast. Swipe a meal or food left to delete it, right to edit. <button class="linkbtn" data-act="tipok">Got it</button></p>`;
   h+=`<div class="egrid">`;
@@ -2205,7 +2217,7 @@ function tgtInfo(kind){const S=store.settings,g=goalKind(),kg=myKg(),pf=S.profil
   const T={
    kcal:["Calories",g==="cut"?`<p><b>A ceiling.</b> You're losing fat, so ${fmt(S.kcal)} kcal is the most to eat. Landing on it or a little under is the goal. Going over now and then is fine, but it slows progress.</p><p>Don't go far under either: big gaps cost muscle, sleep and training energy.</p>`:g==="bulk"?`<p><b>A minimum.</b> You're building muscle, so reach ${fmt(S.kcal)} kcal every day. Going 100–200 kcal over is fine.</p><p>Way over just adds more fat than muscle.</p>`:`<p><b>Hit it closely.</b> You're maintaining, so aim within about 100 kcal of ${fmt(S.kcal)} either way. Over the week it should average out.</p>`],
    protein:["Protein",`<p><b>A minimum.</b> Reach ${fmt(S.protein)} g every day${kg?`, about ${(S.protein/kg).toFixed(1)} g per kg`:""}. Going over is fine. It's just more filling and more expensive.</p><p>It protects muscle on a diet and builds it otherwise. Spread it over 3–5 meals.</p>`],
-   carbs:["Carbs",`<p><b>Flexible.</b> Carbs fill the calories left after protein and fat. Eat more around training, especially running and Hyrox days.</p>`],
+   carbs:["Carbs",`<p><b>Flexible.</b> About ${fmt(macroTargets(num(S.kcal),num(S.protein)).cb)} g a day. Carbs fill the calories left after protein and fat. Eat more around training, especially running and Hyrox days.</p>`],
    fat:["Fat",`<p><b>A minimum, roughly.</b> Don't go much below${kg?` about ${Math.round(0.8*kg)} g (0.8 g per kg)`:" about 0.8 g per kg"}, since fat is needed for hormones. Above that it's flexible.</p>`],
    fibre:["Fibre",`<p><b>A minimum.</b> About ${fibreGoal()} g a day, worked out from your calories (14 g per 1,000 kcal, at least ${bySex(RG().fib)} g) keeps digestion regular and keeps you full. More is fine.</p><p>Raise it slowly and drink enough water, or it can cause bloating.</p>`],
    water:["Water",`<p><b>A minimum guide.</b> ${waterGoal()} Drink more when it's hot or you sweat a lot.</p><p>Pale yellow urine means you're drinking enough.</p>`],
@@ -2999,12 +3011,12 @@ sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="addfood")return;const b
   if(a==="manual"){const sl=afSlot;closeSheet();quickAdd(sl);return;}
   if(a==="pick"){const x=afItems()[+b.dataset.i];if(!x)return;
     if(x.t==="ingr"){afPick=x.it;$("afSel").innerHTML=afSelHtml(x.it);const g=$("afG");if(g){g.focus();g.select();}return;}
-    if(x.t==="meal"){const o=x.o;afLog({n:o.n,k:Math.round(o.k),p:r1(o.p),fb:o.fb||undefined,nu:o.nu||undefined},o.n);}
-    else if(x.t==="recipe"){const r=x.r;afLog({n:r.n+", 1 serving",k:Math.round(num(r.k)),p:r1(num(r.p)),fb:num(r.fb)||undefined,nu:r.nu||undefined},"1 serving of "+r.n);}
+    if(x.t==="meal"){const o=x.o;afLog({n:o.n,k:Math.round(o.k),p:r1(o.p),cb:o.cb,f:o.f,fb:o.fb||undefined,nu:o.nu||undefined},o.n);}
+    else if(x.t==="recipe"){const r=x.r;afLog({n:r.n+", 1 serving",k:Math.round(num(r.k)),p:r1(num(r.p)),cb:r.cb,f:r.f,fb:num(r.fb)||undefined,nu:r.nu||undefined},"1 serving of "+r.n);}
     else if(x.t==="quick"){const q=quick()[x.i];afLog(Object.assign({n:q.n,k:q.k,p:q.p},quickNu(q)),q.n);}
     b.classList.add("added");setTimeout(()=>b.classList.remove("added"),600);return;}
   if(a==="addingr"&&afPick){const g=num($("afG").value);if(!(g>0)){$("afG").focus();return;}const m=macrosFor(afPick,g);
-    afLog({n:afPick.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),fb:r1(m.fb)||undefined,nu:m.nu||undefined},r1(g)+" g "+afPick.n.split(/[,(]/)[0].trim().toLowerCase());
+    afLog({n:afPick.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb)||undefined,nu:m.nu||undefined},r1(g)+" g "+afPick.n.split(/[,(]/)[0].trim().toLowerCase());
     afPick=null;$("afSel").innerHTML="";const q=$("afQ");if(q){q.value="";afQ="";$("afRes").innerHTML=afList();}}});
 sheetEl.addEventListener("click",e=>{const b=e.target.closest("[data-qsave]");if(b)b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));});
 
@@ -3222,16 +3234,16 @@ $("panel").addEventListener("click",e=>{
   else if(act==="fccat"){fcCat=b.dataset.c;renderEat();}
   else if(act==="fcpick"){fcPick=b.dataset.n;renderEat();const g=$("fcG");if(g){g.focus();g.select();}}
   else if(act==="fcadd"||act==="fcmb"){const it=allIngr().find(x=>x.n===fcPick);if(!it)return;const g=num($("fcG").value);if(!(g>0)){$("fcG").focus();return;}
-    if(act==="fcadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]),m=macrosFor(it,g);(day.extras=day.extras||[]).push({n:it.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),fb:r1(m.fb),nu:m.nu||undefined});persist("day-"+k);renderEat();toast("Added to today",u);}
+    if(act==="fcadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]),m=macrosFor(it,g);(day.extras=day.extras||[]).push({n:it.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb),nu:m.nu||undefined});persist("day-"+k);renderEat();toast("Added to today",u);}
     else{mb.push(Object.assign({},it,{g}));fcPick=null;renderEat();}}
   else if(act==="mbrm"){mb.splice(+b.dataset.i,1);renderEat();}
   else if(act==="mbclear"){mb=[];renderEat();}
   else if(act==="mbrecipe"){if(!mb.length)return;const t=mbTotals(),sv=num(mbServ)||1,n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", "),u=snap(["settings"]),id=Date.now().toString(36);
-    ensureRecipes().push({id,n,k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv),s:sv,ing:mb.map(x=>r1(x.g)+" g "+x.n.replace(/, (raw|dry|drained)$/,"").toLowerCase()),steps:[]});persist("settings");mb=[];mbServ=1;openRec.add(id);renderEat();toast("Recipe saved",u);}
+    ensureRecipes().push({id,n,k:Math.round(t.k/sv),p:r1(t.p/sv),cb:r1(t.cb/sv),f:r1(t.f/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv),s:sv,ing:mb.map(x=>r1(x.g)+" g "+x.n.replace(/, (raw|dry|drained)$/,"").toLowerCase()),steps:[]});persist("settings");mb=[];mbServ=1;openRec.add(id);renderEat();toast("Recipe saved",u);}
   else if(act==="mbadd"||act==="mbsave"){if(!mb.length)return;const t=mbTotals(),n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", ");
     const sv=num(mbServ)>0?num(mbServ):1;
-    if(act==="mbadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:sv>1?n+", 1 of "+sv+" servings":n,k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv)});persist("day-"+k);mb=[];mbServ=1;renderEat();toast(sv>1?"One serving added to today":"Meal added to today",u);}
-    else{const S=store.settings,u=snap(["settings"]),sl=$("mbSl").value;S.myMeals=myMeals().concat([{id:Date.now().toString(36),slot:sl,n,d:mb.map(x=>r1(x.g)+" g "+x.n.split(",")[0].toLowerCase()).join(", "),k:Math.round(t.k/sv),p:r1(t.p/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv)}]);persist("settings");mb=[];mbServ=1;renderEat();toast("Saved under "+SLOTS.find(x=>x.id===sl).name,u);}}
+    if(act==="mbadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);(day.extras=day.extras||[]).push({n:sv>1?n+", 1 of "+sv+" servings":n,k:Math.round(t.k/sv),p:r1(t.p/sv),cb:r1(t.cb/sv),f:r1(t.f/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv)});persist("day-"+k);mb=[];mbServ=1;renderEat();toast(sv>1?"One serving added to today":"Meal added to today",u);}
+    else{const S=store.settings,u=snap(["settings"]),sl=$("mbSl").value;S.myMeals=myMeals().concat([{id:Date.now().toString(36),slot:sl,n,d:mb.map(x=>r1(x.g)+" g "+x.n.split(",")[0].toLowerCase()).join(", "),k:Math.round(t.k/sv),p:r1(t.p/sv),cb:r1(t.cb/sv),f:r1(t.f/sv),fb:r1(t.fb/sv),nu:nuMul(t.nu,1/sv)}]);persist("settings");mb=[];mbServ=1;renderEat();toast("Saved under "+SLOTS.find(x=>x.id===sl).name,u);}}
   else if(act==="niadd"){const n=$("niN").value.trim(),k=num($("niK").value);if(!n){$("niN").focus();return;}if(!(k>=0)||$("niK").value.trim()===""){$("niK").focus();return;}
     const S=store.settings,u=snap(["settings"]);S.ingredients=(S.ingredients||[]).concat([{n,k,p:num($("niP").value),cb:num($("niC").value),f:num($("niF").value),fb:num(($("niB")||{}).value)}]);persist("settings");fcCat="Mine";fcPick=n;renderEat();toast("Ingredient saved",u);}
   else if(act==="usetargets"){const r=calcTargets(Object.assign({sex:"m",act:1.55,goal:-550},profile()));if(!r)return;const S=store.settings,u=snap(["settings"]);S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;persist("settings");render();toast("Targets set to "+fmt(S.kcal)+" kcal and "+S.protein+" g protein",u);}
@@ -3414,7 +3426,7 @@ $("panel").addEventListener("click",e=>{
   if(a==="recopen"){const id=b.dataset.id;if(openRec.has(id))openRec.delete(id);else openRec.add(id);renderEat();}
   else if(a==="reclog"){const r=allRecipes().find(x=>x.id===b.dataset.id);if(!r)return;const P=portionOf(r),k=sel,day=ensureDay(k),u=snap(["day-"+k]),lab=P.n===1?"1 serving":r1(P.n)+" servings";
     {const box=document.querySelector(`#rpOut-${CSS.escape(r.id)}`),twI=box&&box.closest(".portion").querySelector('[data-pf2="tw"]');if(twI&&num(twI.value)>0){store.settings.recTw=Object.assign({},store.settings.recTw,{[r.id]:num(twI.value)});persist("settings");}}
-    (day.extras=day.extras||[]).push({n:r.n+", "+lab,k:Math.round(num(r.k)*P.n),p:r1(num(r.p)*P.n),fb:r1(num(r.fb)*P.n)||undefined,nu:r.nu?nuMul(r.nu,P.n):undefined});persist("day-"+k);renderEat();toast("Logged "+lab+" of "+r.n,u);}
+    (day.extras=day.extras||[]).push({n:r.n+", "+lab,k:Math.round(num(r.k)*P.n),p:r1(num(r.p)*P.n),cb:r.cb!=null?r1(num(r.cb)*P.n):undefined,f:r.f!=null?r1(num(r.f)*P.n):undefined,fb:r1(num(r.fb)*P.n)||undefined,nu:r.nu?nuMul(r.nu,P.n):undefined});persist("day-"+k);renderEat();toast("Logged "+lab+" of "+r.n,u);}
   else if(a==="recedit")editRecipe(+b.dataset.i);
   else if(a==="reccopy"){const r=RECIPES.find(x=>x.id===b.dataset.id);if(!r)return;ensureRecipes().push({id:r.id,n:r.n,k:r.k,p:r.p,s:r.s,ing:r.ing.slice(),steps:r.steps.slice(),note:r.note});persist("settings");renderEat();toast("Saved your own copy. Change anything with Edit");}
 });
@@ -3662,8 +3674,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="3.6";
+const APP_VERSION="3.7";
 const CHANGELOG=[
+  {v:"3.7",d:"10 October 2026",t:"Carbs and fat",items:["Carbs and fat now show under calories and protein, with your targets","Foods from the calculator, the + search, the meal builder and quick picks save their carbs and fat. You can also type them in when adding food by hand","Tappable targets are shown in your accent colour instead of underlined","Fixed the top of the app sitting under the status bar on iPhone"]},
   {v:"3.6",d:"9 October 2026",t:"Track more than calories",items:["The + on a meal opens a search across your meals, recipes, quick picks and every ingredient. Pick an ingredient and enter the grams. You can still type numbers in yourself","Track fibre, water, creatine, omega-3, vitamin D, magnesium, potassium, calcium and iron on the Eat tab. Choose which in Settings → Preferences → Nutrients to track","Every ingredient now has its minerals, vitamin D, omega-3 and creatine worked out, and they add up as you log food","Supplements count automatically when you tick them, using the amount in their name, like 5 g creatine. Adding a supplement turns on tracking for it","Water has a +250 ml button"]},
   {v:"3.5",d:"9 October 2026",t:"English food names",items:["German foods in the food calculator and quick add now show their English name too, like Rote Bete (beetroot) and Rotkohl (red cabbage), so you can search in either language"]},
   {v:"3.4",d:"9 October 2026",t:"Works wherever you live",items:["New region setting, guessed from your phone's time zone: Germany, Austria and Switzerland, the rest of Europe, the UK and Ireland, the US and Canada, Australia and New Zealand, or elsewhere","Vitamin D, calcium, potassium, magnesium, fibre and iron follow the official guidelines for your region","Vitamin D advice follows your season: October to March in the north, April to September in the south, and only if you're mostly indoors near the equator","Height and body measurements in feet and inches if you prefer"]},
