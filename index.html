@@ -384,7 +384,11 @@ textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertica
 .extra:first-child{border-top:0}
 .entry{border:0;background:none;padding:0;text-align:left;flex:1;min-width:0;font-size:15px}
 .buy{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px}
-.buy:has(#cD){grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr)}
+.cform .ctypes{margin-bottom:10px}
+.cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cgrid .lbl{display:block;margin:0 0 4px;font-size:12.5px}
+.cgrid .field{width:100%;text-align:center;font-variant-numeric:tabular-nums}
+.cmode{background:none;border:0;padding:0;color:var(--blue);font:inherit;cursor:pointer}
+.cfcalc{margin:8px 0 12px;min-height:2.6em}.cfcalc b{color:var(--ink)}
 .fcout{font-size:14px;align-self:end;padding-bottom:10px}
 .mbrow{display:grid;grid-template-columns:minmax(0,1fr) 80px 14px 32px;gap:6px;align-items:center;border-top:1px solid var(--line);padding:6px 0}
 .mbrow:first-of-type{border-top:0}
@@ -2119,8 +2123,7 @@ function secCardio({k,p,day}){
   let h=H.html+`<div class="card">`;
   if(cl.length)h+=cl.map((c,i)=>`<div class="swr li" data-sw="cardio" data-i="${i}">${swbg("Edit","Delete")}<div class="sw extra"><button class="entry" data-act="editentry">${esc(c.t)}</button><span style="display:flex;align-items:center;gap:6px"><b>${cardioTxt(c)}</b><button class="rm" data-act="rmcardio" data-i="${i}" aria-label="Remove ${esc(c.t)}">×</button></span></div></div>`).join("")+`<div style="height:10px"></div>`;
   h+=`<div class="chips">${store.settings.gymWalk?`<button class="chip" data-act="gymwalk">Walk to and from the gym<small>${fmt(store.settings.gymWalk)} min</small></button>`:""}${p==="run"?`<button class="chip" data-act="easyrun">Easy run<small>25 min</small></button>`:""}</div>
-  <div class="buy"><select class="field" id="cT" aria-label="Cardio type">${["Walk","Run","Incline walk","Bike","Other"].map(x=>`<option${p==="run"&&x==="Run"?" selected":""}>${x}</option>`).join("")}</select><input class="field" id="cM" inputmode="numeric" placeholder="min" aria-label="Minutes"><input class="field" id="cD" inputmode="decimal" placeholder="${DU()}" aria-label="Distance in ${DU()==="mi"?"miles":"kilometres"}"></div>
-  <p class="note" style="margin:6px 0 10px">Fill in the time, the distance, or both. With both, you also get your pace.</p>
+  ${cardioForm("cfA",null,p==="run"?"Run":"Walk")}
   <button class="btn" data-act="addcardio">Add cardio</button>
   <p class="note">This week: ${fmt(wkMin)} min${wkKm>0?` · ${distTxt(wkKm)}`:""}</p></div>`;
   return h;
@@ -2716,14 +2719,46 @@ function weightSeries(endKey){
   return {pts,avg};
 }
 function bodyKgOn(k){const ks=Object.keys(store.days).filter(x=>x<=k&&num(store.days[x].weight)>0).sort();const w=ks.length?num(store.days[ks[ks.length-1]].weight):num((store.settings.profile||{}).w);return toKg(w);}
-const PACE={Walk:12,"Walk to and from the gym":12,Run:6,"Easy run":6.7,"Incline walk":15,Bike:2.6,Other:8};
-const PERKM={Walk:[0.45,0.6],"Walk to and from the gym":[0.45,0.6],Run:[0.85,1.05],"Easy run":[0.85,1.05],"Incline walk":[0.75,1.05]};
+const PACE={Walk:12,"Walk to and from the gym":12,Run:6,"Easy run":6.7,"Incline walk":15,Bike:2.6,Row:5,Elliptical:7,Stairs:10,Swim:25,Hike:13,SkiErg:5,Other:8};
+const PERKM={Walk:[0.45,0.6],"Walk to and from the gym":[0.45,0.6],Run:[0.85,1.05],"Easy run":[0.85,1.05],"Incline walk":[0.75,1.05],Hike:[0.55,0.8]};
+const CTYPES=["Walk","Run","Incline walk","Bike","Row","Elliptical","Stairs","Swim","Hike","SkiErg","Other"];
+const runLike=t=>/Run|run|Walk|walk|Hike/.test(t||"");
+function parseMin(v){v=String(v||"").trim().replace(",",".");if(!v)return 0;if(v.includes(":")){const p=v.split(":").map(Number);if(p.some(isNaN))return 0;return p.length===3?p[0]*60+p[1]+p[2]/60:p[0]+p[1]/60;}return num(v);}
+function fmtDur(m){m=Number(m)||0;const mm=Math.floor(m+1e-9),ss=Math.round((m-mm)*60);return ss&&ss<60?`${mm}:${String(ss).padStart(2,"0")} min`:`${fmt(m)} min`;}
+function fmtPace(per){const mm=Math.floor(per),ss=Math.round((per-mm)*60);return `${ss===60?mm+1:mm}:${String(ss===60?0:ss).padStart(2,"0")}`;}
+// any two of time, distance and speed (or pace) give the third
+function cardioCalc(t,mIn,dIn,sIn,mode){const mi=DU()==="mi",U=mi?1.609344:1;let m=parseMin(mIn),km=num(dIn)*U,kmh=0;
+  if(String(sIn||"").trim()){if(mode==="pace"){const p=parseMin(sIn);if(p>0)kmh=60/p*U;}else kmh=num(sIn)*U;}
+  const o={t,m:0};let calc="";
+  if(m>0&&km>0){}else if(m>0&&kmh>0){km=kmh*m/60;calc="d";}else if(km>0&&kmh>0){m=km/kmh*60;calc="m";}
+  else if(km>0){m=km*(PACE[t]||8);o.est=1;}
+  else if(!(m>0))return null;
+  o.m=o.est?Math.max(1,Math.round(m)):Math.max(1/60,Math.round(m*60)/60);if(km>0)o.km=Math.round(km*1000)/1000;o.calc=calc;return o;}
+function cardioForm(id,c,defT){const t=c?c.t:defT||"Walk",mode=runLike(t)?"pace":"speed",mi=DU()==="mi";
+  const types=CTYPES.includes(t)?CTYPES:[t].concat(CTYPES);
+  const dv=c&&c.km>0?Math.round((mi?c.km/1.609344:c.km)*100)/100:"",mv=c&&!c.est?c.m:"";
+  return `<div class="cform" id="${id}" data-type="${esc(t)}" data-mode="${mode}"><div class="chips ctypes" role="group" aria-label="Type of cardio">${types.map(x=>`<button type="button" class="chip${x===t?" on":""}" data-ctype="${esc(x)}" aria-pressed="${x===t}">${esc(x)}</button>`).join("")}</div>
+  <div class="cgrid"><div><span class="lbl">Time</span><input class="field" data-cf="m" inputmode="decimal" placeholder="min" value="${mv}" aria-label="Time in minutes, or minutes:seconds"></div><div><span class="lbl">Distance</span><input class="field" data-cf="d" inputmode="decimal" placeholder="${mi?"mi":"km"}" value="${dv}" aria-label="Distance in ${mi?"miles":"kilometres"}"></div><div><button type="button" class="lbl cmode" data-cmode aria-label="Switch between speed and pace">${mode==="pace"?"Pace":"Speed"} <span aria-hidden="true">⇄</span></button><input class="field" data-cf="s" inputmode="decimal" placeholder="${mode==="pace"?(mi?"min/mi":"min/km"):(mi?"mph":"km/h")}" aria-label="${mode==="pace"?"Pace in minutes per "+(mi?"mile":"kilometre")+", like 5:30":"Speed in "+(mi?"miles":"kilometres")+" per hour"}"></div></div>
+  <p class="note cfcalc">${cardioLiveText(null)}</p></div>`;}
+function cardioRead(f){const g=k=>f.querySelector(`[data-cf="${k}"]`).value;return cardioCalc(f.dataset.type,g("m"),g("d"),g("s"),f.dataset.mode);}
+function cardioLiveText(o){if(!o)return "Fill in any two of time, distance and speed, and the app works out the rest. Time can be minutes or min:sec.";
+  const kmh=o.km>0&&!o.est?o.km/(o.m/60):0,mi=DU()==="mi";
+  return `<b>${cardioTxt(o,true)}</b>${kmh?` · ${(Math.round((mi?kmh/1.609344:kmh)*10)/10).toLocaleString()} ${mi?"mph":"km/h"}`:""}${o.est?"<br>Time estimated from a typical pace. Add your time or speed to make it exact.":o.calc==="d"?"<br>Distance worked out from your speed.":o.calc==="m"?"<br>Time worked out from your speed.":""}`;}
+function cardioLive(f){const el=f.querySelector(".cfcalc");if(el)el.innerHTML=cardioLiveText(cardioRead(f));}
+document.addEventListener("input",e=>{const f=e.target.closest&&e.target.closest(".cform");if(f)cardioLive(f);});
+document.addEventListener("click",e=>{const f=e.target.closest&&e.target.closest(".cform");if(!f)return;const b=e.target.closest("[data-ctype],[data-cmode]");if(!b)return;e.stopPropagation();
+  if(b.dataset.ctype!=null){f.dataset.type=b.dataset.ctype;f.querySelectorAll("[data-ctype]").forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on);});const nm=runLike(f.dataset.type)?"pace":"speed";if(nm!==f.dataset.mode&&!f.querySelector('[data-cf="s"]').value)setMode(f,nm);}
+  else setMode(f,f.dataset.mode==="pace"?"speed":"pace");
+  cardioLive(f);},true);
+function setMode(f,m){const mi=DU()==="mi",inp=f.querySelector('[data-cf="s"]'),old=f.dataset.mode,v=inp.value.trim();f.dataset.mode=m;
+  if(v){if(m==="pace"){const sp=num(v);inp.value=sp>0?fmtPace(60/sp):"";}else{const p=parseMin(v);inp.value=p>0?String(Math.round(60/p*10)/10):"";}}
+  inp.placeholder=m==="pace"?(mi?"min/mi":"min/km"):(mi?"mph":"km/h");f.querySelector("[data-cmode]").firstChild.textContent=(m==="pace"?"Pace":"Speed")+" ";}
 function DU(){return LEN()==="in"?"mi":"km";}
-function distTxt(km){const mi=DU()==="mi",v=mi?km/1.609344:km;return `${fmt(Math.round(v*100)/100)} ${mi?"mi":"km"}`;}
-function paceTxt(c){if(!(c.km>0&&c.m>0)||c.est||c.t==="Bike")return "";const per=c.m/(DU()==="mi"?c.km/1.609344:c.km),mm=Math.floor(per),ss=Math.round((per-mm)*60);return `${mm}:${String(ss===60?59:ss).padStart(2,"0")} /${DU()}`;}
-function cardioTxt(c){const m=Number(c.m)||0;return [c.km>0?distTxt(c.km):"",`${c.est?"~":""}${fmt(m)} min`,paceTxt(c)].filter(Boolean).join(" · ");}
-function cardioFrom(t,mIn,dIn){let m=num(mIn),km=num(dIn);if(DU()==="mi")km*=1.609344;if(!(m>0)&&!(km>0))return null;const o={t,m:0};if(km>0)o.km=Math.round(km*1000)/1000;if(m>0)o.m=Math.round(m);else{o.m=Math.max(1,Math.round(km*(PACE[t]||8)));o.est=1;}return o;}
-const CARDIO_MET={Walk:[3,4.3],"Walk to and from the gym":[3,4.3],Run:[7,10],"Easy run":[6,8.5],"Incline walk":[5,7],Bike:[5,8],Other:[4,7]};
+function distTxt(km){const mi=DU()==="mi",v=mi?km/1.609344:km;return `${(Math.round(v*100)/100).toLocaleString()} ${mi?"mi":"km"}`;}
+function paceTxt(c){if(!(c.km>0&&c.m>0)||c.est)return "";if(!runLike(c.t)){const kmh=c.km/(c.m/60),mi=DU()==="mi";return `${(Math.round((mi?kmh/1.609344:kmh)*10)/10).toLocaleString()} ${mi?"mph":"km/h"}`;}const per=c.m/(DU()==="mi"?c.km/1.609344:c.km),mm=Math.floor(per),ss=Math.round((per-mm)*60);return `${mm}:${String(ss===60?59:ss).padStart(2,"0")} /${DU()}`;}
+function cardioTxt(c,noPace){const m=Number(c.m)||0;return [c.km>0?distTxt(c.km):"",`${c.est?"~":""}${fmtDur(m)}`,noPace?"":paceTxt(c)].filter(Boolean).join(" · ")+(noPace&&runLike(c.t)&&c.km>0&&!c.est?` · ${fmtPace(c.m/(DU()==="mi"?c.km/1.609344:c.km))} /${DU()}`:"");}
+function cardioFrom0(t,mIn,dIn){let m=num(mIn),km=num(dIn);if(DU()==="mi")km*=1.609344;if(!(m>0)&&!(km>0))return null;const o={t,m:0};if(km>0)o.km=Math.round(km*1000)/1000;if(m>0)o.m=Math.round(m);else{o.m=Math.max(1,Math.round(km*(PACE[t]||8)));o.est=1;}return o;}
+const CARDIO_MET={Walk:[3,4.3],"Walk to and from the gym":[3,4.3],Run:[7,10],"Easy run":[6,8.5],"Incline walk":[5,7],Bike:[5,8],Row:[6,8.5],Elliptical:[5,7],Stairs:[8,9.5],Swim:[6,9],Hike:[5.5,7.5],SkiErg:[6,9],Other:[4,7]};
 // MET ranges and seconds per metre for distance stations
 const DIST_MET={sled:[8,12,3],sledpull:[8,12,3],bbj:[8,11,3],sblunge:[6,9,2],sbcarry:[6,8,1.2],sleddrag:[5,8,1.5],kbrack:[5,7,1.1],bearcrawl:[6,8,2],farmer:[5,7,1.1]};
 const ERG_MET={skierg:[7,11],skiint:[8,12],rowerg:[7,11],rowint:[8,12],ergint:[8,12],rower:[7,10],hyroxsim:[8,11]};
@@ -3060,7 +3095,7 @@ $("panel").addEventListener("click",e=>{
     else{const rows=materialize(day,ex);rows.push({w:"",r:"",d:false,t:act==="adddrop"?"d":"n"});persist(docId);render();}
   }else if(act==="gymwalk"||act==="addcardio"){
     let t="Walk to and from the gym",m=Number(store.settings.gymWalk)||48;
-    if(act==="addcardio"){const o=cardioFrom($("cT").value,$("cM").value,$("cD").value);if(!o){$("cM").focus();return;}const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push(o);persist(docId);render();return;}
+    if(act==="addcardio"){const f=$("cfA"),o=cardioRead(f);if(!o){const e0=[...f.querySelectorAll("[data-cf]")].find(x=>!x.value.trim());(e0||f.querySelector("[data-cf]")).focus();return;}delete o.calc;const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push(o);persist(docId);render();return;}
     const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t,m:Math.round(m)});persist(docId);render();
   }else if(act==="easyrun"){const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t:"Easy run",m:25});persist(docId);render();
   }else if(act==="restpick"){openRestPick(b.dataset.id,k);
@@ -3479,9 +3514,8 @@ function editBuy(dk,i){
 }
 function editCardio(i){
   const k=sel,day=ensureDay(k),c=(day.cardioLog||[])[i];if(!c)return;
-  const types=["Walk","Walk to and from the gym","Run","Easy run","Incline walk","Bike","Other"];if(!types.includes(c.t))types.unshift(c.t);
-  openSheet("Edit cardio",`<label class="sfld"><span class="lbl">Type</span><select class="field" id="sT">${types.map(t=>`<option${t===c.t?" selected":""}>${esc(t)}</option>`).join("")}</select></label>`+fld("Minutes","sM",c.est?"":c.m,"numeric")+fld(DU()==="mi"?"Distance (miles)":"Distance (km)","sD",c.km>0?Math.round((DU()==="mi"?c.km/1.609344:c.km)*100)/100:"","decimal")+`<p class="note">Fill in the time, the distance, or both.</p>`,
-    [{label:"Save",fn:()=>{const o=cardioFrom(sv("sT"),sv("sM"),sv("sD"));if(!o)return false;const u=snap(["day-"+k]);delete c.km;delete c.est;Object.assign(c,o);persist("day-"+k);render();toast("Cardio updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
+  openSheet("Edit cardio",cardioForm("cfE",c),
+    [{label:"Save",fn:()=>{const o=cardioRead($("cfE"));if(!o)return false;delete o.calc;const u=snap(["day-"+k]);delete c.km;delete c.est;Object.assign(c,o);persist("day-"+k);render();toast("Cardio updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function editSupp(i){
   const list=ensureSupps(),old=list[i];if(old==null)return;
@@ -4045,8 +4079,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="4.0";
+const APP_VERSION="4.1";
 const CHANGELOG=[
+  {v:"4.1",d:"10 October 2026",t:"Better cardio logging",items:["Log cardio with any two of time, distance and speed, and the app works out the third as you type","Switch speed to pace (like 5:30 per km) with one tap. Runs and walks start on pace, everything else on speed","Time can be minutes or min:sec, so 31:20 works","Pick the type from buttons instead of a scroll list, with new types: rowing, elliptical, stairs, swimming, hiking and SkiErg","Each entry shows distance, time and your pace or speed, and editing an entry uses the same form","Distances like 5.25 km no longer get rounded to 5"]},
   {v:"4.0",d:"10 October 2026",t:"Every exercise, animated",items:["All 227 exercises now have a movement figure, up from 38. That includes deadlifts, rows, skull crushers, planks, crunches, dips, every calisthenics move and all the Hyrox and cardio work","Running, walking, rowing, cycling, sled pushes, carries, bear crawls, jump rope and battle ropes play as a smooth loop, with arms and legs moving in turn","New equipment in the figures: kettlebells, medicine balls, wall-ball targets, the ab wheel, landmine bars, sleds, rowers, the SkiErg, bikes, boxes and walls","Variations show their own kit, so a dumbbell bench shows dumbbells and a goblet squat shows a kettlebell held at the chest","Every exercise now has a muscle map too, including wall balls, farmer's carries and the machine moves in the Hyrox template"]},
   {v:"3.9",d:"10 October 2026",t:"Real muscles, real people",items:["A new muscle map with proper muscle shapes, front and back: upper and lower chest, all three shoulder heads, traps, mid-back, lats, lower back, both glutes, the quad and hamstring heads, calves and more","Tap any muscle on the map, or its name under it, to see what it is, what it does and whether it's a main muscle or a helper","Incline presses now show the upper chest as the main muscle","The Training guide shows a muscle map for every muscle","The movement figures look like people now, with a real torso, head, neck, hands and feet","Log cardio by distance, time or both. With both you also get your pace, and calories use the distance for walks and runs. Miles if you use feet and inches","More rice: basmati, jasmine, brown, parboiled, risotto, sushi and wild rice, and rice noodles","More vegetables: frozen mixed vegetables, Asia stir-fry mix, Mediterranean mix, peas, sweetcorn, Brussels sprouts, aubergine, asparagus, kale and okra","Portion my foods spreads food more sensibly: usual portions grow with your calories, meals stay balanced, it no longer cuts your protein food to chase fat, and it gets closer to your calories"]},
   {v:"3.8",d:"10 October 2026",t:"Meal planner",items:["Track zinc, vitamin B12, vitamin C, folate and iodine, plus limits for salt, added sugar, saturated fat and alcohol. Limits show as a stay-under bar that turns amber when you go over. Tap any of them for what it means","Drinks in the food calculator: beer, wine, spirits, cola, orange juice and energy drinks","Suggest meals: the app picks easy, cheap meals for the meals you haven't eaten yet and works out portions that land on your calories, protein, carbs and fat","Portion my foods: pick what you want to eat, like eggs for breakfast and chicken and rice for dinner, and the app works out how much of each","Change any amount with − and +, and everything else adjusts around it. Lock an amount to keep it fixed","Plan what's left today or a whole day, with vegetarian, no fish and no dairy filters","Each suggested meal has short steps, another idea button, and logs to the right meal in one tap","Bigger rest timer button with a stopwatch icon","The bar on the right is now a real scrollbar that matches the page, shows which section you're in while you scroll, and fast-scrolls when you hold and drag it. Much smoother","Keywords like superset can be tapped inside pop-ups too"]},
