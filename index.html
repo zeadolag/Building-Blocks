@@ -426,7 +426,7 @@ details.mine summary{cursor:pointer;color:var(--blue);font-weight:500}
 .spseg{width:200px;margin:0 0 8px;flex:none}.spseg button{padding:0 12px;font-size:13px;height:32px}
 .spgrp{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0 6px;font-size:14.5px}.spgrp span{color:var(--muted);font-size:12.5px}
 .spgrp+.sprow{border-top:1px solid var(--line)}
-.sprow.small{padding:8px 0}.sprow.small strong{font-size:14px}
+.sprow.small{padding:8px 0}.spsw .sprow{border-top:0;border-radius:0}.splist>.spsw:first-child{border-top:0}.spsw .sw{background:var(--surface)}.sprow.small strong{font-size:14px}
 .spplus{width:28px;height:28px;border-radius:99px;display:grid;place-items:center;background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue);font-size:18px;font-weight:500;line-height:1}
 .sprow.flash{background:color-mix(in srgb,var(--green) 16%,transparent)}
 .splist+.splist{margin-top:10px}
@@ -3527,7 +3527,7 @@ function renderSpend(){
   // what was counted this period
   const pr=rows.slice().sort((a,b)=>b.dk.localeCompare(a.dk)||b.j-a.j);
   h+=`<h2 class="sec-title">Counted ${label}</h2>`;
-  h+=pr.length?`<div class="card splist">${pr.map(r=>`<div class="sprow small" role="button" tabindex="0" data-act="spbuy" data-sphold="buy" data-day="${r.dk}" data-i="${r.j}"><span class="spmain"><strong>${esc(r.n)}</strong><small>${r.s?esc(r.s)+" · ":""}${shortDate(r.dk)}</small></span><b>${eur(r.e)}</b></div>`).join("")}</div><p class="note sphint">Tap to change the price or day. Hold to remove it.</p>`
+  h+=pr.length?`<div class="card splist">${pr.map(r=>`<div class="swr li spsw" data-sw="buy" data-day="${r.dk}" data-i="${r.j}">${swbg("Edit","Remove")}<div class="sw"><div class="sprow small" role="button" tabindex="0" data-act="spbuy" data-sphold="buy" data-day="${r.dk}" data-i="${r.j}"><span class="spmain"><strong>${esc(r.n)}</strong><small>${r.s?esc(r.s)+" · ":""}${shortDate(r.dk)}</small></span><b>${eur(r.e)}</b></div></div></div>`).join("")}</div><p class="note sphint">Swipe left to remove, right to edit. Tap to change the price or day.</p>`
     :`<div class="card"><p class="note" style="margin:0">Nothing counted ${label} yet.</p></div>`;
   // history
   h+=`<h2 class="sec-title">${view==="week"?"Recent weeks":view==="fortnight"?"Recent 2-week periods":"Recent months"}</h2><div class="card">`;
@@ -3723,7 +3723,7 @@ function doDelete(wr){
   if(kind==="set"){const id=wr.closest("[data-ex]").dataset.ex,ex=exLookup(k,id),day=ensureDay(k),u=snap(["day-"+k]);const rows=materialize(day,ex);rows.splice(i,1);persist("day-"+k);renderTrain();renderWeek();toast("Set deleted",u);}
   else if(kind==="ex")skipEx(wr.closest("[data-ex]").dataset.ex);
   else if(kind==="food"){const day=ensureDay(k),u=snap(["day-"+k]);(day.extras||[]).splice(i,1);persist("day-"+k);renderEat();toast("Food deleted",u);}
-  else if(kind==="buy"){const dk=wr.dataset.day,day=ensureDay(dk),u=snap(["day-"+dk]);(day.buys||[]).splice(i,1);persist("day-"+dk);renderSpend();toast("Purchase deleted",u);}
+  else if(kind==="buy"){const dk=wr.dataset.day,day=ensureDay(dk),u=snap(["day-"+dk]),b=(day.buys||[])[i];(day.buys||[]).splice(i,1);persist("day-"+dk);renderSpend();toast(`${b?buyName(b)+" removed":"Removed"}`,u);}
   else if(kind==="cardio"){const day=ensureDay(k),u=snap(["day-"+k]);(day.cardioLog||[]).splice(i,1);persist("day-"+k);render();toast("Cardio deleted",u);}
   else if(kind==="supp"){const u=snap(["settings"]);ensureSupps().splice(i,1);persist("settings");renderEat();toast("Supplement removed",u);}
   else if(kind==="recipe"){const u=snap(["settings"]);ensureRecipes().splice(i,1);persist("settings");renderEat();toast("Recipe deleted",u);}
@@ -4241,8 +4241,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="4.4";
+const APP_VERSION="4.5";
 const CHANGELOG=[
+  {v:"4.5",d:"10 October 2026",t:"Swipe to remove",items:["Swipe a counted purchase left to remove it, or right to edit it, like food and sets elsewhere in the app","Tapping still lets you change the price or day, and holding still works too"]},
   {v:"4.4",d:"10 October 2026",t:"Products you just tap",items:["Adding a product and logging a purchase are now one thing: Add product. It's saved for good, and counted straight away unless you untick I bought it today","Tap any saved product to count it as bought. No retyping","Products stay until you hold one and delete it, or edit it","Sort products by store, grouped with what you spent at each, or by price or name","Below them, everything counted this period. Tap one to change its price or day, or hold to remove it","Things you'd already bought were added to your products automatically"]},
   {v:"4.3",d:"10 October 2026",t:"A simpler Spend tab",items:["Add a purchase from one button: type the name, price and store, pick the day, and it closes when you're done. Add and log another keeps it open for a whole receipt","Things you've bought before pop up as you type, with their last price and store filled in","Everything you buy is saved under Your products, showing whether you've bought it this week or when you last did","Sort purchases and products by date, price, store, name, most bought or not bought yet","Tap a store to see only what you bought there, what you spent and how many of its products you've bought this period","Tap a purchase to edit it, or a product to buy it again or see its price history. Hold either one to edit, buy again or delete","Set a weekly budget, or let your regular buys set your usual spend. Mark a product as a regular buy and how long one lasts when you edit it"]},
   {v:"4.2",d:"10 October 2026",t:"Meal sizes wheel",items:["A new wheel for how you like to spread your day: a big breakfast, most of it at lunch, a big dinner, or skipping a meal. Drag the dots round the wheel, use − and +, or pick a quick option","Find it under Meal sizes on the Eat tab's planning card, inside Suggested meals and Portion my foods, and in Settings under Preferences","Suggested meals and Portion my foods now share out your calories the way you set, and each meal shows what it's aiming for","Meals you skip on the wheel are left out of planning","Meal tiles on the Eat tab show roughly how much to aim for before you log them"]},
