@@ -409,6 +409,24 @@ details.mine summary{cursor:pointer;color:var(--blue);font-weight:500}
 .addrec summary{cursor:pointer;font-weight:500;list-style:none}
 .addrec summary::after{content:" +";color:var(--muted)}
 .addrec[open] summary::after{content:" −"}
+.spsum .bar{margin-top:10px}.spsum .left{font-size:13.5px}
+.btn.spadd{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0}.btn.spadd svg{width:18px;height:18px}
+.spstores{margin:4px 0 6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.spstores::-webkit-scrollbar{display:none}.spstores .chip{flex:none}
+.spstorenote{margin:4px 0 0}
+.sphead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}.sphead .sec-title{margin-bottom:8px}
+.spsort select{height:34px;padding:0 28px 0 10px;font-size:13.5px;margin-bottom:8px;width:auto}
+.splist{padding-top:4px;padding-bottom:4px}
+.sprow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;transition:transform .15s,background .15s;border-radius:8px}
+.sprow:first-child{border-top:0}.sprow.pressing{transform:scale(.98);background:var(--mutedbg)}
+.spmain{min-width:0;display:grid;gap:2px}.spmain strong{font-weight:500;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spmain small{color:var(--muted);font-size:12.5px}
+.spst{color:var(--blue)}.spok{color:var(--green)}
+.spr{display:flex;align-items:center;gap:8px;flex:none}.spr b,.sprow>b{font-variant-numeric:tabular-nums;font-weight:600}
+.spdot{width:8px;height:8px;border-radius:99px;background:var(--green)}
+.sphint{font-size:12.5px;margin:6px 2px 0}
+.spsug{display:flex;flex-wrap:wrap;gap:6px}
+.sphist{display:grid;gap:0}.sphist div{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.btn.dangertxt{color:var(--red)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .storehead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-size:15px}
 .storehead span{color:var(--muted);font-size:13px}
 .prod{border-top:1px solid var(--line);padding:10px 0}
@@ -3083,53 +3101,7 @@ function prodCard(pr){
     <p class="prodcost" data-pc="${pr.id}">${prodCostText(pr)}</p></div>`;
 }
 function prodCostText(pr){const wk=prodWeekly(pr),d=prodDays(pr);return `${eur(wk)} a week${d?`, one lasts about ${d>=10?Math.round(d):r1(d)} days`:""}`;}
-function renderSpend(){
-  const view=spendView(),k=sel,{start,len}=periodOf(k,view),end=addDays(start,len-1);
-  const PR=products(),mult=view==="week"?1:view==="fortnight"?2:len/7;
-  const plan=PR.reduce((a,pr)=>a+prodWeekly(pr),0)*mult,spent=spendFrom(start,len);
-  const pct=plan?Math.min(100,spent/plan*100):0,over=spent>plan;
-  const dfmt=x=>parseKey(x).toLocaleDateString(undefined,{day:"numeric",month:"short"});
-  const label=view==="week"?"this week":view==="fortnight"?"these 2 weeks":"this month";
-  const stores=storesList();if(!spStore||!stores.includes(spStore))spStore=stores[0]||"";
-  let h=`<datalist id="storeList">${stores.map(s=>`<option value="${esc(s)}">`).join("")}</datalist><section><div class="seg seg3" role="group" aria-label="Budget period"><button data-act="view" data-v="week" aria-pressed="${view==="week"}">Weekly</button><button data-act="view" data-v="fortnight" aria-pressed="${view==="fortnight"}">2 weeks</button><button data-act="view" data-v="month" aria-pressed="${view==="month"}">Monthly</button></div>`;
-  h+=`<div class="card"><div><span class="big">${eur(spent)}</span> <span class="of">spent ${label}, ${dfmt(start)} to ${dfmt(end)}</span></div>
-    <div class="bar${over?" over":""}"><span style="width:${pct}%"></span></div>
-    <div class="left">${over?eur(spent-plan)+" over":eur(plan-spent)+" left"} of the planned ${eur(plan)}</div></div>`;
-  // log purchase
-  h+=`<h2 class="sec-title">Log a purchase</h2><div class="card">`;
-  if(stores.length){
-    h+=`<p class="lbl">Store</p><div class="chips">${stores.map(s=>`<button class="chip${s===spStore?" on":""}" data-act="spstore" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>`;
-    const inStore=PR.filter(pr=>(pr.store||"")===spStore);
-    if(inStore.length)h+=`<p class="lbl">Tap what you bought</p><div class="chips">${inStore.map(pr=>`<button class="chip" data-act="logprod" data-id="${pr.id}">${esc(pr.n)}<small>${eur(num(pr.price))}</small></button>`).join("")}</div>`;
-  }
-  h+=`<p class="lbl">Or type the receipt total or an item</p><div class="buy"><input class="field" id="buyN" placeholder="What (optional)" aria-label="What you bought"><input class="field" id="buyE" inputmode="decimal" placeholder="€" aria-label="Amount in euros"></div>
-    <input class="field" id="buyS" list="storeList" placeholder="Store" value="${esc(spStore)}" aria-label="Store" style="margin-top:8px">
-    <button class="btn" data-act="addbuy">Add to ${esc(shortDate(k))}</button></div>`;
-  // shopping grouped by store
-  h+=`<h2 class="sec-title">Shopping ${label}</h2>`;
-  const rows=[];for(let i=0;i<len;i++){const dk=addDays(start,i),dd=store.days[dk];((dd&&dd.buys)||[]).forEach((b,j)=>rows.push({dk,j,b}));}
-  if(!rows.length)h+=`<div class="card"><p class="note" style="margin:0">Nothing logged ${label} yet.</p></div>`;
-  else{const by={};for(const r of rows){const s=storeOf(r.b);(by[s]=by[s]||[]).push(r);}
-    for(const [s,list] of Object.entries(by)){const sub=list.reduce((a,r)=>a+num(r.b.e),0);
-      h+=`<div class="card"><div class="storehead"><b>${esc(s)}</b><span>${eur(sub)}</span></div>`+list.map(r=>`<div class="swr li" data-sw="buy" data-day="${r.dk}" data-i="${r.j}">${swbg("Edit","Delete")}<div class="sw extra"><button class="entry" data-act="editentry">${esc(String(r.b.n||"Groceries").replace(/^[^:]+:\s*/,""))}<br><small class="of">${shortDate(r.dk)}</small></button><span style="display:flex;align-items:center;gap:6px"><b>${eur(num(r.b.e))}</b><button class="rm" data-act="rmbuy" data-day="${r.dk}" data-i="${r.j}" aria-label="Remove">×</button></span></div></div>`).join("")+`</div>`;}}
-  // planned products grouped by store
-  h+=`<h2 class="sec-title">Planned costs</h2><p class="note" style="margin:-4px 0 10px">Add what you buy regularly and how long it lasts. The tracker works out the cost per week, per 2 weeks and per month.</p>`;
-  const groups={};for(const pr of PR){const s=pr.store||"No store";(groups[s]=groups[s]||[]).push(pr);}
-  for(const [s,list] of Object.entries(groups)){const sub=list.reduce((a,pr)=>a+prodWeekly(pr),0)*mult;
-    h+=`<div class="card"><div class="storehead"><b>${esc(s)}</b><span>${eur(sub)} ${view==="week"?"a week":view==="fortnight"?"per 2 weeks":"a month"}</span></div>${list.map(prodCard).join("")}</div>`;}
-  h+=`<button class="btn ghost" data-act="addprod">Add a product</button>`;
-  // history
-  h+=`<h2 class="sec-title">${view==="week"?"Recent weeks":view==="fortnight"?"Recent 2-week periods":"Recent months"}</h2><div class="card">`;
-  const ps=[];
-  if(view==="month"){const d=parseKey(k);for(let m=5;m>=0;m--){const s0=keyOf(new Date(d.getFullYear(),d.getMonth()-m,1)),dd=parseKey(s0),l=new Date(dd.getFullYear(),dd.getMonth()+1,0).getDate();ps.push({s:s0,t:spendFrom(s0,l),lbl:dd.toLocaleDateString(undefined,{month:"short"})});}}
-  else for(let w=5;w>=0;w--){const s0=addDays(start,-len*w);ps.push({s:s0,t:spendFrom(s0,len),lbl:dfmt(s0)});}
-  const mx=Math.max(plan,...ps.map(w=>w.t),1);
-  h+=ps.map(w=>`<div class="hist"><span class="of">${w.lbl}</span><div class="bar${w.t>plan?" over":""}"><span style="width:${w.t/mx*100}%"></span></div><b>${w.t?eur(w.t):"–"}</b></div>`).join("");
-  const logged=ps.filter(w=>w.t>0);
-  if(logged.length>1)h+=`<p class="note">Average over logged periods: ${eur(logged.reduce((a,w)=>a+w.t,0)/logged.length)}</p>`;
-  h+=`</div></section>`;
-  $("panel").innerHTML=h;
-}
+function renderSpendOld(){}
 
 // ---------- Events ----------
 $("prev").onclick=()=>{sel=addDays(sel,-1);render();};
@@ -3522,6 +3494,128 @@ sheetEl.addEventListener("click",e=>{
   const sc=e.target.closest("[data-scope]");
   if(sc){sheetEl._scope=sc.dataset.scope;sheetEl.querySelectorAll("[data-scope]").forEach(x=>x.setAttribute("aria-pressed",String(x===sc)));}
 });
+function renderSpend(){
+  const view=spendView(),k=sel,{start,len}=periodOf(k,view),end=addDays(start,len-1),S=store.settings;
+  const mult=view==="week"?1:view==="fortnight"?2:len/7,reg=products().reduce((a,pr)=>a+prodWeekly(pr),0),bud=num(S.spendBudget);
+  const plan=(bud>0?bud:reg)*mult,spent=spendFrom(start,len),over=plan>0&&spent>plan;
+  const dfmt=x=>parseKey(x).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+  const label=view==="week"?"this week":view==="fortnight"?"these 2 weeks":"this month";
+  const rows=[];for(let i=0;i<len;i++){const dk=addDays(start,i),dd=store.days[dk];((dd&&dd.buys)||[]).forEach((b,j)=>rows.push({dk,j,b,n:buyName(b),s:buyStore(b),e:num(b.e)}));}
+  const cat=catalog(start,end),stores=[...new Set(cat.map(c=>c.store).filter(Boolean).concat(rows.map(r=>r.s).filter(Boolean)))];
+  if(spFilter&&!stores.includes(spFilter))spFilter="";
+  let h=`<datalist id="storeList">${stores.map(s=>`<option value="${esc(s)}">`).join("")}</datalist><section><div class="seg seg3" role="group" aria-label="Budget period"><button data-act="view" data-v="week" aria-pressed="${view==="week"}">Weekly</button><button data-act="view" data-v="fortnight" aria-pressed="${view==="fortnight"}">2 weeks</button><button data-act="view" data-v="month" aria-pressed="${view==="month"}">Monthly</button></div>`;
+  h+=`<div class="card spsum"><div><span class="big">${eur(spent)}</span> <span class="of">spent ${label}</span></div><p class="of" style="margin:2px 0 0;font-size:13px">${dfmt(start)} to ${dfmt(end)}</p>
+    ${plan>0?`<div class="bar${over?" over":""}"><span style="width:${Math.min(100,spent/plan*100)}%"></span></div><div class="left">${over?eur(spent-plan)+" over":eur(plan-spent)+" left"} of your ${bud>0?"budget":"usual spend"} of ${eur(plan)} · <button type="button" class="linkbtn" data-act="spbudget">${bud>0?"Change":"Set a budget"}</button></div>`
+      :`<button type="button" class="linkbtn" data-act="spbudget" style="margin-top:8px">Set a budget</button>`}</div>
+  <button class="btn spadd" data-act="spadd">${IC.plusbig||"+"} Add a purchase</button>`;
+  if(stores.length)h+=`<div class="chips spstores" role="group" aria-label="Filter by store"><button type="button" class="chip${spFilter?"":" on"}" data-act="spfilter" data-s="">All stores</button>${stores.map(s=>{const t=rows.filter(r=>r.s===s).reduce((a,r)=>a+r.e,0);return `<button type="button" class="chip${spFilter===s?" on":""}" data-act="spfilter" data-s="${esc(s)}">${esc(s)}${t?`<small>${eur(t)}</small>`:""}</button>`;}).join("")}</div>`;
+  if(spFilter){const L=cat.filter(c=>c.store===spFilter),got=L.filter(c=>c.inP).length,t=rows.filter(r=>r.s===spFilter).reduce((a,r)=>a+r.e,0);
+    h+=`<p class="note spstorenote"><b>${esc(spFilter)}</b>: ${eur(t)} ${label} · ${L.length} product${L.length===1?"":"s"}, ${got} bought ${label}</p>`;}
+  // purchases
+  const pr=rows.filter(r=>!spFilter||r.s===spFilter);
+  const so={new:(a,b)=>b.dk.localeCompare(a.dk)||b.j-a.j,price:(a,b)=>b.e-a.e,store:(a,b)=>(a.s||"~").localeCompare(b.s||"~")||b.dk.localeCompare(a.dk),name:(a,b)=>a.n.localeCompare(b.n)};
+  pr.sort(so[spSort]||so.new);
+  h+=`<div class="sphead"><h2 class="sec-title">Bought ${label}</h2>${pr.length>1?sortSel("spsort",spSort,[["new","Newest"],["price","Price"],["store","Store"],["name","Name"]]):""}</div>`;
+  h+=pr.length?`<div class="card splist">${pr.map(r=>`<div class="sprow" role="button" tabindex="0" data-act="spbuy" data-sphold="buy" data-day="${r.dk}" data-i="${r.j}"><span class="spmain"><strong>${esc(r.n)}</strong><small>${r.s?`<span class="spst" data-act="spfilter" data-s="${esc(r.s)}">${esc(r.s)}</span> · `:""}${shortDate(r.dk)}</small></span><b>${eur(r.e)}</b></div>`).join("")}</div><p class="note sphint">Tap to edit. Hold for more.</p>`
+    :`<div class="card"><p class="note" style="margin:0">${spFilter?`Nothing from ${esc(spFilter)} ${label}.`:`Nothing logged ${label} yet. Tap <b>Add a purchase</b> and type the name, price and store.`}</p></div>`;
+  // products
+  const cs={last:(a,b)=>(b.last||"").localeCompare(a.last||"")||a.n.localeCompare(b.n),name:(a,b)=>a.n.localeCompare(b.n),store:(a,b)=>(a.store||"~").localeCompare(b.store||"~")||a.n.localeCompare(b.n),price:(a,b)=>b.price-a.price,count:(a,b)=>b.count-a.count||a.n.localeCompare(b.n),notyet:(a,b)=>(a.inP?1:0)-(b.inP?1:0)||a.n.localeCompare(b.n)};
+  const cl=cat.filter(c=>!spFilter||c.store===spFilter).sort(cs[cSort]||cs.last);
+  if(cl.length){h+=`<div class="sphead"><h2 class="sec-title">Your products</h2>${sortSel("csort",cSort,[["last","Last bought"],["notyet","Not bought yet"],["name","Name"],["store","Store"],["price","Price"],["count","Most bought"]])}</div>
+    <div class="card splist">${cl.map(c=>`<div class="sprow" role="button" tabindex="0" data-act="spprod" data-sphold="prod" data-key="${encodeURIComponent(c.key)}"><span class="spmain"><strong>${esc(c.n)}</strong><small>${c.store?`<span class="spst" data-act="spfilter" data-s="${esc(c.store)}">${esc(c.store)}</span> · `:""}${c.inP?`<span class="spok">✓ Bought ${label}</span>`:c.last?`Last bought ${agoTxt(c.last)}`:"Not bought yet"}${c.wk>0?` · regular, ${eur(c.wk*mult)} ${view==="week"?"a week":view==="fortnight"?"per 2 weeks":"a month"}`:""}</small></span><span class="spr"><b>${eur(c.price)}</b>${c.inP?`<i class="spdot" aria-hidden="true"></i>`:""}</span></div>`).join("")}</div>
+    <p class="note sphint">Tap a product to buy it again or see its history. Hold to edit or delete.</p>`;}
+  // history
+  h+=`<h2 class="sec-title">${view==="week"?"Recent weeks":view==="fortnight"?"Recent 2-week periods":"Recent months"}</h2><div class="card">`;
+  const ps=[];
+  if(view==="month"){const d=parseKey(k);for(let m=5;m>=0;m--){const s0=keyOf(new Date(d.getFullYear(),d.getMonth()-m,1)),dd=parseKey(s0),l=new Date(dd.getFullYear(),dd.getMonth()+1,0).getDate();ps.push({s:s0,t:spendFrom(s0,l),lbl:dd.toLocaleDateString(undefined,{month:"short"})});}}
+  else for(let w=5;w>=0;w--){const s0=addDays(start,-len*w);ps.push({s:s0,t:spendFrom(s0,len),lbl:dfmt(s0)});}
+  const mx=Math.max(plan,...ps.map(w=>w.t),1);
+  h+=ps.map(w=>`<div class="hist"><span class="of">${w.lbl}</span><div class="bar${plan>0&&w.t>plan?" over":""}"><span style="width:${w.t/mx*100}%"></span></div><b>${w.t?eur(w.t):"–"}</b></div>`).join("");
+  const logged=ps.filter(w=>w.t>0);if(logged.length>1)h+=`<p class="note">Average over logged periods: ${eur(logged.reduce((a,w)=>a+w.t,0)/logged.length)}</p>`;
+  h+=`</div></section>`;
+  $("panel").innerHTML=h;
+}
+let spFilter="",spSort="new",cSort="last";
+function sortSel(id,cur,opts){return `<label class="spsort"><span class="sr-only">Sort by</span><select class="field" data-spsort="${id}" aria-label="Sort by">${opts.map(([v,l])=>`<option value="${v}"${v===cur?" selected":""}>${l}</option>`).join("")}</select></label>`;}
+function buyName(b){const n=String(b.n||"Groceries");return b.s?n:n.replace(/^[^:]+:\s*/,"")||"Groceries";}
+function buyStore(b){const s=storeOf(b);return s==="Other"?"":s;}
+function pkey(n,s){return String(n||"").trim().toLowerCase()+"|"+String(s||"").trim().toLowerCase();}
+function agoTxt(dk){const d=dayDiff(dk,todayKey());return d<=0?"today":d===1?"yesterday":d<14?d+" days ago":d<60?Math.round(d/7)+" weeks ago":shortDate(dk);}
+// every product you've saved or bought, with when and how often
+function catalog(start,end){const S=store.settings,hid=S.prodHidden||{},M=new Map();
+  for(const pr of products()){const key=pkey(pr.n,pr.store);M.set(key,{key,n:pr.n,store:pr.store||"",price:num(pr.price),pid:pr.id,pr,last:null,count:0,inP:false,wk:prodWeekly(pr)});}
+  for(const dk of Object.keys(store.days).sort())for(const b of store.days[dk].buys||[]){const n=buyName(b);if(!b.s&&!String(b.n||"").trim())continue;const s=buyStore(b),key=pkey(n,s);let c=M.get(key);
+    if(!c){c={key,n,store:s,price:num(b.e),last:null,count:0,inP:false,wk:0};M.set(key,c);}
+    c.count++;if(!c.last||dk>=c.last){c.last=dk;if(!c.pid)c.price=num(b.e);}if(dk>=start&&dk<=end)c.inP=true;}
+  return [...M.values()].filter(c=>!(hid[c.key]&&!(c.last&&c.last>hid[c.key]))&&!/^groceries$/i.test(c.n));}
+function upsertProduct(n,s,price){if(!n||/^groceries$/i.test(n))return;const P=ensureProducts(),key=pkey(n,s),pr=P.find(x=>pkey(x.n,x.store)===key);
+  if(pr)pr.price=price;else P.push({id:"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),n,store:s||"",price});
+  const H=store.settings.prodHidden;if(H&&H[key])delete H[key];}
+function logBuy(dk,n,s,e){const day=ensureDay(dk);(day.buys=day.buys||[]).push({n:n||"Groceries",e:Math.round(e*100)/100,s:s||undefined});upsertProduct(n,s,Math.round(e*100)/100);persist("day-"+dk);persist("settings");}
+function spSuggest(q){q=q.trim().toLowerCase();const c=catalog("","").filter(x=>!q||x.n.toLowerCase().includes(q)).sort((a,b)=>(b.last||"").localeCompare(a.last||"")||b.count-a.count).slice(0,6);
+  return c.length?`<p class="lbl" style="margin:8px 0 6px">${q?"Matches":"Bought before"}</p><div class="spsug">${c.map(x=>`<button type="button" class="chip" data-spsug="${encodeURIComponent(x.key)}">${esc(x.n)}<small>${eur(x.price)}${x.store?" · "+esc(x.store):""}</small></button>`).join("")}</div>`:"";}
+function addPurchase(pre){const stores=storesList().filter(s=>s!=="Other"),p=pre||{};
+  openSheet("Add a purchase",`<label class="sfld"><span class="lbl">What did you buy?</span><input class="field" id="spN" placeholder="Like chicken breast, or Groceries" value="${esc(p.n||"")}" autocomplete="off"></label><div id="spSug">${p.n?"":spSuggest("")}</div>
+   <div class="pair" style="margin-top:4px"><label class="sfld"><span class="lbl">Price (${curSym()})</span><input class="field" id="spE" inputmode="decimal" placeholder="0.00" value="${p.e!=null?esc(p.e):""}"></label><label class="sfld"><span class="lbl">Date</span><input class="field" id="spD" type="date" value="${p.dk||sel}"></label></div>
+   <label class="sfld"><span class="lbl">Store</span><input class="field" id="spS" list="storeList" placeholder="Store" value="${esc(p.s!=null?p.s:spFilter||"")}" autocomplete="off"></label>
+   ${stores.length?`<div class="chips" style="margin-top:6px">${stores.map(s=>`<button type="button" class="chip" data-spst="${esc(s)}">${esc(s)}</button>`).join("")}</div>`:""}`,
+   [{label:"Add",fn:()=>spSave(false)},{label:"Add and log another",cls:"btn ghost",fn:()=>spSave(true)},{label:"Cancel",cls:"btn ghost"}]);
+  sheetEl._kind="spadd";if(p.n){setTimeout(()=>{const e=$("spE");if(e)e.focus();},60);}}
+function spSave(again){const e=num(sv("spE"));if(!(e>0)){const x=$("spE");if(x)x.focus();return false;}
+  const n=sv("spN"),s=sv("spS"),dk=sv("spD")||sel,u=snap(["day-"+dk,"settings"]);logBuy(dk,n,s,e);renderSpend();toast(`${n||"Purchase"} added, ${eur(e)}`,u);
+  if(again){["spN","spE"].forEach(id=>{const x=$(id);if(x)x.value="";});$("spSug").innerHTML=spSuggest("");$("spN").focus();return false;}}
+sheetEl.addEventListener("input",e=>{if(sheetEl._kind!=="spadd"||e.target.id!=="spN")return;$("spSug").innerHTML=spSuggest(e.target.value);});
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="spadd")return;const sg=e.target.closest("[data-spsug]");const st=e.target.closest("[data-spst]");
+  if(sg){const c=catalog("","").find(x=>x.key===decodeURIComponent(sg.dataset.spsug));if(c){$("spN").value=c.n;$("spE").value=c.price||"";$("spS").value=c.store||"";$("spSug").innerHTML="";$("spE").focus();}}
+  if(st){$("spS").value=st.dataset.spst;}});
+function findCat(key){return catalog("","").find(c=>c.key===key);}
+function prodSheet(key){const c=findCat(key);if(!c)return;const list=[];for(const dk of Object.keys(store.days).sort().reverse())for(const b of store.days[dk].buys||[])if(pkey(buyName(b),buyStore(b))===key)list.push({dk,e:num(b.e)});
+  const tot=list.reduce((a,x)=>a+x.e,0);
+  openSheet(c.n,`<p class="note" style="margin-top:0">${c.store?esc(c.store)+" · ":""}${eur(c.price)}${c.wk>0?` · regular buy, about ${eur(c.wk)} a week`:""}</p>
+   ${list.length?`<p class="lbl">Bought ${list.length} time${list.length===1?"":"s"}, ${eur(tot)} in total</p><div class="sphist">${list.slice(0,12).map(x=>`<div><span>${shortDate(x.dk)}</span><b>${eur(x.e)}</b></div>`).join("")}</div>`:`<p class="note">Not bought yet.</p>`}`,
+   [{label:`Bought it ${sel===todayKey()?"today":shortDate(sel)}`,fn:()=>{const u=snap(["day-"+sel,"settings"]);logBuy(sel,c.n,c.store,c.price);renderSpend();toast(`${c.n} added, ${eur(c.price)}`,u);}},
+    {label:"Different price or day",cls:"btn ghost",fn:()=>{setTimeout(()=>addPurchase({n:c.n,s:c.store,e:c.price}),0);}},
+    {label:"Edit product",cls:"btn ghost",fn:()=>{setTimeout(()=>editProduct(key),0);}},{label:"Close",cls:"btn ghost"}]);}
+function editProduct(key){const c=findCat(key);if(!c)return;const pr=c.pr,reg=pr&&prodWeekly(pr)>0,days=reg?Math.round(prodDays(pr)):"";
+  openSheet("Edit product",fld("Name","pN",c.n)+`<div class="pair">`+fld("Price ("+curSym()+")","pE",c.price,"decimal")+fld("Store","pS",c.store)+`</div>
+   <div class="setrow" style="margin-top:6px"><span class="sl">Regular buy<small>Counts towards your usual spend, based on how long one lasts</small></span><button type="button" class="switch" role="switch" aria-checked="${!!reg}" data-preg><i></i></button></div>
+   <div id="pRegBox"${reg?"":" hidden"}>${fld("One lasts (days)","pL",days,"decimal")}</div>`,
+   [{label:"Save",fn:()=>{const n=sv("pN"),e=num(sv("pE")),s=sv("pS");if(!n)return false;const u=snap(["settings"]),P=ensureProducts();let p=P.find(x=>x.id===c.pid);if(!p){p={id:"p"+Date.now().toString(36)};P.push(p);}
+      p.n=n;p.price=e;p.store=s;const on=sheetEl.querySelector("[data-preg]").getAttribute("aria-checked")==="true",L=num(sv("pL"));
+      if(on&&L>0){p.mode="days";p.days=L;delete p.q;delete p.packG;delete p.gpd;}else if(!on){delete p.mode;delete p.days;delete p.q;delete p.packG;delete p.gpd;}
+      persist("settings");renderSpend();toast("Product updated",u);}},
+    {label:"Delete product",cls:"btn ghost dangertxt",fn:()=>{setTimeout(()=>delProduct(key),0);}},{label:"Cancel",cls:"btn ghost"}]);sheetEl._kind="prodedit";}
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="prodedit")return;const b=e.target.closest("[data-preg]");if(!b)return;const on=b.getAttribute("aria-checked")!=="true";b.setAttribute("aria-checked",on);$("pRegBox").hidden=!on;if(on)setTimeout(()=>$("pL").focus(),30);});
+function delProduct(key){const c=findCat(key);if(!c)return;const u=snap(["settings"]),S=store.settings;if(c.pid)S.products=ensureProducts().filter(x=>x.id!==c.pid);S.prodHidden=Object.assign({},S.prodHidden,{[key]:todayKey()});persist("settings");renderSpend();toast(`${c.n} removed from your products`,u);}
+function delBuy(dk,i){const day=ensureDay(dk),b=(day.buys||[])[i];if(!b)return;const u=snap(["day-"+dk]);day.buys.splice(i,1);persist("day-"+dk);renderSpend();toast("Purchase deleted",u);}
+function buyActions(dk,i){const b=((store.days[dk]||{}).buys||[])[i];if(!b)return;
+  openSheet(buyName(b),`<p class="note" style="margin-top:0">${eur(num(b.e))}${buyStore(b)?" · "+esc(buyStore(b)):""} · ${shortDate(dk)}</p>`,
+   [{label:"Edit",fn:()=>{setTimeout(()=>editBuy(dk,i),0);}},{label:`Buy again ${sel===todayKey()?"today":shortDate(sel)}`,cls:"btn ghost",fn:()=>{const u=snap(["day-"+sel,"settings"]);logBuy(sel,buyName(b),buyStore(b),num(b.e));renderSpend();toast("Added again",u);}},
+    {label:"Delete",cls:"btn danger",fn:()=>{delBuy(dk,i);}},{label:"Cancel",cls:"btn ghost"}]);}
+function prodActions(key){const c=findCat(key);if(!c)return;
+  openSheet(c.n,`<p class="note" style="margin-top:0">${eur(c.price)}${c.store?" · "+esc(c.store):""}${c.last?" · last bought "+agoTxt(c.last):""}</p>`,
+   [{label:"Edit",fn:()=>{setTimeout(()=>editProduct(key),0);}},{label:`Bought it ${sel===todayKey()?"today":shortDate(sel)}`,cls:"btn ghost",fn:()=>{const u=snap(["day-"+sel,"settings"]);logBuy(sel,c.n,c.store,c.price);renderSpend();toast(`${c.n} added, ${eur(c.price)}`,u);}},
+    {label:"Delete",cls:"btn danger",fn:()=>{delProduct(key);}},{label:"Cancel",cls:"btn ghost"}]);}
+function budgetSheet(){const S=store.settings,reg=products().reduce((a,pr)=>a+prodWeekly(pr),0);
+  openSheet("Weekly budget",fld("Budget per week ("+curSym()+")","bB",num(S.spendBudget)||"","decimal")+`<p class="note">The 2-week and monthly views scale this up. ${reg>0?`Your regular buys come to about ${eur(reg)} a week.`:""} Leave it empty to ${reg>0?"use your regular buys instead":"have no budget"}.</p>`,
+   [{label:"Save",fn:()=>{const u=snap(["settings"]),v=num(sv("bB"));if(v>0)S.spendBudget=Math.round(v*100)/100;else delete S.spendBudget;persist("settings");renderSpend();toast("Budget saved",u);}},{label:"Cancel",cls:"btn ghost"}]);}
+// hold a row for more options
+let LP=null,LPswallow=false;
+$("panel").addEventListener("pointerdown",e=>{const r=e.target.closest&&e.target.closest("[data-sphold]");if(!r||e.button>0)return;clearTimeout(LP&&LP.t);r.classList.add("pressing");
+  LP={r,x:e.clientX,y:e.clientY,t:setTimeout(()=>{r.classList.remove("pressing");LPswallow=true;if(navigator.vibrate)try{navigator.vibrate(12);}catch(_){}
+    if(r.dataset.sphold==="buy")buyActions(r.dataset.day,+r.dataset.i);else prodActions(decodeURIComponent(r.dataset.key));LP=null;},480)};});
+$("panel").addEventListener("pointermove",e=>{if(LP&&Math.hypot(e.clientX-LP.x,e.clientY-LP.y)>9){clearTimeout(LP.t);LP.r.classList.remove("pressing");LP=null;}});
+["pointerup","pointercancel","pointerleave"].forEach(ev=>$("panel").addEventListener(ev,()=>{if(LP){clearTimeout(LP.t);LP.r.classList.remove("pressing");LP=null;}}));
+document.addEventListener("click",e=>{if(LPswallow){LPswallow=false;e.preventDefault();e.stopPropagation();}},true);document.addEventListener("pointerdown",()=>{if(LPswallow&&!LP)setTimeout(()=>{LPswallow=false;},0);},true);
+$("panel").addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest("[data-sphold]"))e.preventDefault();});
+$("panel").addEventListener("change",e=>{const s=e.target.closest&&e.target.closest("[data-spsort]");if(!s)return;if(s.dataset.spsort==="spsort")spSort=s.value;else cSort=s.value;renderSpend();});
+$("panel").addEventListener("click",e=>{if(tab!=="spend")return;const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
+  if(a==="spfilter"){e.stopPropagation();spFilter=b.dataset.s===spFilter&&b.classList.contains("spst")?"":b.dataset.s;renderSpend();}
+  else if(a==="spadd")addPurchase();
+  else if(a==="spbudget")budgetSheet();
+  else if(a==="spbuy")editBuy(b.dataset.day,+b.dataset.i);
+  else if(a==="spprod")prodSheet(decodeURIComponent(b.dataset.key));},true);
+
 function libPickList(q,exclude){
   q=q.trim().toLowerCase();const o=LIB[exclude]||{m:[],s:[]},first=o.g,om=new Set(o.m),dCur=diffOf(exclude);
   const all=Object.values(LIB).filter(x=>x.id!==exclude&&(!q||x.n.toLowerCase().includes(q)||x.g.toLowerCase().includes(q)||typeOf(x.id).toLowerCase().includes(q)||x.m.some(m=>(MNAME[m]||"").includes(q))));
@@ -3577,8 +3671,10 @@ function editFood(i){
 }
 function editBuy(dk,i){
   const day=ensureDay(dk),b=(day.buys||[])[i];if(!b)return;
-  openSheet("Edit purchase",fld("What or where","sN",b.n)+fld("Amount ("+curSym()+")","sE",b.e,"decimal"),
-    [{label:"Save",fn:()=>{const v=num(sv("sE"));if(!(v>0))return false;const u=snap(["day-"+dk]);b.n=sv("sN")||"Groceries";b.e=Math.round(v*100)/100;persist("day-"+dk);renderSpend();toast("Purchase updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
+  openSheet("Edit purchase",fld("What","sN",buyName(b))+`<div class="pair">`+fld("Price ("+curSym()+")","sE",b.e,"decimal")+`<label class="sfld"><span class="lbl">Date</span><input class="field" id="sD" type="date" value="${dk}"></label></div>`+fld("Store","sS",buyStore(b)),
+    [{label:"Save",fn:()=>{const v=num(sv("sE"));if(!(v>0))return false;const nd=sv("sD")||dk,u=snap(["day-"+dk,"day-"+nd,"settings"]);const o={n:sv("sN")||"Groceries",e:Math.round(v*100)/100,s:sv("sS")||undefined};
+      if(nd!==dk){day.buys.splice(i,1);const d2=ensureDay(nd);(d2.buys=d2.buys||[]).push(o);persist("day-"+nd);}else{b.n=o.n;b.e=o.e;if(o.s)b.s=o.s;else delete b.s;}upsertProduct(o.n,o.s,o.e);persist("day-"+dk);persist("settings");renderSpend();toast("Purchase updated",u);}},
+     {label:"Delete",cls:"btn ghost dangertxt",fn:()=>{setTimeout(()=>delBuy(dk,i),0);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function editCardio(i){
   const k=sel,day=ensureDay(k),c=(day.cardioLog||[])[i];if(!c)return;
@@ -4147,8 +4243,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="4.2";
+const APP_VERSION="4.3";
 const CHANGELOG=[
+  {v:"4.3",d:"10 October 2026",t:"A simpler Spend tab",items:["Add a purchase from one button: type the name, price and store, pick the day, and it closes when you're done. Add and log another keeps it open for a whole receipt","Things you've bought before pop up as you type, with their last price and store filled in","Everything you buy is saved under Your products, showing whether you've bought it this week or when you last did","Sort purchases and products by date, price, store, name, most bought or not bought yet","Tap a store to see only what you bought there, what you spent and how many of its products you've bought this period","Tap a purchase to edit it, or a product to buy it again or see its price history. Hold either one to edit, buy again or delete","Set a weekly budget, or let your regular buys set your usual spend. Mark a product as a regular buy and how long one lasts when you edit it"]},
   {v:"4.2",d:"10 October 2026",t:"Meal sizes wheel",items:["A new wheel for how you like to spread your day: a big breakfast, most of it at lunch, a big dinner, or skipping a meal. Drag the dots round the wheel, use − and +, or pick a quick option","Find it under Meal sizes on the Eat tab's planning card, inside Suggested meals and Portion my foods, and in Settings under Preferences","Suggested meals and Portion my foods now share out your calories the way you set, and each meal shows what it's aiming for","Meals you skip on the wheel are left out of planning","Meal tiles on the Eat tab show roughly how much to aim for before you log them"]},
   {v:"4.1",d:"10 October 2026",t:"Better cardio logging",items:["Log cardio with any two of time, distance and speed, and the app works out the third as you type","Switch speed to pace (like 5:30 per km) with one tap. Runs and walks start on pace, everything else on speed","Time can be minutes or min:sec, so 31:20 works","New cardio types: rowing, elliptical, stairs, swimming, hiking and SkiErg","Each entry shows distance, time and your pace or speed, and editing an entry uses the same form","Distances like 5.25 km no longer get rounded to 5"]},
   {v:"4.0",d:"10 October 2026",t:"Every exercise, animated",items:["All 227 exercises now have a movement figure, up from 38. That includes deadlifts, rows, skull crushers, planks, crunches, dips, every calisthenics move and all the Hyrox and cardio work","Running, walking, rowing, cycling, sled pushes, carries, bear crawls, jump rope and battle ropes play as a smooth loop, with arms and legs moving in turn","New equipment in the figures: kettlebells, medicine balls, wall-ball targets, the ab wheel, landmine bars, sleds, rowers, the SkiErg, bikes, boxes and walls","Variations show their own kit, so a dumbbell bench shows dumbbells and a goblet squat shows a kettlebell held at the chest","Every exercise now has a muscle map too, including wall balls, farmer's carries and the machine moves in the Hyrox template"]},
