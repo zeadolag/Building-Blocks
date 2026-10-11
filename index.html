@@ -476,6 +476,8 @@ details.mine summary{cursor:pointer;color:var(--blue);font-weight:500}
 .msbar2{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px}.msbar2 i{display:block;height:100%}
 .plsch{color:var(--blue);font-size:13.5px;font-weight:500}
 .plancard .plsplit{margin:0;background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.amt{margin-top:4px}.amtrow{display:flex;gap:8px;align-items:center}.amtin{display:flex;gap:6px;align-items:center;flex:1;min-width:0}.amtin .field{text-align:center;min-width:0;flex:1}.amtrow .amtu{flex:1.3;min-width:0}.amtrow>.of{flex:none}
+.afsel .fcout,.fcsel .fcout{margin:8px 0}
 .plancard{display:grid;gap:10px;background:color-mix(in srgb,var(--blue) 7%,var(--surface));border-color:color-mix(in srgb,var(--blue) 30%,var(--line))}
 .plancard strong{display:block;font-weight:600;font-size:15px}
 .plancard small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
@@ -2256,16 +2258,51 @@ function meter(label,val,target,unit){
   <div class="left">${over?fmt(diff)+" "+unit+" over":fmt(diff)+" "+unit+" to go"}</div></div>`;
 }
 // ---------- + on a meal tile: search everything, then add ----------
+// ---------- Counting foods instead of weighing them ----------
+// [singular, plural, grams each]; the first one is the default. Grams is always offered too.
+const QU={
+ "Egg, whole":[["egg","eggs",55]],"Egg whites":[["egg white","egg whites",33]],
+ "Vollkornbrot (whole grain bread)":[["slice","slices",45]],"Tortilla wrap":[["wrap","wraps",60]],"Aish baladi (Egyptian flatbread)":[["loaf","loaves",90]],"Aish shami (white pita)":[["pita","pitas",60]],
+ "Banana":[["banana","bananas",120]],"Apple":[["apple","apples",180]],"Orange":[["orange","oranges",150]],"Dates":[["date","dates",8]],"Avocado":[["avocado","avocados",150]],
+ "Tomato":[["tomato","tomatoes",120]],"Onion":[["onion","onions",110]],"Carrot":[["carrot","carrots",70]],"Bell pepper":[["pepper","peppers",160]],"Cucumber":[["cucumber","cucumbers",400]],"Zucchini":[["zucchini","zucchinis",250]],
+ "Potatoes, raw":[["potato","potatoes",150]],"Sweet potato, raw":[["sweet potato","sweet potatoes",200]],
+ "Ta'ameya (Egyptian falafel)":[["piece","pieces",25]],"Ful medames (stewed fava beans)":[["can (400 g)","cans (400 g)",400]],"Koshari":[["plate (about 400 g)","plates (about 400 g)",400]],
+ "Light mozzarella":[["ball","balls",125]],"Parmesan":[["tbsp grated","tbsp grated",5]],"Cottage cheese (Hüttenkäse)":[["tub (200 g)","tubs (200 g)",200]],"Cottage cheese, light":[["tub (200 g)","tubs (200 g)",200]],
+ "Quark, Magerstufe (fat-free quark, a soft fresh cheese)":[["tub (250 g)","tubs (250 g)",250],["tub (500 g)","tubs (500 g)",500]],
+ "Salmon, raw":[["fillet","fillets",125]],"Cod, raw":[["fillet","fillets",125]],"Tuna in water, drained":[["can (drained)","cans (drained)",130]],
+ "Chickpeas, drained":[["can (drained)","cans (drained)",240]],"Kidney beans, drained":[["can (drained)","cans (drained)",240]],
+ "Whey protein powder":[["scoop","scoops",30]],
+ "Olive oil":[["tbsp","tbsp",13.5],["tsp","tsp",4.5]],"Butter":[["tsp","tsp",5],["tbsp","tbsp",14]],"Light butter":[["tsp","tsp",5],["tbsp","tbsp",14]],"Ghee (samna)":[["tbsp","tbsp",13],["tsp","tsp",4.5]],
+ "Peanut butter":[["tbsp","tbsp",16]],"Tahini":[["tbsp","tbsp",15]],"Tahina (tahini sauce, ready to eat)":[["tbsp","tbsp",15]],"Hummus":[["tbsp","tbsp",15]],"Zaziki (tzatziki)":[["tbsp","tbsp",15]],
+ "Honey":[["tsp","tsp",7],["tbsp","tbsp",21]],"Date syrup":[["tbsp","tbsp",20]],"Ketchup":[["tbsp","tbsp",17]],"Cacao nibs":[["tbsp","tbsp",10]],
+ "Peanuts":[["handful","handfuls",28]],"Almonds":[["handful","handfuls",28]],"Pecans":[["handful","handfuls",28]],
+ "Milk 1.5%":[["glass (250 ml)","glasses (250 ml)",250]],"Whole milk 3.5%":[["glass (250 ml)","glasses (250 ml)",250]],"Protein milk":[["glass (250 ml)","glasses (250 ml)",250]],"Laban rayeb (fermented milk)":[["cup (250 ml)","cups (250 ml)",250]],
+ "Beer, 5%":[["bottle (500 ml)","bottles (500 ml)",500],["small bottle (330 ml)","small bottles (330 ml)",330]],"Wine, 12%":[["glass (150 ml)","glasses (150 ml)",150]],"Spirits, 40% (vodka, whisky)":[["shot (4 cl)","shots (4 cl)",40]],
+ "Cola":[["can (330 ml)","cans (330 ml)",330],["glass (250 ml)","glasses (250 ml)",250]],"Orange juice":[["glass (200 ml)","glasses (200 ml)",200]],"Energy drink":[["can (250 ml)","cans (250 ml)",250]],
+ "Sugarcane juice (asab)":[["glass (250 ml)","glasses (250 ml)",250]],"Karkade (hibiscus tea, sweetened)":[["glass (250 ml)","glasses (250 ml)",250]]
+};
+function qunits(it){return (QU[it.n]||[]).concat([["g","g",1]]);}
+function amtHtml(pre,it,q0,ui0){const U=qunits(it),ui=ui0!=null?ui0:0,u=U[ui],q=q0!=null?q0:(u[2]===1?100:1);
+  return `<div class="amt"><span class="lbl">Amount</span><div class="amtrow"><div class="amtin">${u[2]!==1?`<button type="button" class="mini" data-amtstep="-1" data-pre="${pre}" aria-label="One less">−</button>`:""}<input class="field" id="${pre}G" inputmode="decimal" value="${q}" aria-label="Amount">${u[2]!==1?`<button type="button" class="mini" data-amtstep="1" data-pre="${pre}" aria-label="One more">+</button>`:""}</div>${U.length>1?`<select class="field amtu" id="${pre}U" data-pre="${pre}" aria-label="Unit">${U.map((x,i)=>`<option value="${i}"${i===ui?" selected":""}>${esc(x[1])}${x[2]!==1?` (${r1(x[2])} g each)`:""}</option>`).join("")}</select>`:`<span class="of">g</span>`}</div></div>`;}
+function amtRead(pre,it){const U=qunits(it),s=$(pre+"U"),ui=s?+s.value:U.length-1,u=U[ui]||U[U.length-1],q=num(($(pre+"G")||{}).value);
+  return {q,ui,ug:u[2],g:q*u[2],label:u[2]===1?`${r1(q)} g`:`${r1(q)} ${q===1?u[0]:u[1]}`};}
+function amtNameFor(it,a){return it.n.replace(/, (raw|dry|drained)$/,"").replace(/ \((?!.*\d).*\)$/,"")+", "+a.label;}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-amtstep]");if(!b)return;e.stopPropagation();const inp=$(b.dataset.pre+"G");if(!inp)return;
+  inp.value=Math.max(0,r1(num(inp.value)+ +b.dataset.amtstep));inp.dispatchEvent(new Event("input",{bubbles:true}));},true);
+document.addEventListener("change",e=>{const s=e.target.closest&&e.target.closest(".amtu");if(!s)return;const pre=s.dataset.pre,inp=$(pre+"G");
+  const it=pre==="af"?afPick:pre==="fc"?allIngr().find(x=>x.n===fcPick):null;if(!it||!inp)return;const U=qunits(it),u=U[+s.value];
+  const box=s.closest(".amt");box.outerHTML=amtHtml(pre,it,u[2]===1?100:1,+s.value);const ni=$(pre+"G");if(ni){ni.dispatchEvent(new Event("input",{bubbles:true}));ni.focus();ni.select();}});
+
 let afQ="",afSlot=null,afPick=null;
 function afItems(){const q=afQ.trim().toLowerCase(),has=x=>!q||x.toLowerCase().includes(q),out=[];
   const sl=SLOTS.find(x=>x.id===afSlot);
   for(const s0 of SLOTS)for(const o of slotOpts(s0))if(!String(o.id).startsWith("r:")&&has(o.n)&&!out.some(x=>x.t==="meal"&&x.n===o.n))out.push({t:"meal",n:o.n,d:`${s0.name} · ${fmt(o.k)} kcal, ${Math.round(o.p)} g protein`,o,sl:s0.id});
   for(const r of allRecipes())if(has(r.n))out.push({t:"recipe",n:r.n,d:`Recipe · ${fmt(num(r.k))} kcal, ${Math.round(num(r.p))} g protein per serving`,r});
   quick().forEach((x,i)=>{if(has(x.n))out.push({t:"quick",n:x.n,d:`Quick pick · ${fmt(x.k)} kcal, ${r1(x.p)} g protein`,i});});
-  for(const it of allIngr())if(has(it.n))out.push({t:"ingr",n:it.n,d:`Per 100 g: ${fmt(it.k)} kcal, ${r1(it.p)} g protein`,it});
+  for(const it of allIngr())if(has(it.n)){const u=(QU[it.n]||[])[0];out.push({t:"ingr",n:it.n,d:u?`1 ${u[0]}: ${fmt(it.k*u[2]/100)} kcal, ${r1(it.p*u[2]/100)} g protein`:`Per 100 g: ${fmt(it.k)} kcal, ${r1(it.p)} g protein`,it});}
   if(sl)out.sort((a,b)=>(b.t==="meal"&&b.sl===afSlot)-(a.t==="meal"&&a.sl===afSlot));
   return out;}
-function afList(){const L=afItems(),lab={meal:"Your meals",recipe:"Recipes",quick:"Quick picks",ingr:"Ingredients, by weight"};let h="",last="";
+function afList(){const L=afItems(),lab={meal:"Your meals",recipe:"Recipes",quick:"Quick picks",ingr:"Ingredients"};let h="",last="";
   if(!L.length)return `<p class="note">Nothing matches. <button type="button" class="linkbtn" style="padding:0" data-af="manual">Type it in instead</button></p>`;
   L.slice(0,60).forEach((x,i)=>{if(x.t!==last){last=x.t;h+=`<p class="libhead">${lab[x.t]}</p>`;}h+=`<button type="button" class="libitem" data-af="pick" data-i="${i}"><span><strong>${esc(x.n)}</strong><small>${esc(x.d)}</small></span><span class="plus">${x.t==="ingr"?"›":"+"}</span></button>`;});
   return h;}
@@ -2275,7 +2312,7 @@ function addFoodSheet(slot){afSlot=slot;afQ="";afPick=null;const sl=SLOTS.find(x
    <button type="button" class="linkbtn" data-af="manual">Know the numbers? Type them in</button>`,[{label:"Done",cls:"btn ghost"}]);
   sheetEl._kind="addfood";}
 function afLog(e,label){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);if(afSlot)e.slot=afSlot;(day.extras=day.extras||[]).push(e);persist("day-"+k);renderEat();toast("Added "+label,u);}
-function afSelHtml(it){return `<div class="afsel"><p class="lbl" style="margin-top:10px">${esc(it.n)}</p><div class="pair"><label><span class="lbl">Grams</span><input class="field" id="afG" inputmode="decimal" value="100"></label><div class="fcout" id="afOut">${fcOut(it,100)}</div></div><button class="btn" data-af="addingr">Add</button></div>`;}
+function afSelHtml(it){const U=qunits(it),g0=U[0][2]===1?100:U[0][2];return `<div class="afsel"><p class="lbl" style="margin-top:10px">${esc(it.n)}</p>${amtHtml("af",it)}<div class="fcout" id="afOut">${fcOut(it,g0)}</div><button class="btn" data-af="addingr">Add</button></div>`;}
 // ---------- Meal planner: suggest meals for what's left, or portion the foods you pick ----------
 // One engine for both: every food becomes a variable (grams, pieces or servings) with sensible limits,
 // and a solver finds amounts that land on your calories, protein, carbs and fat, spread sensibly over your meals.
@@ -3294,8 +3331,8 @@ $("panel").addEventListener("input",e=>{
     if(f==="n"||f==="store"||f==="mode")pr[f]=t.value;else if(t.value.trim()!=="")pr[f]=num(t.value);
     persist("settings");const c=document.querySelector(`[data-pc="${pr.id}"]`);if(c)c.textContent=prodCostText(pr);if(f==="mode")renderSpend();}
   else if(t.id==="fcQ"){fcQ=t.value;const r=$("fcRes");if(r)r.innerHTML=fcList();}
-  else if(t.id==="fcG"){const it=allIngr().find(x=>x.n===fcPick),o=$("fcOut");if(it&&o)o.innerHTML=fcOut(it,num(t.value));}
-  else if(t.dataset.mbg!==undefined){const x=mb[+t.dataset.mbg];if(x){x.g=num(t.value);const tt=mbTotals(),o=$("mbTot");if(o)o.innerHTML="Total: "+fcOut({k:tt.k,p:tt.p,cb:tt.cb,f:tt.f},100);}}
+  else if(t.id==="fcG"){const it=allIngr().find(x=>x.n===fcPick),o=$("fcOut");if(it&&o){const a=amtRead("fc",it);o.innerHTML=(a.ug!==1?`<span class="of">${r1(a.g)} g · </span>`:"")+fcOut(it,a.g);}}
+  else if(t.dataset.mbg!==undefined){const x=mb[+t.dataset.mbg];if(x){if(x.ug>1){x.q=num(t.value);x.g=x.q*x.ug;}else x.g=num(t.value);const tt=mbTotals(),o=$("mbTot");if(o)o.innerHTML="Total: "+fcOut({k:tt.k,p:tt.p,cb:tt.cb,f:tt.f,fb:tt.fb},100);}}
   else if(t.dataset.pf&&t.closest(".tcalc")){if(t.dataset.pf==="dob"&&t.value&&!ageOn(t.value)){return;}
     if(t.dataset.pf==="hft"||t.dataset.pf==="hin"){const S=store.settings,box=t.closest(".tcalc"),ft=num((box.querySelector('[data-pf="hft"]')||{}).value),inch=num((box.querySelector('[data-pf="hin"]')||{}).value);S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile.h=String(Math.round((ft*12+inch)*2.54*10)/10);persist("settings");tUpdate(S.profile);return;}const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");tUpdate(S.profile);}
   else if(t.dataset.ed==="name"){const {P}=curPlanEdit();P.name=t.value.slice(0,40)||"Workout";persist("settings");}
@@ -3363,11 +3400,11 @@ function foodCalcHtml(){
   <div class="chips">${["All"].concat(ICATS).concat((store.settings.ingredients||[]).length?["Mine"]:[]).map(c=>`<button class="chip${(c==="All"?!fcCat:fcCat===c)?" on":""}" data-act="fccat" data-c="${c==="All"?"":c}">${c}</button>`).join("")}</div>
   <input class="field" id="fcQ" placeholder="Search, like chicken or rice" value="${esc(fcQ)}" aria-label="Search ingredients">
   <div id="fcRes" class="swres">${fcList()}</div>`;
-  if(it)h+=`<div class="fcsel"><p class="lbl" style="margin-top:12px">${esc(it.n)}</p><div class="pair"><label><span class="lbl">Grams</span><input class="field" id="fcG" inputmode="decimal" value="100"></label><div id="fcOut" class="fcout">${fcOut(it,100)}</div></div>
+  if(it)h+=`<div class="fcsel"><p class="lbl" style="margin-top:12px">${esc(it.n)}</p>${amtHtml("fc",it)}<div id="fcOut" class="fcout">${fcOut(it,qunits(it)[0][2]===1?100:qunits(it)[0][2])}</div>
     <div class="pair" style="margin-top:8px"><button class="btn" style="margin:0" data-act="fcadd">Add to today</button><button class="btn ghost" style="margin:0" data-act="fcmb">Add to meal builder</button></div></div>`;
   // builder
   if(mb.length){const t=mbTotals();
-    h+=`<div class="mb"><p class="lbl" style="margin-top:16px">Meal builder</p>`+mb.map((x,i)=>`<div class="mbrow"><span>${esc(x.n)}</span><input class="field" data-mbg="${i}" inputmode="decimal" value="${esc(x.g)}" aria-label="${esc(x.n)} grams"><span class="of">g</span><button class="rm" data-act="mbrm" data-i="${i}" aria-label="Remove ${esc(x.n)}">×</button></div>`).join("")+
+    h+=`<div class="mb"><p class="lbl" style="margin-top:16px">Meal builder</p>`+mb.map((x,i)=>`<div class="mbrow"><span>${esc(x.n)}</span><input class="field" data-mbg="${i}" inputmode="decimal" value="${esc(x.ug>1?x.q:x.g)}" aria-label="${esc(x.n)} amount"><span class="of">${esc(x.ug>1?x.ul:"g")}</span><button class="rm" data-act="mbrm" data-i="${i}" aria-label="Remove ${esc(x.n)}">×</button></div>`).join("")+
     `<p class="fcout" id="mbTot" style="margin-top:8px">Total: ${fcOut({k:t.k,p:t.p,cb:t.cb,f:t.f,fb:t.fb},100)}</p>
     <div class="servrow"><label><span class="lbl">Makes how many servings?</span><input class="field" id="mbS" inputmode="decimal" value="${esc(mbServ)}" aria-label="Number of servings"></label><p class="fcout" id="mbPer">${mbPerHtml()}</p></div>
     <input class="field" id="mbN" placeholder="Meal name, like Chicken and rice bowl" aria-label="Meal name" style="margin-top:8px">
@@ -3468,7 +3505,7 @@ sheetEl.addEventListener("click",e=>plannerClick(e));
 sheetEl.addEventListener("input",e=>{if(sheetEl._kind!=="planner"||e.target.id!=="plQ")return;PL.q=e.target.value;const r=$("plRes");if(r)r.innerHTML=plResults(PL.picking);});
 sheetEl.addEventListener("close",()=>{sheetEl.classList.remove("tall");});
 sheetEl.addEventListener("input",e=>{if(sheetEl._kind!=="addfood")return;if(e.target.id==="afQ"){afQ=e.target.value;$("afRes").innerHTML=afList();}
-  else if(e.target.id==="afG"&&afPick){const o=$("afOut");if(o)o.innerHTML=fcOut(afPick,num(e.target.value));}});
+  else if(e.target.id==="afG"&&afPick){const o=$("afOut"),a=amtRead("af",afPick);if(o)o.innerHTML=(a.ug!==1?`<span class="of">${r1(a.g)} g · </span>`:"")+fcOut(afPick,a.g);}});
 sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="addfood")return;const b=e.target.closest("[data-af]");if(!b)return;const a=b.dataset.af;
   if(a==="manual"){const sl=afSlot;closeSheet();quickAdd(sl);return;}
   if(a==="pick"){const x=afItems()[+b.dataset.i];if(!x)return;
@@ -3477,8 +3514,8 @@ sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="addfood")return;const b
     else if(x.t==="recipe"){const r=x.r;afLog({n:r.n+", 1 serving",k:Math.round(num(r.k)),p:r1(num(r.p)),cb:r.cb,f:r.f,fb:num(r.fb)||undefined,nu:r.nu||undefined},"1 serving of "+r.n);}
     else if(x.t==="quick"){const q=quick()[x.i];afLog(Object.assign({n:q.n,k:q.k,p:q.p},quickNu(q)),q.n);}
     b.classList.add("added");setTimeout(()=>b.classList.remove("added"),600);return;}
-  if(a==="addingr"&&afPick){const g=num($("afG").value);if(!(g>0)){$("afG").focus();return;}const m=macrosFor(afPick,g);
-    afLog({n:afPick.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb)||undefined,nu:m.nu||undefined},r1(g)+" g "+afPick.n.split(/[,(]/)[0].trim().toLowerCase());
+  if(a==="addingr"&&afPick){const am=amtRead("af",afPick),g=am.g;if(!(g>0)){$("afG").focus();return;}const m=macrosFor(afPick,g);
+    afLog({n:amtNameFor(afPick,am),k:Math.round(m.k),p:r1(m.p),cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb)||undefined,nu:m.nu||undefined},am.label+" "+afPick.n.split(/[,(]/)[0].trim().toLowerCase());
     afPick=null;$("afSel").innerHTML="";const q=$("afQ");if(q){q.value="";afQ="";$("afRes").innerHTML=afList();}}});
 sheetEl.addEventListener("click",e=>{const b=e.target.closest("[data-qsave]");if(b)b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));});
 
@@ -3809,9 +3846,9 @@ $("panel").addEventListener("click",e=>{
   else if(act==="rmprod"){const u=snap(["settings"]),P=ensureProducts(),ix=P.findIndex(x=>x.id===b.dataset.id);if(ix>=0)P.splice(ix,1);persist("settings");renderSpend();toast("Product removed",u);}
   else if(act==="fccat"){fcCat=b.dataset.c;renderEat();}
   else if(act==="fcpick"){fcPick=b.dataset.n;renderEat();const g=$("fcG");if(g){g.focus();g.select();}}
-  else if(act==="fcadd"||act==="fcmb"){const it=allIngr().find(x=>x.n===fcPick);if(!it)return;const g=num($("fcG").value);if(!(g>0)){$("fcG").focus();return;}
-    if(act==="fcadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]),m=macrosFor(it,g);(day.extras=day.extras||[]).push({n:it.n.replace(/, (raw|dry|drained)$/,"")+", "+r1(g)+" g",k:Math.round(m.k),p:r1(m.p),cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb),nu:m.nu||undefined});persist("day-"+k);renderEat();toast("Added to today",u);}
-    else{mb.push(Object.assign({},it,{g}));fcPick=null;renderEat();}}
+  else if(act==="fcadd"||act==="fcmb"){const it=allIngr().find(x=>x.n===fcPick);if(!it)return;const am=amtRead("fc",it),g=am.g;if(!(g>0)){$("fcG").focus();return;}
+    if(act==="fcadd"){const k=sel,day=ensureDay(k),u=snap(["day-"+k]),m=macrosFor(it,g);(day.extras=day.extras||[]).push({n:amtNameFor(it,am),k:Math.round(m.k),p:r1(m.p),cb:r1(m.cb),f:r1(m.f),fb:r1(m.fb),nu:m.nu||undefined});persist("day-"+k);renderEat();toast("Added to today",u);}
+    else{mb.push(Object.assign({},it,{g,q:am.q,ug:am.ug,ul:am.ug===1?"g":qunits(it)[am.ui][1]}));fcPick=null;renderEat();}}
   else if(act==="mbrm"){mb.splice(+b.dataset.i,1);renderEat();}
   else if(act==="mbclear"){mb=[];renderEat();}
   else if(act==="mbrecipe"){if(!mb.length)return;const t=mbTotals(),sv=num(mbServ)||1,n=$("mbN").value.trim()||mb.map(x=>x.n.split(",")[0]).join(", "),u=snap(["settings"]),id=Date.now().toString(36);
@@ -4251,8 +4288,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="4.6";
+const APP_VERSION="4.7";
 const CHANGELOG=[
+  {v:"4.7",d:"11 October 2026",t:"Count it, don't weigh it",items:["Foods you normally count can now be added by the piece: eggs, slices of bread, wraps, pitas and baladi loaves, bananas, apples, oranges, dates, avocados, tomatoes, onions, carrots, peppers, potatoes, ta'ameya, fish fillets, cans of tuna and beans, scoops of whey and more","Spreads and oils go by the spoon (olive oil, butter, ghee, honey, peanut butter, tahini, hummus), nuts by the handful, and drinks by the glass, can, bottle or shot","Use − and + to change the count. The app shows the weight it's based on and works out the calories and macros from it. You can still switch to grams any time","Works in Add food, the food calculator and the meal builder"]},
   {v:"4.6",d:"10 October 2026",t:"Egypt and the Middle East",items:["New regions: Egypt, and the Gulf, Levant or North Africa. Phones set to Egyptian or Middle Eastern time pick them up on their own, and you can change it in Settings → Units and region","Egypt uses WHO/FAO values, with iron and zinc targets for a bread-and-beans diet, a 600 IU vitamin D target, and notes on why low vitamin D is so common there and on iodised salt","Your currency now follows your country until you pick one, so Egypt shows Egyptian pounds and the Gulf shows its own currencies","Egyptian foods with English names: ful medames, ta'ameya, lentil soup, aish baladi and shami, koshari, freekeh, gebna areesh and beida, laban rayeb, molokhia, mahshi, samna, tahina, asab and karkade"]},
   {v:"4.5",d:"10 October 2026",t:"Swipe to remove",items:["Swipe a counted purchase left to remove it, or right to edit it, like food and sets elsewhere in the app","Tapping still lets you change the price or day, and holding still works too"]},
   {v:"4.4",d:"10 October 2026",t:"Products you just tap",items:["Adding a product and logging a purchase are now one thing: Add product. It's saved for good, and counted straight away unless you untick I bought it today","Tap any saved product to count it as bought. No retyping","Products stay until you hold one and delete it, or edit it","Sort products by store, grouped with what you spent at each, or by price or name","Below them, everything counted this period. Tap one to change its price or day, or hold to remove it","Things you'd already bought were added to your products automatically"]},
