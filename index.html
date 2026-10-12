@@ -610,7 +610,17 @@ dialog.sheet.tall{max-height:94vh}
 
 /* ---------- Sheets, toast, timer ---------- */
 dialog.sheet{margin:auto auto 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;border:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom,0px));background:var(--surface);color:var(--ink)}
-dialog.sheet::before{content:"";display:block;width:40px;height:4px;border-radius:999px;background:var(--line);margin:0 auto 12px}
+dialog.sheet::before{content:none}
+.sheet-grab{position:sticky;top:-8px;z-index:3;margin:-8px -16px 4px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--surface);cursor:grab;touch-action:none}
+.sheet-grab::after{content:"";width:40px;height:5px;border-radius:999px;background:var(--line)}
+dialog.sheet{overscroll-behavior:contain;transition:transform .2s ease}
+dialog.sheet.dragging{transition:none}
+dialog.sheet.closing{transition:transform .18s ease-in}
+body.sheetlock{position:fixed;left:0;right:0;overflow:hidden}
+#rail{display:none!important}
+@keyframes slideL{from{transform:translateX(28px);opacity:.4}to{transform:none;opacity:1}}@keyframes slideR{from{transform:translateX(-28px);opacity:.4}to{transform:none;opacity:1}}
+#panel.slide-l{animation:slideL .22s ease}#panel.slide-r{animation:slideR .22s ease}
+@media (prefers-reduced-motion:reduce){#panel.slide-l,#panel.slide-r{animation:none}}
 dialog.sheet::backdrop{background:rgba(0,0,0,.55)}
 .sheet-t{font-size:18px;font-weight:600;margin-bottom:8px}
 .sheet-b{font-size:15px}
@@ -3530,7 +3540,7 @@ sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="cheat")return;const b=e
   (day.extras=day.extras||[]).push({n:"Cheat meal, "+n.toLowerCase(),k:+kc,p:+p,est:true,cheat:true});persist("day-"+k);closeSheet();renderEat();toast("Rough estimate added",u);});
 
 function openSheet(title,body,buttons){
-  sheetEl.innerHTML=`<h2 class="sheet-t">${esc(title)}</h2><div class="sheet-b">${body}</div><div class="sheet-a">${buttons.map((b,i)=>`<button type="button" class="${b.cls||"btn"}" data-sb="${i}">${b.label}</button>`).join("")}</div>`;
+  sheetEl.innerHTML=`<div class="sheet-grab" aria-hidden="true"></div><h2 class="sheet-t">${esc(title)}</h2><div class="sheet-b">${body}</div><div class="sheet-a">${buttons.map((b,i)=>`<button type="button" class="${b.cls||"btn"}" data-sb="${i}">${b.label}</button>`).join("")}</div>`;
   sheetEl._btns=buttons;sheetEl._pick=null;sheetEl._scope="today";sheetEl._kind=null;
   if(typeof sheetEl.showModal==="function")sheetEl.showModal();else sheetEl.setAttribute("open","");
   const f=sheetEl.querySelector("input");if(f&&!f.dataset.nofocus)setTimeout(()=>f.focus(),50);
@@ -3556,7 +3566,7 @@ function renderSpend(){
   const label=view==="week"?"this week":view==="fortnight"?"these 2 weeks":"this month";
   const rows=[];for(let i=0;i<len;i++){const dk=addDays(start,i),dd=store.days[dk];((dd&&dd.buys)||[]).forEach((b,j)=>rows.push({dk,j,b,n:buyName(b),s:buyStore(b),e:num(b.e)}));}
   const cat=catalog(start,end),stores=[...new Set(cat.map(c=>c.store).filter(Boolean))];
-  let h=`<datalist id="storeList">${stores.map(s=>`<option value="${esc(s)}">`).join("")}</datalist><section><div class="seg seg3" role="group" aria-label="Budget period"><button data-act="view" data-v="week" aria-pressed="${view==="week"}">Weekly</button><button data-act="view" data-v="fortnight" aria-pressed="${view==="fortnight"}">2 weeks</button><button data-act="view" data-v="month" aria-pressed="${view==="month"}">Monthly</button></div>`;
+  let h=`<datalist id="storeList">${stores.map(s=>`<option value="${esc(s)}">`).join("")}</datalist><section><div class="seg seg3" role="group" aria-label="Budget period"><button data-act="view" data-v="week" aria-pressed="${view==="week"}">Weekly</button><button data-act="view" data-v="fortnight" aria-pressed="${view==="fortnight"}">Bi-weekly</button><button data-act="view" data-v="month" aria-pressed="${view==="month"}">Monthly</button></div>`;
   h+=`<div class="card spsum"><div><span class="big">${eur(spent)}</span> <span class="of">spent ${label}</span></div><p class="of" style="margin:2px 0 0;font-size:13px">${dfmt(start)} to ${dfmt(end)}</p>
     ${plan>0?`<div class="bar${over?" over":""}"><span style="width:${Math.min(100,spent/plan*100)}%"></span></div><div class="left">${over?eur(spent-plan)+" over":eur(plan-spent)+" left"} of your ${bud>0?"budget":"usual spend"} of ${eur(plan)} · <button type="button" class="linkbtn" data-act="spbudget">${bud>0?"Change":"Set a budget"}</button></div>`
       :`<button type="button" class="linkbtn" data-act="spbudget" style="margin-top:8px">Set a budget</button>`}</div>`;
@@ -3642,7 +3652,7 @@ function prodActions(key){const c=findCat(key);if(!c)return;
   openSheet(c.n,`<p class="note" style="margin-top:0">${eur(c.price)}${c.store?" · "+esc(c.store):""}${c.last?" · last bought "+agoTxt(c.last):""}</p>`,
    [{label:"Edit",fn:()=>{setTimeout(()=>editProduct(key),0);}},{label:"Delete",cls:"btn danger",fn:()=>{delProduct(key);}},{label:"Cancel",cls:"btn ghost"}]);}
 function budgetSheet(){const S=store.settings,reg=products().reduce((a,pr)=>a+prodWeekly(pr),0);
-  openSheet("Weekly budget",fld("Budget per week ("+curSym()+")","bB",num(S.spendBudget)||"","decimal")+`<p class="note">The 2-week and monthly views scale this up. ${reg>0?`Your regular buys come to about ${eur(reg)} a week.`:""} Leave it empty to ${reg>0?"use your regular buys instead":"have no budget"}.</p>`,
+  openSheet("Weekly budget",fld("Budget per week ("+curSym()+")","bB",num(S.spendBudget)||"","decimal")+`<p class="note">The bi-weekly and monthly views scale this up. ${reg>0?`Your regular buys come to about ${eur(reg)} a week.`:""} Leave it empty to ${reg>0?"use your regular buys instead":"have no budget"}.</p>`,
    [{label:"Save",fn:()=>{const u=snap(["settings"]),v=num(sv("bB"));if(v>0)S.spendBudget=Math.round(v*100)/100;else delete S.spendBudget;persist("settings");renderSpend();toast("Budget saved",u);}},{label:"Cancel",cls:"btn ghost"}]);}
 // hold a row for more options
 let LP=null,LPswallow=false;
@@ -3659,6 +3669,42 @@ $("panel").addEventListener("click",e=>{if(tab!=="spend")return;const so=e.targe
   else if(a==="spbudget")budgetSheet();
   else if(a==="spbuy")editBuy(b.dataset.day,+b.dataset.i);
   else if(a==="sptap")spTap(decodeURIComponent(b.dataset.key));},true);
+
+// ---------- Sheets: swipe down to close, and keep the page behind still ----------
+let sheetLockY=0;
+function sheetLock(on){const b=document.body;if(on){if(b.classList.contains("sheetlock"))return;sheetLockY=scrollY;b.classList.add("sheetlock");b.style.top=(-sheetLockY)+"px";}
+  else{if(!b.classList.contains("sheetlock"))return;b.classList.remove("sheetlock");b.style.top="";scrollTo(0,sheetLockY);}}
+new MutationObserver(()=>{sheetLock(sheetEl.open);if(!sheetEl.open){sheetEl.style.transform="";sheetEl.classList.remove("dragging","closing");}}).observe(sheetEl,{attributes:true,attributeFilter:["open"]});
+const SD={on:false,y0:0,x0:0,dy:0,t0:0,grab:false,decided:false};
+function sdStart(x,y,target){const r=sheetEl.getBoundingClientRect();SD.grab=y-r.top<64;SD.x0=x;SD.y0=y;SD.t0=Date.now();SD.dy=0;SD.on=false;SD.decided=false;
+  SD.skip=!!(target.closest&&target.closest(".mwsvg,input[type=range],textarea,select"));}
+function sdMove(x,y,e){if(SD.skip)return;const dy=y-SD.y0,dx=x-SD.x0;
+  if(!SD.decided){if(Math.abs(dy)<8&&Math.abs(dx)<8)return;SD.decided=true;SD.on=dy>0&&Math.abs(dy)>Math.abs(dx)&&(SD.grab||sheetEl.scrollTop<=0);if(SD.on){sheetEl.classList.add("dragging");if(document.activeElement&&document.activeElement.blur&&sheetEl.contains(document.activeElement))document.activeElement.blur();}}
+  if(!SD.on)return;if(e&&e.cancelable)e.preventDefault();SD.dy=Math.max(0,dy);sheetEl.style.transform=`translateY(${SD.dy}px)`;}
+function sdEnd(){if(!SD.on){SD.decided=false;return;}SD.on=false;SD.decided=false;sheetEl.classList.remove("dragging");const v=SD.dy/Math.max(1,Date.now()-SD.t0);
+  if(SD.dy>110||v>0.6){sheetEl.classList.add("closing");sheetEl.style.transform="translateY(100%)";setTimeout(()=>{closeSheet();},180);}else sheetEl.style.transform="";}
+sheetEl.addEventListener("touchstart",e=>{const t=e.touches[0];sdStart(t.clientX,t.clientY,e.target);},{passive:true});
+sheetEl.addEventListener("touchmove",e=>{const t=e.touches[0];sdMove(t.clientX,t.clientY,e);},{passive:false});
+sheetEl.addEventListener("touchend",sdEnd);sheetEl.addEventListener("touchcancel",sdEnd);
+// mouse: drag the handle area
+sheetEl.addEventListener("mousedown",e=>{sdStart(e.clientX,e.clientY,e.target);if(!SD.grab){SD.skip=true;return;}const mv=ev=>sdMove(ev.clientX,ev.clientY,ev),up=()=>{removeEventListener("mousemove",mv);removeEventListener("mouseup",up);sdEnd();};addEventListener("mousemove",mv);addEventListener("mouseup",up);});
+// the dimmed area behind a sheet never scrolls the page
+sheetEl.addEventListener("touchmove",e=>{if(e.target===sheetEl&&e.cancelable)e.preventDefault();},{passive:false});
+// ---------- Swipes: edges switch tabs, controls step one option ----------
+function tabList(){return [...document.querySelectorAll("#island .itab[data-tab]")].map(b=>b.dataset.tab);}
+function swipeTab(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;openTab(L[j]);const p=$("panel");p.classList.remove("slide-l","slide-r");void p.offsetWidth;p.classList.add(dir>0?"slide-l":"slide-r");if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}return true;}
+function swipeSeg(sg,dir){const bs=[...sg.querySelectorAll(":scope>button")],i=bs.findIndex(b=>b.getAttribute("aria-pressed")==="true"),j=Math.max(0,Math.min(bs.length-1,(i<0?0:i)+dir));if(j===i)return;bs[j].click();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
+function swipeDay(dir){sel=addDays(sel,dir);render();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
+const GS={x:0,y:0,t:0,el:null,on:false};
+document.addEventListener("touchstart",e=>{if(sheetEl.open||e.touches.length>1){GS.on=false;return;}const t=e.touches[0],tg=e.target;
+  if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog")){GS.on=false;return;}
+  const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&(tg.closest(".seg")||tg.closest("header.top,#week"));GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();},{passive:true});
+document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.changedTouches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
+  if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.5||Date.now()-GS.t>800)return;const dir=dx<0?1:-1;
+  if(GS.el&&GS.el.classList.contains("seg")){swipeSeg(GS.el,dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
+  if(GS.el){swipeDay(dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
+  if(GS.edge)swipeTab(dir);},{passive:true});
+document.addEventListener("click",e=>{if(GS.block&&e.target.closest&&e.target.closest(".seg,header.top,#week")){e.stopPropagation();e.preventDefault();}},true);
 
 function libPickList(q,exclude){
   q=q.trim().toLowerCase();const o=LIB[exclude]||{m:[],s:[]},first=o.g,om=new Set(o.m),dCur=diffOf(exclude);
@@ -4288,8 +4334,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="4.7";
+const APP_VERSION="4.8";
 const CHANGELOG=[
+  {v:"4.8",d:"12 October 2026",t:"Swipes that make sense",items:["Pull-up sheets now close when you drag them down by the handle, or anywhere when you're at the top of the sheet","The page behind a sheet stays still. Scrolling or dragging no longer moves it","Swipe in from the left or right edge of the screen to go to the tab next door","Swipe across any switch, like Weekly, Bi-weekly and Monthly or the Progress ranges, to move it one step","Swipe across the date at the top to go a day back or forward. The arrows still work","The scrollbar on the right is gone for now","2 weeks is now called Bi-weekly"]},
   {v:"4.7",d:"11 October 2026",t:"Count it, don't weigh it",items:["Foods you normally count can now be added by the piece: eggs, slices of bread, wraps, pitas and baladi loaves, bananas, apples, oranges, dates, avocados, tomatoes, onions, carrots, peppers, potatoes, ta'ameya, fish fillets, cans of tuna and beans, scoops of whey and more","Spreads and oils go by the spoon (olive oil, butter, ghee, honey, peanut butter, tahini, hummus), nuts by the handful, and drinks by the glass, can, bottle or shot","Use − and + to change the count. The app shows the weight it's based on and works out the calories and macros from it. You can still switch to grams any time","Works in Add food, the food calculator and the meal builder"]},
   {v:"4.6",d:"10 October 2026",t:"Egypt and the Middle East",items:["New regions: Egypt, and the Gulf, Levant or North Africa. Phones set to Egyptian or Middle Eastern time pick them up on their own, and you can change it in Settings → Units and region","Egypt uses WHO/FAO values, with iron and zinc targets for a bread-and-beans diet, a 600 IU vitamin D target, and notes on why low vitamin D is so common there and on iodised salt","Your currency now follows your country until you pick one, so Egypt shows Egyptian pounds and the Gulf shows its own currencies","Egyptian foods with English names: ful medames, ta'ameya, lentil soup, aish baladi and shami, koshari, freekeh, gebna areesh and beida, laban rayeb, molokhia, mahshi, samna, tahina, asab and karkade"]},
   {v:"4.5",d:"10 October 2026",t:"Swipe to remove",items:["Swipe a counted purchase left to remove it, or right to edit it, like food and sets elsewhere in the app","Tapping still lets you change the price or day, and holding still works too"]},
@@ -4704,16 +4751,7 @@ addEventListener("resize",()=>requestAnimationFrame(railBuild));
 // ---------- Segmented controls: sliding thumb, swipe to change ----------
 function segSync(root){(root||document).querySelectorAll(".seg").forEach(sg=>{const bs=[...sg.querySelectorAll(":scope>button")];if(!bs.length)return;const i=bs.findIndex(b=>b.getAttribute("aria-pressed")==="true");
   sg.style.setProperty("--n",bs.length);if(!sg.classList.contains("dragging"))sg.style.setProperty("--i",Math.max(0,i));sg.classList.toggle("hasthumb",i>=0);});}
-const segS={el:null,x:0,moved:false,i:-1};
-document.addEventListener("pointerdown",e=>{const sg=e.target.closest&&e.target.closest(".seg");if(!sg)return;segS.el=sg;segS.x=e.clientX;segS.moved=false;segS.i=-1;});
-document.addEventListener("pointermove",e=>{const sg=segS.el;if(!sg)return;if(!segS.moved&&Math.abs(e.clientX-segS.x)<8)return;
-  if(!segS.moved){segS.moved=true;sg.classList.add("dragging");}
-  const bs=[...sg.querySelectorAll(":scope>button")],r=sg.getBoundingClientRect(),i=Math.max(0,Math.min(bs.length-1,Math.floor((e.clientX-r.left)/r.width*bs.length)));
-  if(i!==segS.i){segS.i=i;sg.style.setProperty("--i",i);}});
-function segEnd(){const sg=segS.el;if(!sg)return;segS.el=null;sg.classList.remove("dragging");
-  if(segS.moved){const b=sg.querySelectorAll(":scope>button")[segS.i];segS.block=true;setTimeout(()=>segS.block=false,60);if(b&&b.getAttribute("aria-pressed")!=="true")b.click();else segSync(sg.parentElement);}}
-document.addEventListener("pointerup",segEnd);document.addEventListener("pointercancel",segEnd);
-document.addEventListener("click",e=>{if(segS.block&&e.target.closest&&e.target.closest(".seg")&&e.isTrusted){e.stopPropagation();e.preventDefault();}},true);
+const segS={el:null};
 // keep rail and segments in sync with whatever is on screen
 let uiQ=0,railQ2=0;function uiRefresh(){if(!uiQ)uiQ=requestAnimationFrame(()=>{uiQ=0;segSync();});clearTimeout(railQ2);railQ2=setTimeout(railBuild,120);}
 new MutationObserver(uiRefresh).observe($("panel"),{childList:true,subtree:true,attributes:true,attributeFilter:["aria-pressed"]});
