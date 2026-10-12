@@ -5079,6 +5079,8 @@ function bkFile(){return {name:"body-builder-backup-"+todayKey()+".json",text:JS
 function bkDone(){store.settings.lastBackup=todayKey();delete store.settings.bkSnooze;persist("settings");render();}
 async function bkExport(){
   let f;try{f=bkFile();}catch(e){toast("Couldn't make the backup file");return;}
+  // inside Claude, files are handed over through the viewer's own save prompt
+  try{const c=window.claude;if(c&&typeof c.use==="function"){const dl=await c.use("downloads");if(dl){try{await dl.save({filename:f.name,data:f.text});bkDone();toast("Backup saved");}catch(e){if(!(e&&e.code==="declined"))toast("Couldn't save the backup here");}return;}}}catch(e){}
   // On phones, the share sheet lets people send the file straight to WhatsApp, email or Files
   try{if(window.File&&navigator.canShare){const file=new File([f.text],f.name,{type:"application/json"});if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Body Builder backup"});bkDone();toast("Backup saved");return;}}}
   catch(e){if(e&&e.name==="AbortError")return;}
