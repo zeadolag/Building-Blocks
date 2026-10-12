@@ -621,6 +621,20 @@ body.sheetlock{position:fixed;left:0;right:0;overflow:hidden}
 #rail{display:none!important}
 @keyframes slideL{from{transform:translateX(28px);opacity:.4}to{transform:none;opacity:1}}@keyframes slideR{from{transform:translateX(-28px);opacity:.4}to{transform:none;opacity:1}}
 #panel.slide-l{animation:slideL .22s ease}#panel.slide-r{animation:slideR .22s ease}
+@property --p{syntax:"<number>";inherits:true;initial-value:0}
+@media (prefers-reduced-motion:no-preference){
+ dialog.sheet[open]{animation:sheetUp .26s cubic-bezier(.2,.8,.2,1)}
+ dialog.sheet[open]::backdrop{animation:bdIn .26s ease}
+ dialog.sheet.shutting{transform:translateY(100%);transition:transform .19s ease-in}
+ dialog.sheet.shutting::backdrop{animation:bdOut .19s ease forwards}
+ .pring.pfill{transition:--p .5s cubic-bezier(.2,.8,.2,1)}
+ .tick.pop{animation:tickPop .32s cubic-bezier(.3,1.6,.5,1)}
+}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes bdIn{from{opacity:0}to{opacity:1}}@keyframes bdOut{from{opacity:1}to{opacity:0}}
+@keyframes tickPop{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes slideL{from{transform:translateX(40px);opacity:.3}to{transform:none;opacity:1}}@keyframes slideR{from{transform:translateX(-40px);opacity:.3}to{transform:none;opacity:1}}
+#panel.slide-l{animation:slideL .24s cubic-bezier(.2,.8,.2,1)}#panel.slide-r{animation:slideR .24s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){#panel.slide-l,#panel.slide-r{animation:none}}
 dialog.sheet::backdrop{background:rgba(0,0,0,.55)}
 .sheet-t{font-size:18px;font-weight:600;margin-bottom:8px}
@@ -1911,7 +1925,7 @@ const TABDEF={
 const TAB_ORDER=["train","eat","body","spend","hist","settings"],TAB_LOCKED=["train","eat","settings"];
 function tabCfg(){const c=store.settings.tabs||{};const order=(Array.isArray(c.order)?c.order:[]).filter((t,i,a)=>TABDEF[t]&&a.indexOf(t)===i);for(const t of TAB_ORDER)if(!order.includes(t))order.push(t);
   const hidden=(Array.isArray(c.hidden)?c.hidden:[]).filter(t=>TABDEF[t]&&!TAB_LOCKED.includes(t));return {order,hidden};}
-function openTab(t){if(!TABDEF[t])return;if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);}
+function openTab(t){if(!TABDEF[t])return;const _L=[...document.querySelectorAll("#island .itab[data-tab]")].map(b=>b.dataset.tab),_d=Math.sign(_L.indexOf(t)-_L.indexOf(tab));if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);if(_d&&typeof slidePanel==="function")slidePanel(_d);}
 function renderTabs(){const {order,hidden}=tabCfg(),vis=order.filter(t=>!hidden.includes(t)),i=vis.indexOf(tab);
   const I=$("island");I.style.setProperty("--n",vis.length);I.style.setProperty("--i",Math.max(0,i));I.classList.toggle("nothumb",i<0);
   I.innerHTML=`<span class="ithumb" aria-hidden="true"></span>`+vis.map(t=>`<button type="button" class="itab" data-tab="${t}" aria-current="${t===tab?"page":"false"}">${TABDEF[t][1]}<span>${TABDEF[t][0]}</span></button>`).join("");}
@@ -3172,9 +3186,9 @@ function prodCostText(pr){const wk=prodWeekly(pr),d=prodDays(pr);return `${eur(w
 function renderSpendOld(){}
 
 // ---------- Events ----------
-$("prev").onclick=()=>{sel=addDays(sel,-1);render();};
-$("next").onclick=()=>{sel=addDays(sel,1);render();};
-$("week").onclick=e=>{const b=e.target.closest("[data-day]");if(b){sel=b.dataset.day;render();}};
+$("prev").onclick=()=>{sel=addDays(sel,-1);render();slidePanel(-1);};
+$("next").onclick=()=>{sel=addDays(sel,1);render();slidePanel(1);};
+$("week").onclick=e=>{const b=e.target.closest("[data-day]");if(b){const d=b.dataset.day>sel?1:b.dataset.day<sel?-1:0;sel=b.dataset.day;render();slidePanel(d);}};
 $("island").onclick=e=>{if(islandDrag.moved){islandDrag.moved=false;return;}const b=e.target.closest("[data-tab]");if(b){openTab(b.dataset.tab);}};
 // Slide along the tab island to switch tabs
 const islandDrag={on:false,moved:false,x:0,i:-1};
@@ -3548,10 +3562,13 @@ sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="cheat")return;const b=e
 function openSheet(title,body,buttons){
   sheetEl.innerHTML=`<div class="sheet-grab" aria-hidden="true"></div><h2 class="sheet-t">${esc(title)}</h2><div class="sheet-b">${body}</div><div class="sheet-a">${buttons.map((b,i)=>`<button type="button" class="${b.cls||"btn"}" data-sb="${i}">${b.label}</button>`).join("")}</div>`;
   sheetEl._btns=buttons;sheetEl._pick=null;sheetEl._scope="today";sheetEl._kind=null;
-  if(typeof sheetEl.showModal==="function")sheetEl.showModal();else sheetEl.setAttribute("open","");
+  if(sheetCloseT){clearTimeout(sheetCloseT);sheetCloseT=0;}sheetEl.classList.remove("shutting","closing");sheetEl.style.transform="";
+  if(!sheetEl.open){if(typeof sheetEl.showModal==="function")sheetEl.showModal();else sheetEl.setAttribute("open","");}else{sheetEl.scrollTop=0;}
   const f=sheetEl.querySelector("input");if(f&&!f.dataset.nofocus)setTimeout(()=>f.focus(),50);
 }
-function closeSheet(){if(sheetEl.open){if(typeof sheetEl.close==="function")sheetEl.close();else sheetEl.removeAttribute("open");}}
+let sheetCloseT=0;
+function closeSheetNow(){clearTimeout(sheetCloseT);sheetCloseT=0;sheetEl.classList.remove("closing","shutting");if(sheetEl.open){if(typeof sheetEl.close==="function")sheetEl.close();else sheetEl.removeAttribute("open");}}
+function closeSheet(){if(!sheetEl.open)return;if(RM()||sheetEl.classList.contains("closing")){closeSheetNow();return;}if(sheetCloseT)return;sheetEl.classList.add("shutting");sheetCloseT=setTimeout(closeSheetNow,190);}
 const sv=id=>{const x=sheetEl.querySelector("#"+id);return x?x.value.trim():"";};
 const fld=(label,id,val,mode)=>`<label class="sfld"><span class="lbl">${label}</span><input class="field" id="${id}" value="${esc(val==null?"":val)}"${mode?` inputmode="${mode}"`:""}></label>`;
 sheetEl.addEventListener("click",e=>{
@@ -3698,9 +3715,9 @@ sheetEl.addEventListener("mousedown",e=>{sdStart(e.clientX,e.clientY,e.target);i
 sheetEl.addEventListener("touchmove",e=>{if(e.target===sheetEl&&e.cancelable)e.preventDefault();},{passive:false});
 // ---------- Swipes: edges switch tabs, controls step one option ----------
 function tabList(){return [...document.querySelectorAll("#island .itab[data-tab]")].map(b=>b.dataset.tab);}
-function swipeTab(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;openTab(L[j]);const p=$("panel");p.classList.remove("slide-l","slide-r");void p.offsetWidth;p.classList.add(dir>0?"slide-l":"slide-r");if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}return true;}
+function swipeTab(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;openTab(L[j]);if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}return true;}
 function swipeSeg(sg,dir){const bs=[...sg.querySelectorAll(":scope>button")],i=bs.findIndex(b=>b.getAttribute("aria-pressed")==="true"),j=Math.max(0,Math.min(bs.length-1,(i<0?0:i)+dir));if(j===i)return;bs[j].click();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
-function swipeDay(dir){sel=addDays(sel,dir);render();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
+function swipeDay(dir){sel=addDays(sel,dir);render();slidePanel(dir);if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
 const GS={x:0,y:0,t:0,el:null,on:false};
 document.addEventListener("touchstart",e=>{if(sheetEl.open||e.touches.length>1){GS.on=false;return;}const t=e.touches[0],tg=e.target;
   if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog")){GS.on=false;return;}
@@ -3711,6 +3728,29 @@ document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.
   if(GS.el){swipeDay(dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
   if(GS.edge)swipeTab(dir);},{passive:true});
 document.addEventListener("click",e=>{if(GS.block&&e.target.closest&&e.target.closest(".seg,header.top,#week")){e.stopPropagation();e.preventDefault();}},true);
+
+// ---------- Animations ----------
+const RM=()=>!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+function slidePanel(dir){if(!dir||RM())return;const p=$("panel");p.classList.remove("slide-l","slide-r");void p.offsetWidth;p.classList.add(dir>0?"slide-l":"slide-r");}
+function slideEls(els,dir){if(RM()||!dir)return;els.forEach(el=>{try{el.animate([{transform:`translateX(${dir*26}px)`,opacity:.35},{transform:"none",opacity:1}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"});}catch(_){}});}
+// switches: the content they control slides the way you went
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#panel .seg>button");if(!b||tab==="settings")return;const sg=b.parentElement,bs=[...sg.querySelectorAll(":scope>button")],cur=bs.findIndex(x=>x.getAttribute("aria-pressed")==="true"),ni=bs.indexOf(b);if(cur<0||ni===cur)return;
+  const lab=sg.getAttribute("aria-label"),dir=ni>cur?1:-1;setTimeout(()=>{const s2=[...document.querySelectorAll("#panel .seg")].find(x=>x.getAttribute("aria-label")===lab);if(!s2)return;const card=s2.closest(".card");
+    let els=card?[...card.children].filter(x=>x!==s2&&!x.contains(s2)):[];if(!els.length){els=[];let n=s2.nextElementSibling;while(n&&els.length<12){els.push(n);n=n.nextElementSibling;}}slideEls(els,dir);},20);},true);
+// numbers count to their new value, rings fill from where they were
+const AN={big:new Map(),ring:new Map(),tick:new Set(),first:true};
+function annKey(el,sel){const c=el.closest("[data-ex],[data-tile],[data-sec],[data-key],[data-mot],.card,section");const host=c?(c.dataset.ex||c.dataset.tile||c.dataset.sec||c.dataset.key||""):"";const all=[...(c||document).querySelectorAll(sel)];return tab+"|"+host+"|"+all.indexOf(el);}
+function countUp(el,from,to,fmtFn){if(RM())return;const t0=performance.now(),d=420;const step=now=>{const u=Math.min(1,(now-t0)/d),e=1-Math.pow(1-u,3);el.textContent=fmtFn(from+(to-from)*e);if(u<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
+function animPass(){const P=$("panel");if(!P)return;
+  P.querySelectorAll(".big").forEach(el=>{const txt=el.textContent.trim();if(!/^-?[\d.,]+$/.test(txt))return;const v=Number(txt.replace(/,/g,"").replace(/\.(?=\d{3}\b)/g,""));if(!isFinite(v))return;const k=annKey(el,".big"),old=AN.big.get(k);AN.big.set(k,v);
+    if(old!=null&&old!==v&&!AN.first&&Math.abs(v-old)<100000){const dec=(txt.split(".")[1]||"").length;countUp(el,old,v,x=>dec?x.toFixed(dec):Math.round(x).toLocaleString());}});
+  P.querySelectorAll(".pring[style]").forEach(el=>{const v=parseFloat(el.style.getPropertyValue("--p"));if(!isFinite(v))return;const k=annKey(el,".pring"),old=AN.ring.get(k);AN.ring.set(k,v);
+    if(old!=null&&old!==v&&!AN.first&&!RM()){el.style.setProperty("--p",old);el.classList.add("pfill");requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.setProperty("--p",v)));}});
+  const now=new Set();P.querySelectorAll('.tick[aria-pressed="true"]').forEach(el=>{const k=annKey(el,".tick");now.add(k);if(!AN.first&&!AN.tick.has(k)&&!RM()){el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");}});AN.tick=now;
+  AN.first=false;}
+let anQ=0;new MutationObserver(()=>{if(anQ)return;anQ=requestAnimationFrame(()=>{anQ=0;animPass();});}).observe($("panel"),{childList:true,subtree:true});
+// removing a row: it slides away, then the gap closes
+function collapseThen(el,fn){if(RM()||!el){fn();return;}const h=el.offsetHeight;el.style.overflow="hidden";try{const a=el.animate([{height:h+"px",opacity:1},{height:"0px",opacity:0}],{duration:170,easing:"ease-in"});a.onfinish=()=>{el.style.height="0px";fn();};}catch(_){fn();}}
 
 function libPickList(q,exclude){
   q=q.trim().toLowerCase();const o=LIB[exclude]||{m:[],s:[]},first=o.g,om=new Set(o.m),dCur=diffOf(exclude);
@@ -3858,7 +3898,7 @@ function endSwipe(e){
   const s=swS;swS=null;if(!s.active)return;
   swipedAt=Date.now();swipedEl=s.wr;s.fg.classList.remove("dragging");
   const reset=()=>{s.fg.style.transform="";s.wr.classList.remove("l","r","go");};
-  if(s.dx<-80){s.fg.style.transform="translateX(-110%)";setTimeout(()=>doDelete(s.wr),180);}
+  if(s.dx<-80){s.fg.style.transform="translateX(-110%)";setTimeout(()=>collapseThen(s.wr,()=>doDelete(s.wr)),170);}
   else if(s.dx>80){reset();doEdit(s.wr);}
   else reset();
 }
@@ -4340,8 +4380,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="4.9";
+const APP_VERSION="4.10";
 const CHANGELOG=[
+  {v:"4.10",d:"12 October 2026",t:"Motion",items:["Tabs slide in from the side you're heading to, whether you swipe or tap","Changing the day slides the page the same way, with the arrows, a swipe or a tap on the week","Switches like Weekly, Bi-weekly and Monthly or the Progress ranges slide their content in the direction you moved","Pull-up sheets slide up when they open and drop down when they close","Ticking a set gives the tick a little pop, progress rings fill up to their new value, and big numbers count up or down to their new total","Swiping a row away now closes the gap smoothly","If your phone has Reduce motion turned on, all of this stays off"]},
   {v:"4.9",d:"12 October 2026",t:"No more 500 eggs",items:["If you type a big number while a food is set to count pieces, spoons or glasses (more than 12, or over 2 kg), an amber note tells you what that adds up to and offers to switch to grams with one tap"]},
   {v:"4.8",d:"12 October 2026",t:"Swipes that make sense",items:["Pull-up sheets now close when you drag them down by the handle, or anywhere when you're at the top of the sheet","The page behind a sheet stays still. Scrolling or dragging no longer moves it","Swipe in from the left or right edge of the screen to go to the tab next door","Swipe across any switch, like Weekly, Bi-weekly and Monthly or the Progress ranges, to move it one step","Swipe across the date at the top to go a day back or forward. The arrows still work","The scrollbar on the right is gone for now","2 weeks is now called Bi-weekly"]},
   {v:"4.7",d:"11 October 2026",t:"Count it, don't weigh it",items:["Foods you normally count can now be added by the piece: eggs, slices of bread, wraps, pitas and baladi loaves, bananas, apples, oranges, dates, avocados, tomatoes, onions, carrots, peppers, potatoes, ta'ameya, fish fillets, cans of tuna and beans, scoops of whey and more","Spreads and oils go by the spoon (olive oil, butter, ghee, honey, peanut butter, tahini, hummus), nuts by the handful, and drinks by the glass, can, bottle or shot","Use − and + to change the count. The app shows the weight it's based on and works out the calories and macros from it. You can still switch to grams any time","Works in Add food, the food calculator and the meal builder"]},
