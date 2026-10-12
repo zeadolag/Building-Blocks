@@ -18,6 +18,7 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  if (url.pathname.includes("/beta/")) return; // the beta has its own worker
   // The page itself: try the network first so updates arrive, fall back to the saved copy offline.
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).then(res => {
