@@ -4098,7 +4098,7 @@ function swipeDay(dir){sel=addDays(sel,dir);render();if(navigator.vibrate)try{na
 const GS={x:0,y:0,t:0,el:null,on:false};
 document.addEventListener("touchstart",e=>{if(sheetEl.open||e.touches.length>1){GS.on=false;return;}const t=e.touches[0],tg=e.target;
   if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog")){GS.on=false;return;}
-  const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&tg.closest("header.top,#week");GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();},{passive:true});
+  const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&tg.closest("header.top,#week");GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();GS.sy=scrollY;},{passive:true});
 document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.changedTouches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
   if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.5||Date.now()-GS.t>800)return;const dir=dx<0?1:-1;
   if(GS.el){swipeDay(dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
@@ -4108,19 +4108,21 @@ document.addEventListener("click",e=>{if(GS.block&&e.target.closest&&e.target.cl
 const TS={on:false,dir:0,ghost:null,lock:false,dx:0};
 function tsBuild(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;const P=$("panel"),cur=tab,sp=typeof setPage!=="undefined"?setPage:null;
   // draw the next tab into a hidden stand-in so the page under your finger isn't rebuilt (that would cancel the touch)
-  const tmp=document.createElement("main");P.id="panel-live";tmp.id="panel";tmp.style.display="none";document.body.appendChild(tmp);let html="";
-  try{tab=L[j];if(tab==="settings")setPage=null;if(tab==="train")renderTrain();else if(tab==="eat")renderEat();else if(tab==="spend")renderSpend();else if(tab==="hist")renderHistory();else if(tab==="settings")renderSettings();else renderBody();html=tmp.innerHTML;}catch(e){}
-  finally{tab=cur;if(typeof setPage!=="undefined")setPage=sp;tmp.remove();P.id="panel";}
+  const sy0=scrollY,tmp=document.createElement("main");tmp.className=P.className;P.id="panel-live";tmp.id="panel";P.parentNode.insertBefore(tmp,P);P.style.display="none";let html="",nTop=null;
+  try{tab=L[j];if(tab==="settings")setPage=null;if(tab==="train")renderTrain();else if(tab==="eat")renderEat();else if(tab==="spend")renderSpend();else if(tab==="hist")renderHistory();else if(tab==="settings")renderSettings();else renderBody();html=tmp.innerHTML;const f=tmp.firstElementChild;nTop=(f?f.getBoundingClientRect().top:tmp.getBoundingClientRect().top)+scrollY;}catch(e){}
+  finally{tab=cur;if(typeof setPage!=="undefined")setPage=sp;tmp.remove();P.style.display="";P.id="panel";if(scrollY!==sy0)window.scrollTo(scrollX,sy0);}
   const g=document.createElement("div");g.className="tspeek";g.style.top=Math.max(0,P.offsetTop-scrollY)+"px";const cs=getComputedStyle(P);g.innerHTML=`<div class="tsin" style="box-sizing:border-box;width:${P.offsetWidth}px;margin-left:${P.getBoundingClientRect().left}px;padding:${cs.paddingTop} ${cs.paddingRight} 0 ${cs.paddingLeft}">${html}</div>`;
-  TS.W=document.documentElement.clientWidth;document.documentElement.classList.add("tsdrag");g.style.transform=`translateX(${dir*TS.W}px)`;document.body.appendChild(g);TS.ghost=g;TS.dir=dir;TS.to=L[j];return true;}
+  TS.W=document.documentElement.clientWidth;document.documentElement.classList.add("tsdrag");g.style.transform=`translateX(${dir*TS.W}px)`;document.body.appendChild(g);
+  // line the preview up exactly where the next tab will sit, keeping the page where it is if you had scrolled down
+  if(nTop!=null){const want=Math.max(0,nTop-scrollY),gf=g.querySelector(".tsin").firstElementChild,have=gf?gf.getBoundingClientRect().top:want;g.style.top=(parseFloat(g.style.top)+want-have)+"px";TS.scrollTo=Math.max(0,nTop-want);}else TS.scrollTo=0;TS.ghost=g;TS.dir=dir;TS.to=L[j];return true;}
 function tsMove(dx){TS.dx=dx;const P=$("panel"),d=TS.dir,clamp=d>0?Math.min(0,dx):Math.max(0,dx);P.style.transform=`translateX(${clamp}px)`;if(TS.ghost)TS.ghost.style.transform=`translateX(${clamp+d*TS.W}px)`;}
 function tsEnd(commit){const P=$("panel"),g=TS.ghost,d=TS.dir,W=TS.W||innerWidth,dur=200,ease="cubic-bezier(.2,.8,.2,1)";TS.on=false;TS.lock=false;
-  const fin=()=>{P.style.transition="";P.style.transform="";if(g)g.remove();document.documentElement.classList.remove("tsdrag");TS.ghost=null;if(commit){tab=TS.to;if(tab==="settings")setPage=null;render();window.scrollTo(0,0);if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}}};
+  const fin=()=>{P.style.transition="";P.style.transform="";if(g)g.remove();document.documentElement.classList.remove("tsdrag");TS.ghost=null;if(commit){tab=TS.to;if(tab==="settings")setPage=null;render();window.scrollTo(0,TS.scrollTo||0);if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}}};
   P.style.transition=`transform ${dur}ms ${ease}`;if(g)g.style.transition=`transform ${dur}ms ${ease}`;
   requestAnimationFrame(()=>{P.style.transform=commit?`translateX(${-d*W}px)`:"translateX(0)";if(g)g.style.transform=commit?"translateX(0)":`translateX(${d*W}px)`;});setTimeout(fin,dur+20);}
 document.addEventListener("touchmove",e=>{if(!GS.on||!GS.edge||GS.el||RM())return;const t=e.touches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
   if(!TS.on){if(Math.abs(dx)<10||Math.abs(dx)<Math.abs(dy)*1.3){if(Math.abs(dy)>14)GS.on=false;return;}const dir=dx<0?1:-1;if(!tsBuild(dir)){GS.on=false;return;}TS.on=true;TS.t0=Date.now();}
-  e.preventDefault();tsMove(dx);},{passive:false});
+  e.preventDefault();if(GS.sy!=null&&Math.abs(scrollY-GS.sy)>0)window.scrollTo(scrollX,GS.sy);tsMove(dx);},{passive:false});
 document.addEventListener("touchend",e=>{if(!TS.on)return;GS.on=false;const dx=TS.dx,v=Math.abs(dx)/Math.max(1,Date.now()-TS.t0);tsEnd(Math.abs(dx)>(TS.W||innerWidth)*0.28||(v>0.5&&Math.abs(dx)>40&&Math.sign(dx)===-TS.dir));},{capture:true,passive:true});
 document.addEventListener("touchcancel",()=>{if(TS.on)tsEnd(false);},{passive:true});
 
@@ -4785,8 +4787,12 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="5.05";
+const APP_VERSION="5.06";
 const CHANGELOG=[
+  {v:"5.06",d:"13 October 2026",t:"Steady swipes",items:[
+    "Swiping from the edge to change tabs: the next tab now lands exactly where its preview was, so it no longer starts a little low and then jumps up",
+    "The page no longer scrolls up or down while you swipe sideways, and if you'd scrolled down, the next tab opens without the days at the top jumping back into view",
+    "The backup reminder only shows on the Train tab instead of on every tab"]},
   {v:"5.05",d:"13 October 2026",t:"Calmer",items:[
     "The moving exercise figures are gone for now. Too many looked wrong (crossed legs on the back squat, odd machines), and they'll come back later done properly",
     "Calories burned and other numbers on the Body tab no longer jump around. A counting animation was fighting itself and kept restarting",
@@ -4914,7 +4920,7 @@ function saverHtml(){const S=store.settings,m=S.saver==="on"||S.saver==="off"?S.
   return `<div class="seg seg3" role="group" aria-label="Battery saver">${[["auto","Auto"],["on","On"],["off","Off"]].map(([v,l])=>`<button type="button" data-saver="${v}" aria-pressed="${m===v}">${l}</button>`).join("")}</div>
   <p class="note" style="margin-top:10px">${m==="auto"?(saverAuto.on?`<b>On right now</b>, because ${why}.`:`<b>Off right now.</b> Your phone is keeping up${saverAuto.fps?` (about ${saverAuto.fps} frames a second)`:""}.`):m==="on"?"<b>Always on.</b>":"<b>Always off.</b> Animations run fully even on a slow phone or low battery."}</p>
   <h3 class="bkh">What it changes</h3><ul class="bklist"><li>Cards open and close straight away, and switches change without the sliding highlight.</li><li>The rest timer ring moves once a second instead of smoothly.</li><li>The see-through tab bar becomes solid, which is lighter work for the phone.</li></ul>
-  <p class="note">Sliding between tabs and days stays on, since it's quick and helps you see where you are. If you've turned on Reduce Motion in your phone's settings, the app already keeps animations to a minimum.</p>`;}
+  <p class="note">Sliding between tabs stays on, since it's quick and helps you see where you are. If you've turned on Reduce Motion in your phone's settings, the app already keeps animations to a minimum.</p>`;}
 function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcfg(),lv={new:"New",some:"Some experience",exp:"Experienced"}[S.level]||"Not set";
   return [
     ["appearance","Appearance",`${{system:"System",light:"Light",dark:"Dark"}[T.mode||"system"]} theme`,()=>`<div class="card">${settingsBody()}</div>`],
@@ -5059,7 +5065,7 @@ function backupHtml(){
   <button type="button" class="linkbtn" style="margin-top:12px;color:var(--red)" data-bk="wipe">Delete all my data on this device</button>`:""}`;
 }
 function backupNudge(){
-  const S=store.settings;if(!isLocalMode()||S.bkRemind===false||!S.welcomed||tab==="settings")return "";
+  const S=store.settings;if(!isLocalMode()||S.bkRemind===false||!S.welcomed||tab!=="train")return "";
   const t=todayKey();if(S.bkSnooze&&S.bkSnooze>t)return "";
   const n=daysWithData(),l=S.lastBackup;
   if(l?dayDiff(l,t)<7:n<3)return "";
