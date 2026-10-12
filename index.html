@@ -719,6 +719,8 @@ body.touring{overflow:hidden}
 .copylink{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--ink);padding:8px 12px;margin:0 0 8px;font:inherit}
 .copylink span{font-weight:600;font-size:14px}.copylink small{color:var(--muted);font-size:12px}
 html.tsdrag,html.tsdrag body{overflow-x:hidden}
+html,body{overflow-x:clip}@supports not (overflow-x:clip){body{overflow-x:hidden}}
+.segpill{position:absolute;z-index:0;border-radius:calc(var(--radius) - 3px);background:var(--surface);box-shadow:var(--shadow-sm);pointer-events:none}:root[data-theme="dark"] .segpill{background:#3F3F46}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .segpill{background:#3F3F46}}.seg{position:relative}.seg>button{position:relative;z-index:1}.seg.segmoving>button[aria-pressed="true"]{background:transparent!important;box-shadow:none!important}
 .tspeek{position:fixed;left:0;right:0;bottom:0;overflow:hidden;background:var(--paper);z-index:5;pointer-events:none;will-change:transform}.tsin{padding:0}
 #panel{will-change:auto}
 body.saver .island{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}
@@ -2349,10 +2351,7 @@ function howtoHtml(id,name,note){
   return h;
 }
 function motionBlock(id){
-  if(!MOT[id])return "";
-  const two=!!MOT2[id];
-  const cap=M=>M.cap||(M.v==="f"?(M.ng&&M.lsh?"From above":"Front"):"Side");
-  return `<p class="lbl" style="text-align:center;margin:0">The movement</p><div class="motions${two?" two":""}">${two?`<figure>${motionSVG(id)}<figcaption>${cap(MOT[id])}</figcaption></figure><figure>${motionSVG(id,true)}<figcaption>${cap(MOT2[id])}</figcaption></figure>`:motionSVG(id)}</div><p class="lbl" style="text-align:center;margin:6px 0 0">Muscles worked</p>`;
+  return `<p class="lbl" style="text-align:center;margin:0">Muscles worked</p>`;
 }
 function headerHtml(e,ctx,tag){
   const [id,name,sets,target,flag,drop]=e;
@@ -2837,8 +2836,7 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
   if(a==="pre"){const v=x.split("-").map(Number);SPLIT_ORDER.forEach((k,i)=>p[k]=v[i]);}
   else{const d=a==="up"?5:-5;if(d<0&&p[x]<=0)return;const amt=d<0?Math.min(5,p[x]):5;const others=SPLIT_ORDER.filter(k=>k!==x&&(d<0||p[k]>0)).sort((m,n)=>d>0?p[n]-p[m]:(p[m]>0?0:1)-(p[n]>0?0:1)||p[m]-p[n]);const o=others[0];if(!o)return;
     if(d>0){const take=Math.min(amt,p[o]);if(!take)return;p[x]+=take;p[o]-=take;}else{p[x]-=amt;p[o]+=amt;}}
-  // the wheel sweeps round to the new sizes
-  const p0=Object.assign({},splitPct());if(calm()||SPLIT_ORDER.every(k=>p0[k]===p[k])){splitSet(p,true);return;}
+  splitSet(p,true);return;
   const t0=performance.now(),d=300;const step=now=>{const u=Math.min(1,(now-t0)/d),e=1-Math.pow(1-u,3);if(u>=1){splitSet(p,true);return;}const q={};SPLIT_ORDER.forEach(k=>q[k]=Math.round(p0[k]+(p[k]-p0[k])*e));const sum=SPLIT_ORDER.reduce((a,k)=>a+q[k],0);q[SPLIT_ORDER[SPLIT_ORDER.length-1]]+=100-sum;splitSet(q,false);requestAnimationFrame(step);};requestAnimationFrame(step);},true);
 function openSplitSheet(){openSheet("Meal sizes",`<p class="note" style="margin-top:0">Choose when you like to eat most. Suggested meals and Portion my foods share out your calories this way.</p>${mealWheel("mwX")}`,[{label:"Done",fn:()=>{setTimeout(()=>{if(tab==="eat")renderEat();},0);}}]);sheetEl._kind="split";}
 
@@ -3531,9 +3529,9 @@ function prodCostText(pr){const wk=prodWeekly(pr),d=prodDays(pr);return `${eur(w
 function renderSpendOld(){}
 
 // ---------- Events ----------
-$("prev").onclick=()=>{sel=addDays(sel,-1);render();slidePanel(-1);};
-$("next").onclick=()=>{sel=addDays(sel,1);render();slidePanel(1);};
-$("week").onclick=e=>{const b=e.target.closest("[data-day]");if(b){const d=b.dataset.day>sel?1:b.dataset.day<sel?-1:0;sel=b.dataset.day;render();slidePanel(d);}};
+$("prev").onclick=()=>{sel=addDays(sel,-1);render();};
+$("next").onclick=()=>{sel=addDays(sel,1);render();};
+$("week").onclick=e=>{const b=e.target.closest("[data-day]");if(b){const d=b.dataset.day>sel?1:b.dataset.day<sel?-1:0;sel=b.dataset.day;render();}};
 $("island").onclick=e=>{if(islandDrag.moved){islandDrag.moved=false;return;}const b=e.target.closest("[data-tab]");if(b){openTab(b.dataset.tab);}};
 // Slide along the tab island to switch tabs
 const islandDrag={on:false,moved:false,x:0,i:-1};
@@ -4082,9 +4080,9 @@ function sdStart(x,y,target){const r=sheetEl.getBoundingClientRect();SD.grab=y-r
   SD.skip=!!(target.closest&&target.closest(".mwsvg,input[type=range],textarea,select"));}
 function sdMove(x,y,e){if(SD.skip)return;const dy=y-SD.y0,dx=x-SD.x0;
   if(!SD.decided){if(Math.abs(dy)<8&&Math.abs(dx)<8)return;SD.decided=true;SD.on=dy>0&&Math.abs(dy)>Math.abs(dx)&&(SD.grab||sheetEl.scrollTop<=0);if(SD.on){sheetEl.classList.add("dragging");if(document.activeElement&&document.activeElement.blur&&sheetEl.contains(document.activeElement))document.activeElement.blur();}}
-  if(!SD.on)return;if(e&&e.cancelable)e.preventDefault();SD.dy=Math.max(0,dy);sheetEl.style.transform=`translateY(${SD.dy}px)`;}
-function sdEnd(){if(!SD.on){SD.decided=false;return;}SD.on=false;SD.decided=false;sheetEl.classList.remove("dragging");const v=SD.dy/Math.max(1,Date.now()-SD.t0);
-  if(SD.dy>110||v>0.6){sheetEl.classList.add("closing");sheetEl.style.transform="translateY(100%)";setTimeout(()=>{closeSheet();},180);}else sheetEl.style.transform="";}
+  if(!SD.on)return;if(e&&e.cancelable)e.preventDefault();SD.dy=Math.max(0,dy);const tn=Date.now();(SD.h=SD.h||[]).push([tn,SD.dy]);while(SD.h.length>2&&tn-SD.h[0][0]>100)SD.h.shift();sheetEl.style.transform=`translateY(${SD.dy}px)`;}
+function sdEnd(){if(!SD.on){SD.decided=false;SD.h=[];return;}SD.on=false;SD.decided=false;sheetEl.classList.remove("dragging");const H=SD.h||[],a=H[0],z=H[H.length-1],v=a&&z&&z[0]>a[0]?(z[1]-a[1])/(z[0]-a[0]):0;SD.h=[];
+  if(v>-0.05&&(SD.dy>110||v>0.6)){sheetEl.classList.add("closing");sheetEl.style.transform="translateY(100%)";setTimeout(()=>{closeSheet();},180);}else sheetEl.style.transform="";}
 sheetEl.addEventListener("touchstart",e=>{const t=e.touches[0];sdStart(t.clientX,t.clientY,e.target);},{passive:true});
 sheetEl.addEventListener("touchmove",e=>{const t=e.touches[0];sdMove(t.clientX,t.clientY,e);},{passive:false});
 sheetEl.addEventListener("touchend",sdEnd);sheetEl.addEventListener("touchcancel",sdEnd);
@@ -4096,17 +4094,16 @@ sheetEl.addEventListener("touchmove",e=>{if(e.target===sheetEl&&e.cancelable)e.p
 function tabList(){return [...document.querySelectorAll("#island .itab[data-tab]")].map(b=>b.dataset.tab);}
 function swipeTab(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;openTab(L[j]);if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}return true;}
 function swipeSeg(sg,dir){const bs=[...sg.querySelectorAll(":scope>button")],i=bs.findIndex(b=>b.getAttribute("aria-pressed")==="true"),j=Math.max(0,Math.min(bs.length-1,(i<0?0:i)+dir));if(j===i)return;bs[j].click();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
-function swipeDay(dir){sel=addDays(sel,dir);render();slidePanel(dir);if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
+function swipeDay(dir){sel=addDays(sel,dir);render();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
 const GS={x:0,y:0,t:0,el:null,on:false};
 document.addEventListener("touchstart",e=>{if(sheetEl.open||e.touches.length>1){GS.on=false;return;}const t=e.touches[0],tg=e.target;
   if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog")){GS.on=false;return;}
-  const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&(tg.closest(".seg")||tg.closest("header.top,#week"));GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();},{passive:true});
+  const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&tg.closest("header.top,#week");GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();},{passive:true});
 document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.changedTouches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
   if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.5||Date.now()-GS.t>800)return;const dir=dx<0?1:-1;
-  if(GS.el&&GS.el.classList.contains("seg")){swipeSeg(GS.el,dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
   if(GS.el){swipeDay(dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
   if(GS.edge&&RM())swipeTab(dir);},{passive:true});
-document.addEventListener("click",e=>{if(GS.block&&e.target.closest&&e.target.closest(".seg,header.top,#week")){e.stopPropagation();e.preventDefault();}},true);
+document.addEventListener("click",e=>{if(GS.block&&e.target.closest&&e.target.closest("header.top,#week")){e.stopPropagation();e.preventDefault();}},true);
 // Edge swipe follows your finger: the next tab slides in beside this one while you drag
 const TS={on:false,dir:0,ghost:null,lock:false,dx:0};
 function tsBuild(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;const P=$("panel"),cur=tab,sp=typeof setPage!=="undefined"?setPage:null;
@@ -4132,15 +4129,18 @@ const RM=()=>!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)"
 function calm(){return RM()||lowPower();}
 function slidePanel(dir){if(!dir||RM())return;const p=$("panel");p.classList.remove("slide-l","slide-r");void p.offsetWidth;p.classList.add(dir>0?"slide-l":"slide-r");}
 function slideEls(els,dir){if(RM()||!dir)return;els.forEach(el=>{try{el.animate([{transform:`translateX(${dir*26}px)`,opacity:.35},{transform:"none",opacity:1}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"});}catch(_){}});}
-// switches: the content they control slides the way you went
-document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#panel .seg>button");if(!b||tab==="settings")return;const sg=b.parentElement,bs=[...sg.querySelectorAll(":scope>button")],cur=bs.findIndex(x=>x.getAttribute("aria-pressed")==="true"),ni=bs.indexOf(b);if(cur<0||ni===cur)return;
-  const lab=sg.getAttribute("aria-label"),dir=ni>cur?1:-1;setTimeout(()=>{const s2=[...document.querySelectorAll("#panel .seg")].find(x=>x.getAttribute("aria-label")===lab);if(!s2)return;const card=s2.closest(".card");
-    let els=card?[...card.children].filter(x=>x!==s2&&!x.contains(s2)):[];if(!els.length){els=[];let n=s2.nextElementSibling;while(n&&els.length<12){els.push(n);n=n.nextElementSibling;}}slideEls(els,dir);},20);},true);
+// switches: tapping an option slides the highlight across to it; the content just changes
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".seg>button");if(!b||calm())return;const sg=b.parentElement,bs=[...sg.querySelectorAll(":scope>button")],old=bs.find(x=>x.getAttribute("aria-pressed")==="true");if(!old||old===b)return;
+  const g0=sg.getBoundingClientRect(),q0=old.getBoundingClientRect(),r0={left:q0.left-g0.left,top:q0.top-g0.top,width:q0.width,height:q0.height},lab=sg.getAttribute("aria-label");
+  requestAnimationFrame(()=>{const s2=[...document.querySelectorAll(".seg")].find(x=>x.getAttribute("aria-label")===lab)||sg,nb=s2.querySelector(':scope>button[aria-pressed="true"]');if(!nb)return;const r1=nb.getBoundingClientRect(),sr=s2.getBoundingClientRect(),o0={left:sr.left+r0.left,top:sr.top+r0.top,width:r0.width,height:r0.height};if(Math.abs(r1.left-o0.left)<2&&Math.abs(r1.top-o0.top)<2)return;
+    const pill=document.createElement("span");pill.className="segpill";pill.style.cssText=`left:${o0.left-sr.left}px;top:${o0.top-sr.top}px;width:${o0.width}px;height:${o0.height}px`;s2.classList.add("segmoving");s2.appendChild(pill);
+    const done=()=>{pill.remove();s2.classList.remove("segmoving");};
+    try{const a=pill.animate([{transform:"translate(0,0)",width:o0.width+"px"},{transform:`translate(${r1.left-o0.left}px,${r1.top-o0.top}px)`,width:r1.width+"px"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"});a.onfinish=a.oncancel=done;}catch(_){done();}});},true);
 // folding: cards and tiles grow and shrink to their new height instead of jumping
 const FOLDSEL="#panel article.ex,#panel .etile,#panel .card.recipe,#panel .edfold";
 function foldKey(el,i){return el.dataset.ex||el.dataset.tile||(el.className.split(" ")[0]+":"+i);}
 function foldSnap(){const m=new Map(),c={};document.querySelectorAll(FOLDSEL).forEach(el=>{const t=el.className.split(" ")[0];c[t]=(c[t]||0)+1;m.set(foldKey(el,c[t]),el.offsetHeight);});return m;}
-document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#panel [aria-expanded]");if(!b||calm()||!b.closest(FOLDSEL))return;const before=foldSnap(),sy=scrollY;
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest('#panel [aria-expanded],#panel [data-act="excol"]');if(!b||calm()||!b.closest(FOLDSEL))return;const before=foldSnap(),sy=scrollY;
   requestAnimationFrame(()=>{const c={};document.querySelectorAll(FOLDSEL).forEach(el=>{const t=el.className.split(" ")[0];c[t]=(c[t]||0)+1;const k=foldKey(el,c[t]),h0=before.get(k),h1=el.offsetHeight;
     if(h0==null||Math.abs(h0-h1)<4)return;el.style.overflow="hidden";try{const a=el.animate([{height:h0+"px"},{height:h1+"px"}],{duration:Math.min(320,180+Math.abs(h1-h0)/6),easing:"cubic-bezier(.2,.8,.2,1)"});a.onfinish=a.oncancel=()=>{el.style.overflow="";};}catch(_){el.style.overflow="";}});});},true);
 // numbers count to their new value, rings fill from where they were
@@ -4148,26 +4148,9 @@ const AN={big:new Map(),ring:new Map(),tick:new Set(),bar:new Map(),first:true};
 function annKey(el,sel){const c=el.closest("[data-ex],[data-tile],[data-sec],[data-key],[data-mot],.card,section");const host=c?(c.dataset.ex||c.dataset.tile||c.dataset.sec||c.dataset.key||""):"";const all=[...(c||document).querySelectorAll(sel)];return tab+"|"+host+"|"+all.indexOf(el);}
 function countUp(el,from,to,fmtFn){if(calm())return;const t0=performance.now(),d=420;const step=now=>{const u=Math.min(1,(now-t0)/d),e=1-Math.pow(1-u,3);el.textContent=fmtFn(from+(to-from)*e);if(u<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
 function animPass(){const P=$("panel");if(!P)return;
-  P.querySelectorAll(".big").forEach(el=>{const txt=el.textContent.trim();if(!/^-?[\d.,]+$/.test(txt))return;const v=Number(txt.replace(/,/g,"").replace(/\.(?=\d{3}\b)/g,""));if(!isFinite(v))return;const k=annKey(el,".big"),old=AN.big.get(k);AN.big.set(k,v);
-    if(old!=null&&old!==v&&!AN.first&&Math.abs(v-old)<100000){const dec=(txt.split(".")[1]||"").length;countUp(el,old,v,x=>dec?x.toFixed(dec):Math.round(x).toLocaleString());}});
-  P.querySelectorAll(".pring[style]").forEach(el=>{const v=parseFloat(el.style.getPropertyValue("--p"));if(!isFinite(v))return;const k=annKey(el,".pring"),old=AN.ring.get(k);AN.ring.set(k,v);
-    if(old!=null&&old!==v&&!AN.first&&!calm()){el.style.setProperty("--p",old);el.classList.add("pfill");requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.setProperty("--p",v)));}});
   const now=new Set();P.querySelectorAll('.tick[aria-pressed="true"]').forEach(el=>{const k=annKey(el,".tick");now.add(k);if(!AN.first&&!AN.tick.has(k)&&!RM()){el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");}});AN.tick=now;
-  barPass(P,AN.bar,AN.first);
   AN.first=false;}
 let anQ=0;new MutationObserver(()=>{if(anQ)return;anQ=requestAnimationFrame(()=>{anQ=0;animPass();});}).observe($("panel"),{childList:true,subtree:true});
-// bars sweep from their old length to the new one; planner amounts count to their new value
-const BARSEL='.bar>span,.pbar>span,.nutbar>span,.msbar>span,.msbar2>span,.pbar>i,.bar>i';
-function barPass(root,M,first){const seen=new Map();root.querySelectorAll(BARSEL).forEach(el=>{const w=el.style.width;if(!w)return;const host=el.closest("[data-tile],[data-ex],.card,.plmeal,section"),hk=(host&&(host.dataset.tile||host.dataset.ex))||"",base=(root===sheetEl?(sheetEl._kind||""):tab)+"|"+hk+"|"+(el.parentElement.className||""),n=(seen.get(base)||0)+1;seen.set(base,n);const k=base+"|"+n,old=M.get(k);M.set(k,w);
-  if(old&&old!==w&&!first&&!calm()){try{el.animate([{width:old},{width:w}],{duration:320,easing:"cubic-bezier(.2,.8,.2,1)"});}catch(_){}}});}
-const SAN={bar:new Map(),pla:new Map(),kind:""};
-function sheetPass(){if(!sheetEl.open){SAN.kind="";return;}const first=SAN.kind!==sheetEl._kind;if(first){SAN.bar.clear();SAN.pla.clear();SAN.kind=sheetEl._kind;}
-  barPass(sheetEl,SAN.bar,first);
-  sheetEl.querySelectorAll(".pla").forEach((el,i)=>{const tn=[...el.childNodes].find(n=>n.nodeType===3&&/\d/.test(n.nodeValue));if(!tn)return;const m=tn.nodeValue.match(/^(\D*)([\d.,]+)(.*)$/);if(!m)return;const v=Number(m[2].replace(/,/g,""));const row=el.closest("[data-i],.plrow,li,div"),k=(row&&row.textContent.split(/\d/)[0].slice(0,24))+"|"+i,old=SAN.pla.get(k);SAN.pla.set(k,v);
-    if(first||old==null||old===v||calm()||!isFinite(v))return;const dec=(m[2].split(".")[1]||"").length,t0=performance.now(),d=360;const step=now=>{if(!tn.isConnected)return;const u=Math.min(1,(now-t0)/d),e=1-Math.pow(1-u,3),x=old+(v-old)*e;tn.nodeValue=m[1]+(dec?x.toFixed(dec):Math.round(x).toLocaleString())+m[3];if(u<1)requestAnimationFrame(step);};requestAnimationFrame(step);});}
-let shQ=0;new MutationObserver(()=>{if(shQ)return;shQ=requestAnimationFrame(()=>{shQ=0;sheetPass();});}).observe(sheetEl,{childList:true,subtree:true});
-// body charts draw their line in when the range changes
-document.addEventListener("click",e=>{if(calm()||!(e.target.closest&&e.target.closest('[data-act="brange"]')))return;requestAnimationFrame(()=>{document.querySelectorAll("#panel svg path").forEach(p=>{const st=p.getAttribute("stroke");if(!st||st==="none"||p.getAttribute("fill")&&p.getAttribute("fill")!=="none")return;let L=0;try{L=p.getTotalLength();}catch(_){}if(L<40)return;try{p.animate([{strokeDasharray:L+" "+L,strokeDashoffset:L},{strokeDasharray:L+" "+L,strokeDashoffset:0}],{duration:600,easing:"cubic-bezier(.3,.7,.2,1)"});}catch(_){}});});},true);
 // removing a row: it slides away, then the gap closes
 function collapseThen(el,fn){if(RM()||!el){fn();return;}const h=el.offsetHeight;el.style.overflow="hidden";try{const a=el.animate([{height:h+"px",opacity:1},{height:"0px",opacity:0}],{duration:170,easing:"ease-in"});a.onfinish=()=>{el.style.height="0px";fn();};}catch(_){fn();}}
 
@@ -4802,8 +4785,17 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="5.0";
+const APP_VERSION="5.05";
 const CHANGELOG=[
+  {v:"5.05",d:"13 October 2026",t:"Calmer",items:[
+    "The moving exercise figures are gone for now. Too many looked wrong (crossed legs on the back squat, odd machines), and they'll come back later done properly",
+    "Calories burned and other numbers on the Body tab no longer jump around. A counting animation was fighting itself and kept restarting",
+    "Switches like Weekly, Bi-weekly and Monthly, Store, Price and Name, and the Progress ranges are buttons again. Swiping across them does nothing; tapping slides the highlight to your choice and the content just changes",
+    "Changing the day, with the arrows, a swipe or a tap on the week, no longer slides the page",
+    "The page no longer shrinks and grows back when you switch tabs. Nothing can make it wider than your screen any more",
+    "Exercise cards now close as smoothly as they open",
+    "Pulling a sheet down and then back up again keeps it open. It only closes if your finger is still moving down when you let go",
+    "Removed the counting numbers, filling rings, sweeping bars, chart draw-in and meal-wheel sweep, and the tab slide only plays when you actually change tabs"]},
   {v:"5.0",d:"13 October 2026",t:"Real movement, safer data",items:[
     "Every exercise figure was rebuilt. Knees and elbows only bend the way real joints do, the back can round and arch, and each figure has a head that faces where it's going",
     "Machines are drawn: leg extension and leg curl pads, the leg press sled, hack squat, lat pulldown with its thigh pad, chest press, pec deck, cable towers with pulleys, rowing machine, bikes, Smith machine and more",
@@ -4921,7 +4913,7 @@ let setPage=null,libFrom="help";
 function saverHtml(){const S=store.settings,m=S.saver==="on"||S.saver==="off"?S.saver:"auto",why={slow:"your phone isn't keeping up with the animations, which also happens in iPhone Low Power Mode",battery:"your battery is low",data:"data saver is on"}[saverAuto.why]||"";
   return `<div class="seg seg3" role="group" aria-label="Battery saver">${[["auto","Auto"],["on","On"],["off","Off"]].map(([v,l])=>`<button type="button" data-saver="${v}" aria-pressed="${m===v}">${l}</button>`).join("")}</div>
   <p class="note" style="margin-top:10px">${m==="auto"?(saverAuto.on?`<b>On right now</b>, because ${why}.`:`<b>Off right now.</b> Your phone is keeping up${saverAuto.fps?` (about ${saverAuto.fps} frames a second)`:""}.`):m==="on"?"<b>Always on.</b>":"<b>Always off.</b> Animations run fully even on a slow phone or low battery."}</p>
-  <h3 class="bkh">What it changes</h3><ul class="bklist"><li>Exercise figures move at half the frame rate and pause when they're off screen.</li><li>Numbers and rings change straight away instead of counting up or filling.</li><li>The see-through tab bar becomes solid, which is lighter work for the phone.</li></ul>
+  <h3 class="bkh">What it changes</h3><ul class="bklist"><li>Cards open and close straight away, and switches change without the sliding highlight.</li><li>The rest timer ring moves once a second instead of smoothly.</li><li>The see-through tab bar becomes solid, which is lighter work for the phone.</li></ul>
   <p class="note">Sliding between tabs and days stays on, since it's quick and helps you see where you are. If you've turned on Reduce Motion in your phone's settings, the app already keeps animations to a minimum.</p>`;}
 function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcfg(),lv={new:"New",some:"Some experience",exp:"Experienced"}[S.level]||"Not set";
   return [
