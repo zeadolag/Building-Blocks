@@ -2585,10 +2585,13 @@ const QU={
  "Sugarcane juice (asab)":[["glass (250 ml)","glasses (250 ml)",250]],"Karkade (hibiscus tea, sweetened)":[["glass (250 ml)","glasses (250 ml)",250]]
 };
 // drinks and other liquids: grams per ml, so they can be entered and shown in ml and litres
-const LIQ={"Milk 1.5%":1.03,"Whole milk 3.5%":1.03,"Protein milk":1.03,"Laban rayeb (fermented milk)":1.03,"Orange juice":1.04,"Cola":1.04,"Energy drink":1.04,"Sugarcane juice (asab)":1.06,"Karkade (hibiscus tea, sweetened)":1.03,"Beer, 5%":1.01,"Wine, 12%":0.99,"Spirits, 40% (vodka, whisky)":0.95,"Olive oil":0.92,"Shorbet ads (lentil soup)":1.03};
-function liqOf(n){return LIQ[n]||null;}
-function mlText(ml){ml=Math.round(ml);return ml>=1000?`${(Math.round(ml/50)*50/1000).toLocaleString(undefined,{maximumFractionDigits:2})} L`:`${Math.round(ml/5)*5} ml`;}
-function qunits(it){const d=liqOf(it.n);return (QU[it.n]||[]).map(u=>d&&/\((\d+) (ml|cl)\)/.test(u[0])?[u[0],u[1],(()=>{const m=u[0].match(/\((\d+) (ml|cl)\)/);return Math.round(+m[1]*(m[2]==="cl"?10:1)*d);})()]:u).concat(d?[["ml","ml",d,"v"]]:[]).concat([["g","g",1]]);}
+// Drinks and other liquids. Their labels give nutrition per 100 ml, so 1 ml counts as exactly 1 unit of the stored values.
+// Olive oil is labelled per 100 g, so its ml are converted with oil's real weight (0.92 g per ml).
+const LIQ={"Milk 1.5%":1,"Whole milk 3.5%":1,"Protein milk":1,"Laban rayeb (fermented milk)":1,"Orange juice":1,"Cola":1,"Energy drink":1,"Sugarcane juice (asab)":1,"Karkade (hibiscus tea, sweetened)":1,"Beer, 5%":1,"Wine, 12%":1,"Spirits, 40% (vodka, whisky)":1,"Olive oil":0.92,"Shorbet ads (lentil soup)":1};
+function liqML(){return store.settings.liqUnit!=="g";}
+function liqOf(n){return liqML()?(LIQ[n]||null):null;}
+function mlText(ml){ml=Math.round(ml);return ml>=1000?`${(ml/1000).toLocaleString(undefined,{maximumFractionDigits:2})} L`:`${ml} ml`;}
+function qunits(it){const d=LIQ[it.n]||null,pg=!liqML();if(d&&pg)return (QU[it.n]||[]).concat([["g","g",1],["ml","ml",d,"v"]]);return (QU[it.n]||[]).map(u=>d&&/\((\d+) (ml|cl)\)/.test(u[0])?[u[0],u[1],(()=>{const m=u[0].match(/\((\d+) (ml|cl)\)/);return Math.round(+m[1]*(m[2]==="cl"?10:1)*d);})()]:u).concat(d?[["ml","ml",d,"v"]]:[]).concat([["g","g",1]]);}
 function amtHtml(pre,it,q0,ui0){const U=qunits(it),ui=ui0!=null?ui0:0,u=U[ui],cnt=u[2]!==1&&!u[3],q=q0!=null?q0:(u[3]?250:u[2]===1?100:1);
   return `<div class="amt"><span class="lbl">Amount</span><div class="amtrow"><div class="amtin">${cnt?`<button type="button" class="mini" data-amtstep="-1" data-pre="${pre}" aria-label="One less">−</button>`:""}<input class="field" id="${pre}G" inputmode="decimal" value="${q}" aria-label="Amount">${cnt?`<button type="button" class="mini" data-amtstep="1" data-pre="${pre}" aria-label="One more">+</button>`:""}</div>${U.length>1?`<select class="field amtu" id="${pre}U" data-pre="${pre}" data-ui="${ui}" aria-label="Unit">${U.map((x,i)=>`<option value="${i}"${i===ui?" selected":""}>${esc(x[1])}${x[2]!==1&&!x[3]&&!x[1].includes("(")?` (${r1(x[2])} g each)`:""}</option>`).join("")}</select>`:`<span class="of">g</span>`}</div><p class="amtwarn" id="${pre}W" hidden></p></div>`;}
 function amtRead(pre,it){const U=qunits(it),s=$(pre+"U"),ui=s?+s.value:U.length-1,u=U[ui]||U[U.length-1],q=num(($(pre+"G")||{}).value);
@@ -2711,7 +2714,7 @@ function solvePlan(items,T,meals){
   x=run(x);items.forEach((it,i)=>{if(!it.locked&&!it.fixedNow)x[i]=Math.max(it.lo,Math.min(it.hi,Math.round(x[i]/it.step)*it.step));it.x=x[i];it.fixedNow=false;});
   return items;}
 function planTotals(items){const t={k:0,p:0,cb:0,f:0};for(const it of items){t.k+=it.a[0]*it.x;t.p+=it.a[1]*it.x;t.cb+=it.a[2]*it.x;t.f+=it.a[3]*it.x;}return t;}
-function amountText(it){if(it.kind==="fixed")return `${r1(it.x)} serving${it.x===1?"":"s"}`;if(!it.unit&&liqOf(it.n))return `${mlText(it.x/liqOf(it.n))} <small>(${fmt(it.x)} g)</small>`;if(it.unit)return `${it.x} ${it.x===1?it.unit[1]:it.unit[2]} <small>(${fmt(it.x*it.unit[0])} g)</small>`;return `${fmt(it.x)} g`;}
+function amountText(it){if(it.kind==="fixed")return `${r1(it.x)} serving${it.x===1?"":"s"}`;if(!it.unit&&liqOf(it.n))return liqOf(it.n)===1?mlText(it.x):`${mlText(it.x/liqOf(it.n))} <small>(${fmt(it.x)} g)</small>`;if(it.unit)return `${it.x} ${it.x===1?it.unit[1]:it.unit[2]} <small>(${fmt(it.x*it.unit[0])} g)</small>`;return `${fmt(it.x)} g`;}
 function planNew(mode,scope){const meals=openSlots(scope||"left");PL={mode,scope:scope||"left",meals:meals.length?meals:SLOTS.map(s=>s.id),pick:{},items:[],seed:Math.floor(Math.random()*1000),idea:{},open:{}};
   if(mode==="suggest")planIdeas();planSolve();}
 function ideasFor(m){return IDEAS.filter(I=>I.s.includes(m)&&ideaOk(I));}
@@ -4758,6 +4761,8 @@ function unitsHtml(){
   <p class="note" style="margin:4px 0 12px">Sets which nutrition guidelines are used for vitamins and minerals, and when vitamin D matters most. ${store.settings.region?"":"Guessed from your phone's time zone."}</p>
   <p class="lbl">Height and measurements</p><div class="seg" role="group" aria-label="Length unit">${[["cm","Centimetres"],["in","Feet and inches"]].map(([v,l])=>`<button type="button" data-uset="len:${v}" aria-pressed="${LEN()===v}">${l}</button>`).join("")}</div>
   <label class="sfld"><span class="lbl">Currency</span><select class="field" data-uset="currency">${CURS.map(([c,n])=>`<option value="${c}"${c===curCode()?" selected":""}>${n} (${c})</option>`).join("")}</select></label>
+  <p class="lbl" style="margin-top:14px">Drinks and liquids</p><div class="seg" role="group" aria-label="Unit for drinks">${[["ml","Millilitres (ml)"],["g","Grams (g)"]].map(([v,l])=>`<button type="button" data-uset="liq:${v}" aria-pressed="${(liqML()?"ml":"g")===v}">${l}</button>`).join("")}</div>
+  <p class="note" style="margin-top:0">For milk, juice, oil and other liquids in Add food, the food calculator, meal plans and the shopping list. You can still pick the other unit next to any amount.</p>
   <p class="lbl" style="margin-top:14px">Weight</p><div class="seg" role="group" aria-label="Weight unit">${[["kg","Kilograms (kg)"],["lb","Pounds (lb)"]].map(([v,l])=>`<button type="button" data-uset="unit:${v}" aria-pressed="${U()===v}">${l}</button>`).join("")}</div>
   <p class="note" style="margin-top:0">Switching converts the weights you've already logged.</p>`;
 }
@@ -4794,8 +4799,12 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="5.07";
+const APP_VERSION="5.08";
 const CHANGELOG=[
+  {v:"5.08",d:"13 October 2026",t:"Exact ml",items:[
+    "Drinks are counted exactly as their labels say again. Labels give values per 100 ml, so 250 ml of milk is now 250 ml worth, not the 258 g 5.07 turned it into (that made drinks about 3% too high). Olive oil is the exception, since it's labelled per 100 g",
+    "Amounts in ml are no longer rounded to the nearest 5 ml",
+    "New setting in Settings → Units and region: show drinks and liquids in millilitres or grams. Either way, you can pick the other unit next to any amount"]},
   {v:"5.07",d:"13 October 2026",t:"Millilitres",items:[
     "Drinks and other liquids can be entered in ml: milk, protein milk, laban rayeb, juices, cola, energy drinks, karkade, sugarcane juice, olive oil, lentil soup, beer, wine and spirits. Pick ml next to the amount",
     "Switching between glasses, ml and grams keeps the same amount, so 1 glass becomes 250 ml instead of resetting",
@@ -4941,7 +4950,7 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["tabs","Tab bar",hidden.length?`${hidden.length} hidden: ${hidden.map(t=>TABDEF[t][0]).join(", ")}`:"All tabs shown",()=>`<div class="card">${tabsSettingsHtml()}</div>`],
     ["training","Training",`${lv} · rep style ${(STYLES[S.repDefault]||["as planned"])[0].toLowerCase()}`,()=>`<div class="card">${trainingSettingsHtml()}</div>`],
     ["personal","Personal details",(()=>{const pf=profile(),a=pf.dob?ageOn(pf.dob):num(pf.a);return [a?a+" years":"",num(pf.h)?fmt1(num(pf.h))+" cm":"",pf.west?"weight is a guess":""].filter(Boolean).join(" · ")||"Birthday, height and weight";})(),()=>personalHtml()],
-    ["units","Units and region",`${U()} · ${LEN()==="in"?"ft and in":"cm"} · ${curCode()} · ${RG().src}`,()=>`<div class="card">${unitsHtml()}</div>`],
+    ["units","Units and region",`${U()} · ${LEN()==="in"?"ft and in":"cm"} · ${liqML()?"ml":"g for drinks"} · ${curCode()} · ${RG().src}`,()=>`<div class="card">${unitsHtml()}</div>`],
     ["nutrients","Nutrients to track",(()=>{const n=nutOn().length;return n?n+" tracked on the Eat tab":"Fibre, water, creatine and more";})(),()=>`<div class="card">${nutSettingsHtml()}</div>`],
     ["mealsplit","Meal sizes",splitLine(),()=>`<div class="card"><p class="note" style="margin-top:0">Choose when you like to eat most, like a big breakfast or most of your food at lunch. Suggested meals, Portion my foods and the Eat tab use this.</p>${mealWheel("mwS")}</div>`],
     ["health","Health tracking",(()=>{const H=hcfg();return [H.intake?"Daily intake":"",H.labs?"Blood tests":""].filter(Boolean).join(" and ")||"Off";})(),()=>`<div class="card">${healthSettingsHtml()}</div>`],
@@ -4974,6 +4983,7 @@ $("panel").addEventListener("click",e=>{
       else{T.hidden.push(t);persist("settings");if(tab===t)tab="settings";render();toast(nm+" is hidden. Open it any time from Settings → Tab bar");}return;}
     const i=T.order.indexOf(t),j=a==="up"?i-1:i+1;if(j<0||j>=T.order.length)return;[T.order[i],T.order[j]]=[T.order[j],T.order[i]];persist("settings");render();
     const nb=document.querySelector(`[data-tabset="${a}:${t}"]`);if(nb&&!nb.disabled)nb.focus();return;}
+  const lq=e.target.closest("[data-uset^='liq:']");if(lq&&tab==="settings"){const v=lq.dataset.uset.split(":")[1];if(v==="g")store.settings.liqUnit="g";else delete store.settings.liqUnit;persist("settings");render();return;}
   const ln=e.target.closest("[data-uset^='len:']");if(ln&&tab==="settings"){store.settings.len=ln.dataset.uset.split(":")[1];persist("settings");render();return;}
   const u=e.target.closest("[data-uset^='unit:']");
   if(u&&tab==="settings"){const to=u.dataset.uset.split(":")[1];if(to===U())return;convertUnits(to);render();toast("Weights now in "+(to==="lb"?"pounds":"kilograms")+". Logged weights were converted");}
