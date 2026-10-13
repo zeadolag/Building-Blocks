@@ -2024,10 +2024,10 @@ function onbStage(){const S=store.settings,o=S.onb;return S.welcomed&&(o==="leve
 function afterTargets(){const S=store.settings;if(!S.level&&isLocalMode()){S.onb="level";persist("settings");render();window.scrollTo(0,0);}else{persist("settings");render();if(!S.toured)setTimeout(tourStart,350);}}
 
 const SLOTS=[
-  {id:"breakfast",name:"Breakfast",opts:[{id:"smoothie",n:"Quark smoothie",d:"500 g quark, 258 g protein milk, 50 g Schoko Müsli",k:670,p:85}]},
+  {id:"breakfast",name:"Breakfast",opts:[{id:"smoothie",n:"Quark smoothie",d:"500 g quark, 250 ml protein milk (1 glass), 50 g Schoko Müsli",k:670,p:85}]},
   {id:"lunch",name:"Lunch",recipes:true,opts:[{id:"chicken",n:"Chicken, rice and vegetables",d:"200 g chicken breast (raw), 100 g rice (dry), vegetables",k:690,p:57},{id:"thighpot",n:"Chicken thigh, potatoes and vegetables",d:"200 g chicken thigh (raw), 400 g potatoes (raw), vegetables, light oil spray",k:680,p:47},{id:"salmon",n:"Salmon, rice and vegetables",d:"250 g salmon instead of the chicken",k:975,p:61}]},
   {id:"snack",name:"Snack",note:"Keep at least 20–30 g of nuts or half an avocado a day for healthy fats.",opts:[{id:"nuts",n:"Nuts",d:"20 g each of peanuts, pecans and almonds",k:380,p:11},{id:"halfnuts",n:"Half the nuts plus cottage cheese",d:"30 g mixed nuts and a 200 g tub",k:332,p:30},{id:"cottage",n:"Cottage cheese",d:"200 g tub",k:142,p:24}]},
-  {id:"evening",name:"Dinner",recipes:true,opts:[{id:"muesli",n:"Müsli with protein milk",d:"50 g Schoko Müsli, 258 g protein milk",k:320,p:25}]}
+  {id:"evening",name:"Dinner",recipes:true,opts:[{id:"muesli",n:"Müsli with protein milk",d:"50 g Schoko Müsli, 250 ml protein milk (1 glass)",k:320,p:25}]}
 ];
 const RICE={k:125,p:3};
 
@@ -2584,13 +2584,17 @@ const QU={
  "Cola":[["can (330 ml)","cans (330 ml)",330],["glass (250 ml)","glasses (250 ml)",250]],"Orange juice":[["glass (200 ml)","glasses (200 ml)",200]],"Energy drink":[["can (250 ml)","cans (250 ml)",250]],
  "Sugarcane juice (asab)":[["glass (250 ml)","glasses (250 ml)",250]],"Karkade (hibiscus tea, sweetened)":[["glass (250 ml)","glasses (250 ml)",250]]
 };
-function qunits(it){return (QU[it.n]||[]).concat([["g","g",1]]);}
-function amtHtml(pre,it,q0,ui0){const U=qunits(it),ui=ui0!=null?ui0:0,u=U[ui],q=q0!=null?q0:(u[2]===1?100:1);
-  return `<div class="amt"><span class="lbl">Amount</span><div class="amtrow"><div class="amtin">${u[2]!==1?`<button type="button" class="mini" data-amtstep="-1" data-pre="${pre}" aria-label="One less">−</button>`:""}<input class="field" id="${pre}G" inputmode="decimal" value="${q}" aria-label="Amount">${u[2]!==1?`<button type="button" class="mini" data-amtstep="1" data-pre="${pre}" aria-label="One more">+</button>`:""}</div>${U.length>1?`<select class="field amtu" id="${pre}U" data-pre="${pre}" aria-label="Unit">${U.map((x,i)=>`<option value="${i}"${i===ui?" selected":""}>${esc(x[1])}${x[2]!==1&&!x[1].includes("(")?` (${r1(x[2])} g each)`:""}</option>`).join("")}</select>`:`<span class="of">g</span>`}</div><p class="amtwarn" id="${pre}W" hidden></p></div>`;}
+// drinks and other liquids: grams per ml, so they can be entered and shown in ml and litres
+const LIQ={"Milk 1.5%":1.03,"Whole milk 3.5%":1.03,"Protein milk":1.03,"Laban rayeb (fermented milk)":1.03,"Orange juice":1.04,"Cola":1.04,"Energy drink":1.04,"Sugarcane juice (asab)":1.06,"Karkade (hibiscus tea, sweetened)":1.03,"Beer, 5%":1.01,"Wine, 12%":0.99,"Spirits, 40% (vodka, whisky)":0.95,"Olive oil":0.92,"Shorbet ads (lentil soup)":1.03};
+function liqOf(n){return LIQ[n]||null;}
+function mlText(ml){ml=Math.round(ml);return ml>=1000?`${(Math.round(ml/50)*50/1000).toLocaleString(undefined,{maximumFractionDigits:2})} L`:`${Math.round(ml/5)*5} ml`;}
+function qunits(it){const d=liqOf(it.n);return (QU[it.n]||[]).map(u=>d&&/\((\d+) (ml|cl)\)/.test(u[0])?[u[0],u[1],(()=>{const m=u[0].match(/\((\d+) (ml|cl)\)/);return Math.round(+m[1]*(m[2]==="cl"?10:1)*d);})()]:u).concat(d?[["ml","ml",d,"v"]]:[]).concat([["g","g",1]]);}
+function amtHtml(pre,it,q0,ui0){const U=qunits(it),ui=ui0!=null?ui0:0,u=U[ui],cnt=u[2]!==1&&!u[3],q=q0!=null?q0:(u[3]?250:u[2]===1?100:1);
+  return `<div class="amt"><span class="lbl">Amount</span><div class="amtrow"><div class="amtin">${cnt?`<button type="button" class="mini" data-amtstep="-1" data-pre="${pre}" aria-label="One less">−</button>`:""}<input class="field" id="${pre}G" inputmode="decimal" value="${q}" aria-label="Amount">${cnt?`<button type="button" class="mini" data-amtstep="1" data-pre="${pre}" aria-label="One more">+</button>`:""}</div>${U.length>1?`<select class="field amtu" id="${pre}U" data-pre="${pre}" data-ui="${ui}" aria-label="Unit">${U.map((x,i)=>`<option value="${i}"${i===ui?" selected":""}>${esc(x[1])}${x[2]!==1&&!x[3]&&!x[1].includes("(")?` (${r1(x[2])} g each)`:""}</option>`).join("")}</select>`:`<span class="of">g</span>`}</div><p class="amtwarn" id="${pre}W" hidden></p></div>`;}
 function amtRead(pre,it){const U=qunits(it),s=$(pre+"U"),ui=s?+s.value:U.length-1,u=U[ui]||U[U.length-1],q=num(($(pre+"G")||{}).value);
-  return {q,ui,ug:u[2],g:q*u[2],label:u[2]===1?`${r1(q)} g`:`${r1(q)} ${q===1?u[0]:u[1]}`};}
+  return {q,ui,ug:u[2],ml:!!u[3],g:q*u[2],label:u[3]?mlText(q):u[2]===1?`${r1(q)} g`:`${r1(q)} ${q===1?u[0]:u[1]}`};}
 function amtWarn(pre,it){const w=$(pre+"W");if(!w)return;const a=amtRead(pre,it);
-  if(a.ug>1&&(a.q>12||a.g>2000)){const U=qunits(it),u=U[a.ui];w.hidden=false;w.innerHTML=`⚠ That's ${r1(a.q)} ${esc(u[1])}, about ${a.g>=1000?r1(a.g/1000)+" kg":r1(a.g)+" g"}. Meant ${r1(a.q)} g? <button type="button" class="linkbtn" data-amtg="${pre}">Switch to grams</button>`;}
+  if(a.ug>1&&!a.ml&&(a.q>12||a.g>2000)){const U=qunits(it),u=U[a.ui];w.hidden=false;w.innerHTML=`⚠ That's ${r1(a.q)} ${esc(u[1])}, about ${a.g>=1000?r1(a.g/1000)+" kg":r1(a.g)+" g"}. Meant ${r1(a.q)} g? <button type="button" class="linkbtn" data-amtg="${pre}">Switch to grams</button>`;}
   else{w.hidden=true;w.innerHTML="";}}
 function amtNameFor(it,a){return it.n.replace(/, (raw|dry|drained)$/,"").replace(/ \((?!.*\d).*\)$/,"")+", "+a.label;}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-amtstep]");if(!b)return;e.stopPropagation();const inp=$(b.dataset.pre+"G");if(!inp)return;
@@ -2599,7 +2603,7 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
   const q=inp.value,U=qunits(it);inp.closest(".amt").outerHTML=amtHtml(pre,it,q,U.length-1);const ni=$(pre+"G");if(ni)ni.dispatchEvent(new Event("input",{bubbles:true}));},true);
 document.addEventListener("change",e=>{const s=e.target.closest&&e.target.closest(".amtu");if(!s)return;const pre=s.dataset.pre,inp=$(pre+"G");
   const it=pre==="af"?afPick:pre==="fc"?allIngr().find(x=>x.n===fcPick):null;if(!it||!inp)return;const U=qunits(it),u=U[+s.value];
-  const box=s.closest(".amt");box.outerHTML=amtHtml(pre,it,u[2]===1?100:1,+s.value);const ni=$(pre+"G");if(ni){ni.dispatchEvent(new Event("input",{bubbles:true}));ni.focus();ni.select();}});
+  const box=s.closest(".amt"),pu=U[+s.dataset.ui||0]||U[0],prevG=num(inp.value)*pu[2],nq=u[2]!==1&&!u[3]?Math.max(1,Math.round(prevG/u[2]*2)/2):Math.round(prevG/u[2])||(u[3]?250:100);box.outerHTML=amtHtml(pre,it,nq,+s.value);const ni=$(pre+"G");if(ni){ni.dispatchEvent(new Event("input",{bubbles:true}));ni.focus();ni.select();}});
 
 let afQ="",afSlot=null,afPick=null;
 function afItems(){const q=afQ.trim().toLowerCase(),has=x=>!q||x.toLowerCase().includes(q),out=[];
@@ -2707,7 +2711,7 @@ function solvePlan(items,T,meals){
   x=run(x);items.forEach((it,i)=>{if(!it.locked&&!it.fixedNow)x[i]=Math.max(it.lo,Math.min(it.hi,Math.round(x[i]/it.step)*it.step));it.x=x[i];it.fixedNow=false;});
   return items;}
 function planTotals(items){const t={k:0,p:0,cb:0,f:0};for(const it of items){t.k+=it.a[0]*it.x;t.p+=it.a[1]*it.x;t.cb+=it.a[2]*it.x;t.f+=it.a[3]*it.x;}return t;}
-function amountText(it){if(it.kind==="fixed")return `${r1(it.x)} serving${it.x===1?"":"s"}`;if(it.unit)return `${it.x} ${it.x===1?it.unit[1]:it.unit[2]} <small>(${fmt(it.x*it.unit[0])} g)</small>`;return `${fmt(it.x)} g`;}
+function amountText(it){if(it.kind==="fixed")return `${r1(it.x)} serving${it.x===1?"":"s"}`;if(!it.unit&&liqOf(it.n))return `${mlText(it.x/liqOf(it.n))} <small>(${fmt(it.x)} g)</small>`;if(it.unit)return `${it.x} ${it.x===1?it.unit[1]:it.unit[2]} <small>(${fmt(it.x*it.unit[0])} g)</small>`;return `${fmt(it.x)} g`;}
 function planNew(mode,scope){const meals=openSlots(scope||"left");PL={mode,scope:scope||"left",meals:meals.length?meals:SLOTS.map(s=>s.id),pick:{},items:[],seed:Math.floor(Math.random()*1000),idea:{},open:{}};
   if(mode==="suggest")planIdeas();planSolve();}
 function ideasFor(m){return IDEAS.filter(I=>I.s.includes(m)&&ideaOk(I));}
@@ -2767,7 +2771,7 @@ function planLog(only){const k=sel,day=ensureDay(k),u=snap(["day-"+k]);let n=0;
     const sl=SLOTS.find(s=>s.id===m),I=PL.idea[m];let e={n:"",k:0,p:0,cb:0,f:0,fb:0,nu:{},slot:m};
     for(const it of L){if(it.kind==="fixed"){const o=it.o;e.k+=num(o.k)*it.x;e.p+=num(o.p)*it.x;e.cb+=it.a[2]*it.x;e.f+=it.a[3]*it.x;e.fb+=num(o.fb)*it.x;e.nu=nuAdd(e.nu,o.nu?nuMul(o.nu,it.x):null);}
       else{const g=it.unit?it.x*it.unit[0]:it.x,mm=macrosFor(it.it,g);e.k+=mm.k;e.p+=mm.p;e.cb+=mm.cb;e.f+=mm.f;e.fb+=mm.fb;e.nu=nuAdd(e.nu,mm.nu);}}
-    e.n=(I&&PL.mode==="suggest"?I.n:sl.name)+": "+L.map(it=>(it.kind==="fixed"?r1(it.x)+"× ":it.unit?it.x+" ":fmt(it.x)+" g ")+it.n.split(/[,(]/)[0].trim().toLowerCase()).join(", ");
+    e.n=(I&&PL.mode==="suggest"?I.n:sl.name)+": "+L.map(it=>(it.kind==="fixed"?r1(it.x)+"× ":it.unit?it.x+" ":liqOf(it.n)?mlText(it.x/liqOf(it.n))+" ":fmt(it.x)+" g ")+it.n.split(/[,(]/)[0].trim().toLowerCase()).join(", ");
     e.k=Math.round(e.k);e.p=r1(e.p);e.cb=r1(e.cb);e.f=r1(e.f);e.fb=r1(e.fb);(day.extras=day.extras||[]).push(e);n++;}
   persist("day-"+k);renderEat();toast(n?`Logged ${n} meal${n>1?"s":""}`:"Nothing to log",u);}
 function plannerClick(e){if(sheetEl._kind!=="planner")return;const b=e.target.closest("[data-pl]");if(!b)return;const [a,x,y,z]=b.dataset.pl.split(":"),P=PL,S=store.settings;
@@ -3359,6 +3363,8 @@ function checkin(){const t=todayKey(),S=store.settings,pf=S.profile||{},goal=num
   const over=A.f&&A.nf>=4&&A.f>kc*1.1,under=A.f&&A.nf>=4&&A.f<kc*0.85;
   const step=d=>{let v=Math.round(Math.max(-200,Math.min(200,d))/50)*50;if(Math.abs(v)<100)v=Math.sign(d)*100;return v;};
   const CT=calcTargets(Object.assign({sex:"m",act:1.55},pf)),floor=CT?Math.max(CT.floor,Math.round(CT.bmr/10)*10):(pf.sex==="f"?1200:1500);
+  const verdict=r=>goal<0?(r<-0.01*kg?"fast":r>want*0.5?"slow":"ok"):goal>0?(r<want*0.5?"slow":r>want*1.6&&r>0.005*kg?"fast":"ok"):(Math.abs(r)>0.3?(r>0?"up":"down"):"ok");
+  const C=ciWindow(addDays(t,-14)),prevRate=C.nw>=3?B.w-C.w:null,now=verdict(rate),twice=prevRate!=null&&verdict(prevRate)===now;
   const sugg=d=>{let v=step(d);let to=Math.round((kc+v)/10)*10;if(v<0&&to<floor){to=floor;v=to-kc;if(v>-50){R.txt+=` Your target is already about as low as is sensible (${fmt(floor)} kcal), so instead add some daily walking or cardio.`;return;}}R.kcal=to;R.delta=v;};
   const gap=(want-rate)*7700/7;
   if(goal<0){
@@ -3372,6 +3378,7 @@ function checkin(){const t=todayKey(),S=store.settings,pf=S.profile||{},goal=num
     else if(rate>want*1.6&&rate>0.005*kg){R.txt=`You're gaining ${ws(rate)}, faster than your goal of ${ws(want)}. More of that will be fat, so ease off a little.`;R.tone="warn";sugg(Math.min(-100,gap));}
     else R.txt=`You're at ${ws(rate)}, right around your goal of ${ws(want)}. Keep going.`;}
   else{if(Math.abs(rate)>0.3){R.txt=`You wanted to keep your weight steady but it's ${ws(rate)}.`;R.tone="warn";sugg(-rate*7700/7);}else R.txt=`Your weight is steady (${ws(rate)}), just as planned.`;}
+  if(R.kcal&&!twice){R.kcal=null;R.delta=null;R.wait=true;R.txt+=" One week can be water and salt, so the app waits: if next week goes the same way, it'll suggest a change to your calories.";}
   return R;}
 function checkinDue(){const S=store.settings;if(!S.welcomed)return false;const t=todayKey();return !S.checkin||dayDiff(S.checkin,t)>=7;}
 function checkinHtml(){if(!checkinDue())return "";const C=checkin();
@@ -3929,13 +3936,13 @@ function shop(){return Array.isArray(store.settings.shop)?store.settings.shop:[]
 function shopName(n){return String(n).split(/[,(]/)[0].trim();}
 function shopAddPlan(){const S=store.settings,L=S.shop=shop().map(r=>Object.assign({},r));let n=0;
   for(const it of PL.items.filter(i=>PL.meals.includes(i.meal)&&i.x>0)){const nm=shopName(it.n),key=nm.toLowerCase();
-    let r=L.find(x=>!x.done&&x.k===key);if(!r){r={k:key,n:nm,g:0,c:0,s:0,plan:1};L.push(r);n++;}
+    let r=L.find(x=>!x.done&&x.k===key);if(!r){r={k:key,n:nm,g:0,c:0,s:0,plan:1};L.push(r);n++;}if(liqOf(it.n))r.d=liqOf(it.n);
     if(it.kind==="fixed")r.s+=it.x;else if(it.unit){r.c+=it.x;r.u=it.unit;}else r.g+=it.x;r.plan=1;}
   persist("settings");toast(n?`Added ${n} food${n>1?"s":""} to your shopping list on the Spend tab`:"Amounts added to your shopping list");}
 function shopProd(r){const k=r.k;if(k.length<3)return null;return products().find(p=>{const pn=String(p.n).toLowerCase();return pn.includes(k)||k.includes(pn.split(/[,(]/)[0].trim());})||null;}
 function shopAmt(r){if(r.note)return r.note;const m=r.plan?Math.max(1,num(store.settings.shopDays)||1):1,out=[];
   if(r.c>0){const c=Math.ceil(r.c*m*10)/10;out.push(`${r1(c)} ${c===1?r.u[1]:r.u[2]}`);}
-  if(r.g>0){const g=r.g*m;out.push(g>=1000?`${(Math.round(g/100)/10).toLocaleString()} kg`:`${Math.round(g/10)*10} g`);}
+  if(r.g>0){const g=r.g*m;out.push(r.d?mlText(g/r.d):g>=1000?`${(Math.round(g/100)/10).toLocaleString()} kg`:`${Math.round(g/10)*10} g`);}
   if(r.s>0)out.push(`${r1(r.s*m)} serving${r.s*m===1?"":"s"}`);return out.join(" + ");}
 function shopHtml(){const L=shop(),S=store.settings,days=Math.max(1,num(S.shopDays)||1),open=L.filter(r=>!r.done);
   const est=open.reduce((a,r)=>{const p=shopProd(r);return a+(p?num(p.price):0);},0),fromPlan=L.some(r=>r.plan);
@@ -4787,8 +4794,14 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="5.06";
+const APP_VERSION="5.07";
 const CHANGELOG=[
+  {v:"5.07",d:"13 October 2026",t:"Millilitres",items:[
+    "Drinks and other liquids can be entered in ml: milk, protein milk, laban rayeb, juices, cola, energy drinks, karkade, sugarcane juice, olive oil, lentil soup, beer, wine and spirits. Pick ml next to the amount",
+    "Switching between glasses, ml and grams keeps the same amount, so 1 glass becomes 250 ml instead of resetting",
+    "Suggested meals, Portion my foods and the shopping list show liquids in ml, or litres from 1 L up",
+    "The sample breakfast and dinner now say 250 ml protein milk (1 glass) instead of 258 g",
+    "The weekly check-in only suggests a calorie change when two weeks in a row point the same way. After one odd week it says so and waits, since water and salt can move the scale that much on their own"]},
   {v:"5.06",d:"13 October 2026",t:"Steady swipes",items:[
     "Swiping from the edge to change tabs: the next tab now lands exactly where its preview was, so it no longer starts a little low and then jumps up",
     "The page no longer scrolls up or down while you swipe sideways, and if you'd scrolled down, the next tab opens without the days at the top jumping back into view",
