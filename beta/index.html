@@ -4176,6 +4176,15 @@ function animPass(){const P=$("panel");if(!P)return;
   const now=new Set();P.querySelectorAll('.tick[aria-pressed="true"]').forEach(el=>{const k=annKey(el,".tick");now.add(k);if(!AN.first&&!AN.tick.has(k)&&!RM()){el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");}});AN.tick=now;
   AN.first=false;}
 let anQ=0;new MutationObserver(()=>{if(anQ)return;anQ=requestAnimationFrame(()=>{anQ=0;animPass();});}).observe($("panel"),{childList:true,subtree:true});
+// moving things up or down: every row glides from where it was to where it is now
+const MOVESEL=".edrow,.tabrow,#panel article.ex";
+function moveKey(el){return el.dataset.ex||((el.querySelector("strong,.tabname")||el).textContent||"").trim();}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest('[data-act="exup"],[data-act="exdown"],[data-act="rtup"],[data-act="layup"],[data-act="laydown"],[data-tabset^="up:"],[data-tabset^="down:"]');if(!b||b.disabled||calm())return;
+  const before=new Map();document.querySelectorAll(MOVESEL).forEach(el=>{const k=moveKey(el);if(!before.has(k))before.set(k,el.getBoundingClientRect().top);});
+  requestAnimationFrame(()=>{document.querySelectorAll(MOVESEL).forEach(el=>{const t0=before.get(moveKey(el));if(t0==null)return;const d=t0-el.getBoundingClientRect().top;if(Math.abs(d)<2)return;
+    try{el.animate([{transform:`translateY(${d}px)`},{transform:"none"}],{duration:260,easing:"cubic-bezier(.2,.8,.2,1)"});}catch(_){}});});},true);
+// a swapped exercise or routine item fades in so you can see what changed
+function swapFlash(sel){if(calm())return;requestAnimationFrame(()=>{const el=document.querySelector(sel);if(!el)return;try{el.animate([{opacity:.25,transform:"scale(.98)"},{opacity:1,transform:"none"}],{duration:320,easing:"cubic-bezier(.2,.8,.2,1)"});}catch(_){}});}
 // removing a row: it slides away, then the gap closes
 function collapseThen(el,fn){if(RM()||!el){fn();return;}const h=el.offsetHeight;el.style.overflow="hidden";try{const a=el.animate([{height:h+"px",opacity:1},{height:"0px",opacity:0}],{duration:170,easing:"ease-in"});a.onfinish=()=>{el.style.height="0px";fn();};}catch(_){fn();}}
 
@@ -4222,7 +4231,7 @@ function editEx(id){
         day.swap=day.swap||{};
         if(scope==="plan"){const PE=ensureEditable(p);const ix=PE?PE.ex.findIndex(x=>x[0]===orig):-1;if(ix>=0){const o=PE.ex[ix],L0=libArr(n);PE.ex[ix]=[L0[0],L0[1],o[2],o[3],L0[4],o[5],o[6],o[7]];}delete day.swap[orig];persist("settings");}
         else{if(n===orig)delete day.swap[orig];else day.swap[orig]=n;}
-        persist("day-"+k);render();toast((scope==="plan"?"Swapped from now on":"Swapped for today")+(canDo(n)?"":". Heads up: it "+needsText(needs(n)).toLowerCase()+", which isn't in your equipment"),u);}},
+        persist("day-"+k);render();swapFlash(`#panel article.ex[data-ex="${CSS.escape(n)}"]`);toast((scope==="plan"?"Swapped from now on":"Swapped for today")+(canDo(n)?"":". Heads up: it "+needsText(needs(n)).toLowerCase()+", which isn't in your equipment"),u);}},
      {label:"Remove for today",cls:"btn danger",fn:()=>skipEx(id)},
      {label:"Cancel",cls:"btn ghost"}]);
 }
@@ -4643,7 +4652,7 @@ function routineSwap(kind,i){
     [{label:"Swap",fn:()=>{const n=sheetEl._pick;if(!n)return false;const u=snap(["day-"+k,"settings"]),day=ensureDay(k);
       if(sheetEl._scope==="plan"){ensureRoutine(kind,p,P)[i]=n;if(day.rswap&&day.rswap[kind])delete day.rswap[kind][i];persist("settings");}
       else{day.rswap=day.rswap||{};day.rswap[kind]=day.rswap[kind]||{};day.rswap[kind][i]=n;}
-      persist("day-"+k);renderTrain();toast((sheetEl._scope==="plan"?"Swapped from now on":"Swapped for today")+(needsOf(WEQ[n]).length?". Heads up: it "+needsText(needsOf(WEQ[n])).toLowerCase():""),u);}},
+      persist("day-"+k);renderTrain();swapFlash(`.swr[data-sw="routine"][data-k="${kind}"][data-i="${i}"]`);toast((sheetEl._scope==="plan"?"Swapped from now on":"Swapped for today")+(needsOf(WEQ[n]).length?". Heads up: it "+needsText(needsOf(WEQ[n])).toLowerCase():""),u);}},
      {label:"Cancel",cls:"btn ghost"}]);
 }
 $("panel").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
@@ -4812,8 +4821,12 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="5.08";
+const APP_VERSION="5.09";
 const CHANGELOG=[
+  {v:"5.09",d:"13 October 2026",t:"Things move where they go",items:[
+    "Moving an exercise up or down while editing a plan now glides it into its new place, and the one it swapped with glides the other way. The same goes for warm-ups and stretches, the Train layout and the tab bar order",
+    "Swapping an exercise, warm-up or stretch fades the new one in, so you can see what changed",
+    "With Battery saver or Reduce Motion on, they just jump into place"]},
   {v:"5.08",d:"13 October 2026",t:"Exact ml",items:[
     "Drinks are counted exactly as their labels say again. Labels give values per 100 ml, so 250 ml of milk is now 250 ml worth, not the 258 g 5.07 turned it into (that made drinks about 3% too high). Olive oil is the exception, since it's labelled per 100 g",
     "Amounts in ml are no longer rounded to the nearest 5 ml",
