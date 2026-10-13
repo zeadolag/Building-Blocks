@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Body Builder</title>
 <meta name="description" content="Track your workouts, food, body weight and spending in one place.">
 <link rel="manifest" href="manifest.webmanifest">
@@ -720,7 +720,7 @@ body.touring{overflow:hidden}
 .copylink{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--ink);padding:8px 12px;margin:0 0 8px;font:inherit}
 .copylink span{font-weight:600;font-size:14px}.copylink small{color:var(--muted);font-size:12px}
 html.tsdrag,html.tsdrag body{overflow-x:hidden}
-html,body{overflow-x:clip}@supports not (overflow-x:clip){body{overflow-x:hidden}}
+html{touch-action:manipulation}html,body{overflow-x:clip}@supports not (overflow-x:clip){body{overflow-x:hidden}}
 .segpill{position:absolute;z-index:0;border-radius:calc(var(--radius) - 3px);background:var(--surface);box-shadow:var(--shadow-sm);pointer-events:none}:root[data-theme="dark"] .segpill{background:#3F3F46}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .segpill{background:#3F3F46}}.seg{position:relative}.seg>button{position:relative;z-index:1}.seg.segmoving>button[aria-pressed="true"]{background:transparent!important;box-shadow:none!important}
 .tspeek{position:fixed;left:0;right:0;bottom:0;overflow:hidden;background:var(--paper);z-index:5;pointer-events:none;will-change:transform}.tsin{padding:0}
 #panel{will-change:auto}
@@ -4124,6 +4124,9 @@ document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.
   if(GS.el){swipeDay(dir);GS.block=true;setTimeout(()=>GS.block=false,350);return;}
   if(GS.edge&&RM())swipeTab(dir);},{passive:true});
 document.addEventListener("click",e=>{if(GS.block&&e.target.closest&&e.target.closest("header.top,#week")){e.stopPropagation();e.preventDefault();}},true);
+// No zooming like a native app: double-tap zoom is off through touch-action above, and iPhones also ignore the viewport setting for pinching, so pinch gestures are stopped here
+for(const ev of ["gesturestart","gesturechange","gestureend"])document.addEventListener(ev,e=>{e.preventDefault();},{passive:false});
+document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1&&e.cancelable)e.preventDefault();},{passive:false});
 // Edge swipe follows your finger: the next tab slides in beside this one while you drag
 const TS={on:false,dir:0,ghost:null,lock:false,dx:0};
 function tsBuild(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;const P=$("panel"),cur=tab,sp=typeof setPage!=="undefined"?setPage:null;
@@ -4814,6 +4817,7 @@ const CHANGELOG=[
   {v:"5.08",d:"13 October 2026",t:"Exact ml",items:[
     "Drinks are counted exactly as their labels say again. Labels give values per 100 ml, so 250 ml of milk is now 250 ml worth, not the 258 g 5.07 turned it into (that made drinks about 3% too high). Olive oil is the exception, since it's labelled per 100 g",
     "Amounts in ml are no longer rounded to the nearest 5 ml",
+    "The app no longer zooms in when you double-tap or pinch, or when you tap into a box to type",
     "Wherever an amount is converted with an estimate, it says so under the amount: counted foods like eggs or slices of bread (a typical weight), a glass counted as 250 ml, olive oil converted from ml to grams, or drinks entered in grams instead of the ml their labels use",
     "New setting in Settings → Units and region: show drinks and liquids in millilitres or grams. Either way, you can pick the other unit next to any amount"]},
   {v:"5.07",d:"13 October 2026",t:"Millilitres",items:[
