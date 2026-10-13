@@ -331,7 +331,10 @@ textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertica
 .libitem{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:10px 0}
 .libitem strong{font-weight:500}
 .libitem small{display:block;color:var(--muted);font-size:13px}
-.libitem .plus{font-size:20px;color:var(--blue);font-weight:500}
+.libitem .plus{font-size:20px;color:var(--blue);font-weight:500;min-width:20px;text-align:center}
+.libitem[disabled]{cursor:default}
+.libbar{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 72px);z-index:3;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:10px 0 4px;padding:8px;border-radius:14px;background:var(--surface);box-shadow:0 4px 18px rgba(0,0,0,.14)}
+.libbar .btn{margin:0}
 .libitem.cant strong{color:var(--muted)}
 .libitem[aria-pressed="true"]{background:color-mix(in srgb,var(--blue) 10%,transparent)}
 .libitem .chk{visibility:hidden;color:var(--blue);font-weight:600;padding-right:8px}
@@ -1958,14 +1961,17 @@ function dayExercises(k,p){
 }
 function hiddenExIds(day){const s=new Set();for(const o of Object.keys(day.skip||{})){if(day.skip[o]){s.add(o);const t=(day.swap||{})[o];if(t)s.add(t);}}return s;}
 function exLookup(k,id){return dayExercises(k,planOf(k)).find(x=>x[0]===id)||libArr(id);}
-let editPlan=false,libQ="",libG="";
+let editPlan=false,libQ="",libG="";const libPicks=new Set();
 function libResults(){
   const q=libQ.trim().toLowerCase();
   const all=Object.values(LIB).filter(x=>(!libG||x.g===libG)&&(!q||x.n.toLowerCase().includes(q)||x.m.some(m=>(MNAME[m]||"").includes(q))));
   all.sort((a,b)=>a.n.localeCompare(b.n));
   if(!all.length)return `<p class="note">No matches. Try another word, or add it as a custom exercise below.</p>`;
   const more=!q&&!libG&&all.length>12?`<p class="note">Showing 12 of ${all.length}. Search or pick a group to see more.</p>`:"";
-  return (q||libG?all.slice(0,30):all.slice(0,12)).map(x=>`<button class="libitem${canDo(x.id)?"":" cant"}" data-act="addex" data-id="${x.id}"><span><strong>${esc(x.n)}</strong><small>${x.g} · ${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}</small>${needsBadge(x.id)}</span><span class="plus">+</span></button>`).join("")+more;
+  const cp=plansFor(sel)[planOf(sel)],have=new Set(((cp&&cp.ex)||[]).map(e=>e[0]));
+  return (q||libG?all.slice(0,30):all.slice(0,12)).map(x=>{const inP=have.has(libArr(x.id)[0]),on=libPicks.has(x.id);return `<button type="button" class="libitem${canDo(x.id)&&!inP?"":" cant"}" data-act="libpick" data-id="${x.id}" aria-pressed="${on}"${inP?" disabled":""}><span><strong>${esc(x.n)}</strong><small>${inP?"Already in this workout":`${x.g} · ${typeOf(x.id)} · ${DIFFN[diffOf(x.id)]}`}</small>${inP?"":needsBadge(x.id)}</span><span class="plus" aria-hidden="true">${on?"✓":"+"}</span></button>`;}).join("")+more;
+}
+function libBar(){const n=libPicks.size;return n?`<div class="libbar"><button type="button" class="btn" data-act="addpicks">Add ${n} exercise${n>1?"s":""}</button><button type="button" class="btn ghost" data-act="clearpicks">Clear</button></div>`:"";
 }
 function renderEditPlan(k,p,P){
   const PL=plansFor(k),W=weekFor(k),days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],idx=[1,2,3,4,5,6,0];
@@ -1975,7 +1981,7 @@ function renderEditPlan(k,p,P){
   else h+=`<p class="note">No exercises yet. Add some below.</p>`;
   h+=`<p class="lbl" style="margin-top:16px">Add an exercise</p><input class="field" id="libQ" placeholder="Search, like row or glutes" value="${esc(libQ)}" aria-label="Search exercises">
     <div class="chips" style="margin-top:8px">${["All"].concat(GROUPS).map(g=>`<button class="chip${(g==="All"?!libG:libG===g)?" on":""}" data-act="libg" data-g="${g==="All"?"":g}">${g}</button>`).join("")}</div>
-    <div id="libRes">${libResults()}</div>
+    <div id="libRes">${libResults()}</div><div id="libBar">${libBar()}</div>
     <div class="qa" style="margin-top:10px;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)"><input class="field" id="cxN" placeholder="Custom exercise" aria-label="Custom exercise name"><input class="field" id="cxS" inputmode="numeric" placeholder="sets" aria-label="Sets"><input class="field" id="cxR" placeholder="reps" aria-label="Reps"></div>
     <button class="linkbtn" data-act="addcustomex">Add custom exercise</button>`;
   h+=`<p class="lbl" style="margin-top:18px">Weekly schedule</p><button class="btn ghost" style="margin:0 0 6px" data-act="changesplit">Change your weekly split</button>`+days.map((d,j)=>`<label class="wkrow"><span>${d}</span><select class="field" data-wk="${idx[j]}">${Object.keys(PL).map(id=>`<option value="${id}"${W[idx[j]]===id?" selected":""}>${esc(PL[id].name)}</option>`).join("")}</select></label>`).join("");
@@ -3001,10 +3007,10 @@ function suppsHtml(day){
 }
 function suppAdd(){
   const have=supps();
-  openSheet("Add a supplement",`<p class="note" style="margin-top:0">Pick a common one to get tips on when and how to take it, or type your own. This is general information, not medical advice.</p>
-  <div class="swres">${SUPPLIB.map(x=>{const on=have.some(n=>x.re.test(n));return `<button type="button" class="libitem${on?" cant":""}" data-pick="${esc(x.n)}" aria-pressed="false"${on?" disabled":""}><span><strong>${esc(x.n)}</strong><small>${esc(x.cat)}${on?" · already on your list":" · "+esc(x.why.split(".")[0])}</small></span><span class="chk">✓</span></button>`;}).join("")}</div>
+  openSheet("Add a supplement",`<p class="note" style="margin-top:0">Tick as many as you like, then add them together. Picking a common one gets you tips on when and how to take it, or type your own. This is general information, not medical advice.</p>
+  <div class="swres">${SUPPLIB.map(x=>{const on=have.some(n=>x.re.test(n));return `<button type="button" class="libitem${on?" cant":""}" data-mpick="${esc(x.n)}" aria-pressed="false"${on?" disabled":""}><span><strong>${esc(x.n)}</strong><small>${esc(x.cat)}${on?" · already on your list":" · "+esc(x.why.split(".")[0])}</small></span><span class="chk">✓</span></button>`;}).join("")}</div>
   <label class="sfld"><span class="lbl">Or type your own</span><input class="field" id="spN" data-nofocus="1" placeholder="Name and dose, like Zinc 10 mg"></label>`,
-  [{label:"Add",fn:()=>{const own=($("spN")||{}).value?$("spN").value.trim():"",n=own||sheetEl._pick;if(!n)return false;const u=snap(["settings"]);ensureSupps().push(n);suppTrack(n);persist("settings");renderEat();toast("Added "+n,u);}},{label:"Cancel",cls:"btn ghost"}]);
+  [{label:"Add",fn:()=>{const own=($("spN")||{}).value?$("spN").value.trim():"",ns=[...sheetEl._picks];if(own&&!ns.includes(own))ns.push(own);if(!ns.length)return false;const u=snap(["settings"]),L=ensureSupps();ns.forEach(n=>{L.push(n);suppTrack(n);});persist("settings");renderEat();toast(ns.length===1?"Added "+ns[0]:"Added "+ns.length+" supplements",u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function suppNote(n){const S=store.settings,cur=(S.suppNotes||{})[n]||"";
   openSheet("Note: "+n,`<p class="note" style="margin-top:0">How does it affect you? Anything to remember, like side effects or what time works best.</p><textarea class="field area" id="spNote" placeholder="For example: taking it at night helps me sleep">${esc(cur)}</textarea>`,
@@ -3659,7 +3665,7 @@ $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   const act=b.dataset.act,i=+b.dataset.i;
   const S=store.settings;
-  if(act==="editplan"){editPlan=!editPlan;libQ="";libG="";renderTrain();window.scrollTo(0,0);}
+  if(act==="editplan"){editPlan=!editPlan;libQ="";libG="";libPicks.clear();renderTrain();window.scrollTo(0,0);}
   else if(act==="editdone"){editPlan=false;render();}
   else if(act==="exup"||act==="exdown"){const {P}=curPlanEdit(),j=act==="exup"?i-1:i+1;if(j<0||j>=P.ex.length)return;[P.ex[i],P.ex[j]]=[P.ex[j],P.ex[i]];persist("settings");renderTrain();}
   else if(act==="exdel"){const {P}=curPlanEdit();P.ex.splice(i,1);persist("settings");renderTrain();}
@@ -3670,6 +3676,9 @@ $("panel").addEventListener("click",e=>{
     else{const key=a[7]||b[7]||("g"+Date.now().toString(36));a[7]=key;b[7]=key;}
     persist("settings");renderTrain();}
   else if(act==="addex"){const {P}=curPlanEdit(),a=libArr(b.dataset.id);if(P.ex.some(x=>x[0]===a[0]))return;P.ex.push(a);persist("settings");renderTrain();}
+  else if(act==="libpick"){if(b.disabled)return;const id=b.dataset.id,on=!libPicks.has(id);on?libPicks.add(id):libPicks.delete(id);b.setAttribute("aria-pressed",String(on));const pl=b.querySelector(".plus");if(pl)pl.textContent=on?"✓":"+";const r=$("libBar");if(r)r.innerHTML=libBar();}
+  else if(act==="clearpicks"){libPicks.clear();const r=$("libRes");if(r)r.innerHTML=libResults();const w=$("libBar");if(w)w.innerHTML="";}
+  else if(act==="addpicks"){const {P}=curPlanEdit(),u=snap(["settings"]);let n=0;for(const id of libPicks){const a=libArr(id);if(P.ex.some(x=>x[0]===a[0]))continue;P.ex.push(a);n++;}libPicks.clear();persist("settings");renderTrain();if(n)toast(n===1?"Added 1 exercise":"Added "+n+" exercises",u);}
   else if(act==="addcustomex"){
     const n=$("cxN").value.trim();if(!n){$("cxN").focus();return;}
     const id="x"+Date.now().toString(36),sets=Math.max(1,Math.round(num($("cxS").value))||3),r=$("cxR").value.trim()||"8–12";
@@ -3925,7 +3934,7 @@ sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="cheat")return;const b=e
 
 function openSheet(title,body,buttons){
   sheetEl.innerHTML=`<div class="sheet-grab" aria-hidden="true"></div><h2 class="sheet-t">${esc(title)}</h2><div class="sheet-b">${body}</div><div class="sheet-a">${buttons.map((b,i)=>`<button type="button" class="${b.cls||"btn"}" data-sb="${i}">${b.label}</button>`).join("")}</div>`;
-  sheetEl._btns=buttons;sheetEl._pick=null;sheetEl._scope="today";sheetEl._kind=null;
+  sheetEl._btns=buttons;sheetEl._pick=null;sheetEl._picks=new Set();sheetEl._scope="today";sheetEl._kind=null;
   if(sheetCloseT){clearTimeout(sheetCloseT);sheetCloseT=0;}sheetEl.classList.remove("shutting","closing");sheetEl.style.transform="";
   if(!sheetEl.open){if(typeof sheetEl.showModal==="function")sheetEl.showModal();else sheetEl.setAttribute("open","");}else{sheetEl.scrollTop=0;}
   const f=sheetEl.querySelector("input");if(f&&!f.dataset.nofocus)setTimeout(()=>f.focus(),50);
@@ -3939,6 +3948,8 @@ sheetEl.addEventListener("click",e=>{
   if(e.target===sheetEl){closeSheet();return;}
   const b=e.target.closest("[data-sb]");
   if(b){const fn=sheetEl._btns[+b.dataset.sb].fn;const r=fn?fn():undefined;if(r!==false)closeSheet();return;}
+  const mp=e.target.closest("[data-mpick]");
+  if(mp){if(mp.disabled)return;const n=mp.dataset.mpick,P=sheetEl._picks,on=!P.has(n);on?P.add(n):P.delete(n);mp.setAttribute("aria-pressed",String(on));const ab=sheetEl.querySelector('[data-sb="0"]');if(ab)ab.textContent=P.size>1?"Add "+P.size:"Add";return;}
   const pk=e.target.closest("[data-pick]");
   if(pk){sheetEl._pick=pk.dataset.pick;sheetEl.querySelectorAll("[data-pick]").forEach(x=>x.setAttribute("aria-pressed",String(x===pk)));return;}
   const sc=e.target.closest("[data-scope]");
@@ -4821,8 +4832,12 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="5.09";
+const APP_VERSION="5.10";
 const CHANGELOG=[
+  {v:"5.10",d:"13 October 2026",t:"Pick several at once",items:[
+    "Adding supplements: tick as many as you want, then add them all with one tap. The button shows how many you picked, and one undo takes them all back.",
+    "Editing a workout: tap exercises to tick them, even across different searches and muscle groups, then add them together. Exercises already in the workout are greyed out.",
+    "Swapping an exercise or a routine still picks just one, since you can only swap to one thing."]},
   {v:"5.09",d:"13 October 2026",t:"Things move where they go",items:[
     "Moving an exercise up or down while editing a plan now glides it into its new place, and the one it swapped with glides the other way. The same goes for warm-ups and stretches, the Train layout and the tab bar order",
     "Swapping an exercise, warm-up or stretch fades the new one in, so you can see what changed",
