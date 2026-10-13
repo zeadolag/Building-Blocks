@@ -715,6 +715,7 @@ body.touring{overflow:hidden}
 .shopcard .swr+.swr{border-top:1px solid var(--line)}.shopadd{display:flex;gap:8px;margin-top:10px}.shopadd .field{flex:1;margin:0}
 .cinote{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;color:var(--ink);font:inherit;gap:10px}.cinote small{display:block;color:var(--muted);font-size:13px}
 .cicard{border-left:3px solid var(--green,#16a34a)}.cicard.warn{border-left-color:#d97706}.cicard strong{display:block}
+.amtnote{font-size:12px;margin:6px 0 0;color:var(--muted)}
 .copycard{display:flex;flex-direction:column;gap:10px}.copycard strong{display:block}.copycard small{color:var(--muted);font-size:13px}
 .copylink{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--ink);padding:8px 12px;margin:0 0 8px;font:inherit}
 .copylink span{font-weight:600;font-size:14px}.copylink small{color:var(--muted);font-size:12px}
@@ -2589,11 +2590,20 @@ const QU={
 // Olive oil is labelled per 100 g, so its ml are converted with oil's real weight (0.92 g per ml).
 const LIQ={"Milk 1.5%":1,"Whole milk 3.5%":1,"Protein milk":1,"Laban rayeb (fermented milk)":1,"Orange juice":1,"Cola":1,"Energy drink":1,"Sugarcane juice (asab)":1,"Karkade (hibiscus tea, sweetened)":1,"Beer, 5%":1,"Wine, 12%":1,"Spirits, 40% (vodka, whisky)":1,"Olive oil":0.92,"Shorbet ads (lentil soup)":1};
 function liqML(){return store.settings.liqUnit!=="g";}
+// Says plainly when an amount is converted with an estimate rather than taken straight from the label
+function amtNote(it,u){const d=LIQ[it.n];if(!u)return "";
+  if(/^(glass|cup)/.test(u[0]))return `Estimate: a ${u[0].split(" ")[0]} is counted as ${u[0].match(/\((\d+ ?\w+)\)/)?u[0].match(/\((\d+ ?\w+)\)/)[1]:"a typical amount"}. Glasses vary, so pick ml and measure if you want it exact.`;
+  // counted foods (eggs, slices, cans of tuna...) use a typical weight; cans and bottles of drinks state their exact volume
+  if(u[2]!==1&&!u[3]&&!(d===1&&/\(\d+ ?(ml|cl)\)/.test(u[0])))return `Estimate: 1 ${esc(u[0].replace(/ \(.*\)$/,""))} is counted as ${r1(u[2])} g, a typical size. Weigh it if you want it exact.`;
+  if(!d)return "";
+  if(d!==1&&u[3])return `Estimate: ${esc(it.n.split(/[,(]/)[0].trim().toLowerCase())} is labelled per 100 g, so ml are converted at about ${d} g per ml (its typical weight).`;
+  if(d===1&&u[2]===1&&!u[3])return "Close estimate: drink labels give values per 100 ml, so grams are counted as ml here. That's about 3% off for milk and juice. Pick ml for the exact label values.";
+  return "";}
 function liqOf(n){return liqML()?(LIQ[n]||null):null;}
 function mlText(ml){ml=Math.round(ml);return ml>=1000?`${(ml/1000).toLocaleString(undefined,{maximumFractionDigits:2})} L`:`${ml} ml`;}
 function qunits(it){const d=LIQ[it.n]||null,pg=!liqML();if(d&&pg)return (QU[it.n]||[]).concat([["g","g",1],["ml","ml",d,"v"]]);return (QU[it.n]||[]).map(u=>d&&/\((\d+) (ml|cl)\)/.test(u[0])?[u[0],u[1],(()=>{const m=u[0].match(/\((\d+) (ml|cl)\)/);return Math.round(+m[1]*(m[2]==="cl"?10:1)*d);})()]:u).concat(d?[["ml","ml",d,"v"]]:[]).concat([["g","g",1]]);}
 function amtHtml(pre,it,q0,ui0){const U=qunits(it),ui=ui0!=null?ui0:0,u=U[ui],cnt=u[2]!==1&&!u[3],q=q0!=null?q0:(u[3]?250:u[2]===1?100:1);
-  return `<div class="amt"><span class="lbl">Amount</span><div class="amtrow"><div class="amtin">${cnt?`<button type="button" class="mini" data-amtstep="-1" data-pre="${pre}" aria-label="One less">−</button>`:""}<input class="field" id="${pre}G" inputmode="decimal" value="${q}" aria-label="Amount">${cnt?`<button type="button" class="mini" data-amtstep="1" data-pre="${pre}" aria-label="One more">+</button>`:""}</div>${U.length>1?`<select class="field amtu" id="${pre}U" data-pre="${pre}" data-ui="${ui}" aria-label="Unit">${U.map((x,i)=>`<option value="${i}"${i===ui?" selected":""}>${esc(x[1])}${x[2]!==1&&!x[3]&&!x[1].includes("(")?` (${r1(x[2])} g each)`:""}</option>`).join("")}</select>`:`<span class="of">g</span>`}</div><p class="amtwarn" id="${pre}W" hidden></p></div>`;}
+  return `<div class="amt"><span class="lbl">Amount</span><div class="amtrow"><div class="amtin">${cnt?`<button type="button" class="mini" data-amtstep="-1" data-pre="${pre}" aria-label="One less">−</button>`:""}<input class="field" id="${pre}G" inputmode="decimal" value="${q}" aria-label="Amount">${cnt?`<button type="button" class="mini" data-amtstep="1" data-pre="${pre}" aria-label="One more">+</button>`:""}</div>${U.length>1?`<select class="field amtu" id="${pre}U" data-pre="${pre}" data-ui="${ui}" aria-label="Unit">${U.map((x,i)=>`<option value="${i}"${i===ui?" selected":""}>${esc(x[1])}${x[2]!==1&&!x[3]&&!x[1].includes("(")?` (${r1(x[2])} g each)`:""}</option>`).join("")}</select>`:`<span class="of">g</span>`}</div>${(()=>{const n=amtNote(it,u);return n?`<p class="note amtnote">${n}</p>`:"";})()}<p class="amtwarn" id="${pre}W" hidden></p></div>`;}
 function amtRead(pre,it){const U=qunits(it),s=$(pre+"U"),ui=s?+s.value:U.length-1,u=U[ui]||U[U.length-1],q=num(($(pre+"G")||{}).value);
   return {q,ui,ug:u[2],ml:!!u[3],g:q*u[2],label:u[3]?mlText(q):u[2]===1?`${r1(q)} g`:`${r1(q)} ${q===1?u[0]:u[1]}`};}
 function amtWarn(pre,it){const w=$(pre+"W");if(!w)return;const a=amtRead(pre,it);
@@ -2714,7 +2724,7 @@ function solvePlan(items,T,meals){
   x=run(x);items.forEach((it,i)=>{if(!it.locked&&!it.fixedNow)x[i]=Math.max(it.lo,Math.min(it.hi,Math.round(x[i]/it.step)*it.step));it.x=x[i];it.fixedNow=false;});
   return items;}
 function planTotals(items){const t={k:0,p:0,cb:0,f:0};for(const it of items){t.k+=it.a[0]*it.x;t.p+=it.a[1]*it.x;t.cb+=it.a[2]*it.x;t.f+=it.a[3]*it.x;}return t;}
-function amountText(it){if(it.kind==="fixed")return `${r1(it.x)} serving${it.x===1?"":"s"}`;if(!it.unit&&liqOf(it.n))return liqOf(it.n)===1?mlText(it.x):`${mlText(it.x/liqOf(it.n))} <small>(${fmt(it.x)} g)</small>`;if(it.unit)return `${it.x} ${it.x===1?it.unit[1]:it.unit[2]} <small>(${fmt(it.x*it.unit[0])} g)</small>`;return `${fmt(it.x)} g`;}
+function amountText(it){if(it.kind==="fixed")return `${r1(it.x)} serving${it.x===1?"":"s"}`;if(!it.unit&&liqOf(it.n))return liqOf(it.n)===1?mlText(it.x):`≈${mlText(it.x/liqOf(it.n))} <small>(${fmt(it.x)} g, estimated)</small>`;if(it.unit)return `${it.x} ${it.x===1?it.unit[1]:it.unit[2]} <small>(${fmt(it.x*it.unit[0])} g)</small>`;return `${fmt(it.x)} g`;}
 function planNew(mode,scope){const meals=openSlots(scope||"left");PL={mode,scope:scope||"left",meals:meals.length?meals:SLOTS.map(s=>s.id),pick:{},items:[],seed:Math.floor(Math.random()*1000),idea:{},open:{}};
   if(mode==="suggest")planIdeas();planSolve();}
 function ideasFor(m){return IDEAS.filter(I=>I.s.includes(m)&&ideaOk(I));}
@@ -4804,6 +4814,7 @@ const CHANGELOG=[
   {v:"5.08",d:"13 October 2026",t:"Exact ml",items:[
     "Drinks are counted exactly as their labels say again. Labels give values per 100 ml, so 250 ml of milk is now 250 ml worth, not the 258 g 5.07 turned it into (that made drinks about 3% too high). Olive oil is the exception, since it's labelled per 100 g",
     "Amounts in ml are no longer rounded to the nearest 5 ml",
+    "Wherever an amount is converted with an estimate, it says so under the amount: counted foods like eggs or slices of bread (a typical weight), a glass counted as 250 ml, olive oil converted from ml to grams, or drinks entered in grams instead of the ml their labels use",
     "New setting in Settings → Units and region: show drinks and liquids in millilitres or grams. Either way, you can pick the other unit next to any amount"]},
   {v:"5.07",d:"13 October 2026",t:"Millilitres",items:[
     "Drinks and other liquids can be entered in ml: milk, protein milk, laban rayeb, juices, cola, energy drinks, karkade, sugarcane juice, olive oil, lentil soup, beer, wine and spirits. Pick ml next to the amount",
