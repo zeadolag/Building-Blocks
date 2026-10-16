@@ -2272,7 +2272,7 @@ function renderHistory(){
 const GEN_WARM=["5 min light cardio or a brisk walk","Arm circles and leg swings, 10 each","1–2 light warm-up sets of your first exercise"];
 const GEN_STRETCH=["Stretch each muscle you trained, 30–45 s"];
 function showWelcome(){return (mode==="local"||migrated)&&!store.settings.welcomed;}
-function onbStage(){const S=store.settings,o=S.onb;return S.welcomed&&(o==="level"||o==="equip"||o==="split")?o:null;}
+function onbStage(){const S=store.settings,o=S.onb;return S.welcomed&&(o==="level"||o==="equip"||o==="split"||o==="look")?o:null;}
 function afterTargets(){const S=store.settings;if(!S.level&&isLocalMode()){S.onb="level";persist("settings");render();window.scrollTo(0,0);}else{persist("settings");render();if(!S.toured)setTimeout(tourStart,350);}}
 
 const SLOTS=[
@@ -2833,6 +2833,7 @@ function renderTrain(){
   const stg=onbStage();
   if(stg==="level"){h+=levelHtml()+`</section>`;$("panel").innerHTML=h;return;}
   if(stg==="equip"){h+=equipHtml(true)+`</section>`;$("panel").innerHTML=h;return;}
+  if(stg==="look"){h+=lookStepHtml()+`</section>`;$("panel").innerHTML=h;return;}
   if(stg==="split"||splitOpen){if(!splitDraft)draftInit();h+=splitHtml(stg==="split")+`</section>`;$("panel").innerHTML=h;return;}
   const sp=store.settings.split;
   if(sp&&sp.until&&todayKey()>sp.until)h+=`<div class="card notice"><strong>Your split ended on ${shortDate(sp.until)}</strong><p class="note" style="margin:4px 0 10px">Keep going with the same week, or set up a new split.</p><div class="pair"><button class="btn ghost" style="margin:0" data-act="splitkeep">Keep it going</button><button class="btn" style="margin:0" data-act="splitnew">New split</button></div></div>`;
@@ -3931,7 +3932,7 @@ $("panel").addEventListener("click",e=>{
     if(act==="addcardio"){const f=$("cfA"),o=cardioRead(f);if(!o){const e0=[...f.querySelectorAll("[data-cf]")].find(x=>!x.value.trim());(e0||f.querySelector("[data-cf]")).focus();return;}delete o.calc;const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push(o);persist(docId);render();return;}
     const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t,m:Math.round(m)});persist(docId);render();
   }else if(act==="easyrun"){const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t:"Easy run",m:25});persist(docId);render();
-  }else if(act==="lookgo"){store.settings.lookPicked=1;persist("settings");renderTrain();window.scrollTo(0,0);
+  }else if(act==="lookgo"){const S=store.settings;S.lookPicked=1;if(S.onb==="look")delete S.onb;persist("settings");render();window.scrollTo(0,0);if(!S.toured)setTimeout(tourStart,350);
   }else if(act==="iconbk"){bkExport();
   }else if(act==="iconok"){store.settings.iconNote=1;persist("settings");renderTrain();
   }else if(act==="recapok"){const m=recapWeek();if(m){store.settings.recapSeen=m;persist("settings");}renderTrain();
@@ -4264,16 +4265,16 @@ function profileFields(pf){
   <div id="tOut" style="margin-top:12px">${targetsOut(pf)}</div>`;
 }
 let welcomeManual=false;
+function lookStepHtml(){return `<div class="card welcome"><p class="stepl">Step 5 of 5</p><h2 style="font-size:24px">Pick a look</h2>
+    <p class="note" style="margin:6px 0 14px">Last one, and optional. You can change it any time in Settings → Appearance.</p>
+    <div class="lookpick">${[["today","Today","Soft and rounded, with a colour for each tab. Calm for everyday use."],["focus","Focus","Bold and dark, with the current set and a big Log set button. Made for the gym floor."],["classic","Classic","Clean and simple, in white, grey and blue."]].map(([v,n,d])=>`<button type="button" class="stopt lookopt" data-wstyle="${v}" aria-pressed="${styleId()===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>${n}</strong><small>${d}</small></span></button>`).join("")}</div>
+    <button class="btn" data-act="lookgo">Done</button><button class="linkbtn" style="margin-top:10px" data-act="lookgo">Skip for now</button></div>`;}
 function welcomeHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
-  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 2 of 5</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
+  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
     <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
     <button class="btn" data-act="welcomeman">Save and start</button><button class="linkbtn" style="margin-top:10px" data-act="welcomecalc">Work them out from my details instead</button>${restoreLink()}</div>`;
-  if(!store.settings.lookPicked)return `<div class="card welcome"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Welcome to Routine</h2>
-    <p class="note" style="margin:6px 0 14px">First, pick how the app looks. You can change it any time in Settings → Appearance.</p>
-    <div class="lookpick">${[["today","Today","Soft and rounded, with a colour for each tab. Calm for everyday use."],["focus","Focus","Bold and dark, with the current set and a big Log set button. Made for the gym floor."],["classic","Classic","Clean and simple, in white, grey and blue."]].map(([v,n,d])=>`<button type="button" class="stopt lookopt" data-wstyle="${v}" aria-pressed="${styleId()===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>${n}</strong><small>${d}</small></span></button>`).join("")}</div>
-    <button class="btn" data-act="lookgo">Continue</button>${restoreLink()}</div>`;
-  return `<div class="card welcome tcalc"><p class="stepl">Step 2 of 5</p><h2 style="font-size:26px">Your details</h2>
+  return `<div class="card welcome tcalc"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Welcome to Routine</h2>
     <p class="note" style="margin:6px 0 12px">A few details so the app can work out how much you should eat each day. They stay on your device.</p>
     ${profileFields(pf)}
     <button class="btn" data-act="welcomego">Save and start</button>
@@ -5066,7 +5067,7 @@ function fitEx(list){const used=new Set(list.filter(e=>canDo(e[0])).map(e=>e[0])
   return out;}
 function equipHtml(onb){
   const S=store.settings,cur=S.equipPreset||(myEquip()?"own":"gym"),have=myEquip()||[];
-  return `<div class="card${onb?" welcome":""}">${onb?`<p class="stepl">Step 4 of 5</p><h2 style="font-size:24px">What equipment do you have?</h2><p class="note" style="margin:6px 0 12px">Your plan only uses exercises you can actually do. You can change this any time in Settings → Training.</p>`:`<p class="note" style="margin:0 0 10px">Exercises that need anything you don't have are marked, and the app suggests swaps. You can still pick them.</p>`}
+  return `<div class="card${onb?" welcome":""}">${onb?`<p class="stepl">Step 3 of 5</p><h2 style="font-size:24px">What equipment do you have?</h2><p class="note" style="margin:6px 0 12px">Your plan only uses exercises you can actually do. You can change this any time in Settings → Training.</p>`:`<p class="note" style="margin:0 0 10px">Exercises that need anything you don't have are marked, and the app suggests swaps. You can still pick them.</p>`}
   <div class="tplgrid">${EQPRESETS.map(([v,t,d])=>`<button type="button" class="tpl" data-act="eqp" data-v="${v}" aria-pressed="${cur===v}"><strong>${t}</strong><small>${d}</small></button>`).join("")}</div>
   ${cur==="own"?`<p class="lbl" style="margin-top:12px">Tick what you have</p><div class="eqgrid">${EQKEYS.map(([k,l])=>`<button type="button" class="toggle mini-t" data-act="eqk" data-v="${k}" aria-pressed="${have.includes(k)}"><span class="box">✓</span><span class="txt"><strong>${l}</strong></span></button>`).join("")}</div>`:""}
   <p class="note">Bodyweight exercises are always included.</p>${onb?`<button class="btn" data-act="eqgo">Continue</button>`:""}</div>`;
@@ -5116,7 +5117,7 @@ const LEVELS=[["new","New to the gym","Less than 6 months. You'll get a ready-ma
   ["some","Some experience","6 months to 2 years. Start from a suggested plan, or from an empty one."],
   ["exp","Experienced","More than 2 years. You build your own workouts. Ready-made plans are still there if you want one."]];
 function levelHtml(){const cur=store.settings.level||"";
-  return `<div class="card welcome"><p class="stepl">Step 3 of 5</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
+  return `<div class="card welcome"><p class="stepl">Step 2 of 5</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
   ${LEVELS.map(([v,t,d])=>`<button type="button" class="toggle radio" data-act="lvl" data-v="${v}" aria-pressed="${cur===v}"><span class="box">✓</span><span class="txt"><strong>${t}</strong><small>${d}</small></span></button>`).join("")}
   <button class="btn" data-act="lvlgo">Continue</button></div>`;}
 const SPLIT_TPL=[["full3","Full body, 3 days","Mon, Wed, Fri. The best place to start.",["rest","full","rest","full","rest","full","rest"]],
@@ -5140,7 +5141,7 @@ function splitHtml(onb){
   const opts=cur=>[...Object.keys(PL).filter(id=>!["rest","dyn"].includes(id)).map(id=>[id,PL[id].name]),["dyn","Dynamic: choose on the day"],["rest","Rest"],["__new","+ New custom day…"]]
     .map(([v,l])=>`<option value="${v}"${v===cur?" selected":""}>${esc(l)}</option>`).join("");
   const days=D.week.filter(x=>x!=="rest").length;
-  return `<div class="card welcome">${onb?`<p class="stepl">Step 5 of 5</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
+  return `<div class="card welcome">${onb?`<p class="stepl">Step 4 of 5</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
   <p class="note" style="margin:6px 0 12px">Pick a ready-made week, then change any day you like. ${onb?"You can change all of this later.":""}</p>
   <p class="lbl">Start from</p><div class="tplgrid">${SPLIT_TPL.filter(t=>t[4]!=="nobeg"||store.settings.level!=="new"||D.tpl===t[0]).map(t=>`<button type="button" class="tpl" data-act="spltpl" data-v="${t[0]}" aria-pressed="${D.tpl===t[0]}"><strong>${t[1]}</strong><small>${t[2]}</small></button>`).join("")}</div>
   <p class="lbl" style="margin-top:14px">Each day <span style="float:right">${days} training day${days===1?"":"s"}</span></p>
@@ -5164,9 +5165,10 @@ function saveSplit(){
   S.fill=D.fill;
   S.split=D.dur==="set"?{start:t,n:D.n,unit:D.unit,until:splitUntil(D)}:{start:t,until:null};
   if(D.fill&&onb)S.presetNote=true;
-  delete S.onb;splitOpen=false;splitDraft=null;
+  if(onb&&!S.lookPicked)S.onb="look";else delete S.onb;splitOpen=false;splitDraft=null;
   const day=store.days[t];if(day&&day.plan){delete day.plan;persist("day-"+t);}
   persist("settings");render();window.scrollTo(0,0);
+  if(onb&&S.onb==="look")return;
   if(onb&&!S.toured)setTimeout(tourStart,350);else toast("Split saved");
 }
 $("panel").addEventListener("click",e=>{
@@ -5271,8 +5273,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="6.41";
+const APP_VERSION="6.42";
 const CHANGELOG=[
+  {v:"6.42",d:"16 October 2026",t:"Look picked last",items:["Picking a look is now the last step of setup, and you can skip it. Setup starts with your details again."]},
   {v:"6.41",d:"16 October 2026",t:"Look first, linked goal boxes",items:[
     "Setup now starts by picking a look (Today, Focus or Classic) on its own screen, before your details.",
     "Your goal has two linked boxes, kcal a day and kg a week. Type in either one and the other fills in, so 700 kcal a day shows 0.64 kg a week."]},

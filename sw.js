@@ -1,6 +1,6 @@
 // Routine service worker: lets the app open without internet.
 // Bump VERSION whenever index.html changes so phones pick up the update.
-const VERSION = "bb-6.41";
+const VERSION = "bb-6.42";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-32.png"];
 
