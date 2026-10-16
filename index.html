@@ -671,6 +671,62 @@ html[data-style="focus"] .etile.mealt.done .ethd strong::after{content:" ✓";co
 .rcgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px;margin-top:10px}
 .rcgrid small{display:block;font-size:12px;color:var(--muted)}
 .rcgrid b{font-size:16px;font-weight:600}
+
+/* Week strip: date pills, workout cards, dots (circles are the original .plate) */
+#week[data-wk="pills"]{gap:4px}
+.wkp{border:0;background:none;display:grid;justify-items:center;gap:1px;padding:6px 0 7px;border-radius:14px;color:var(--ink)}
+.wkp small{font-size:11px;color:var(--muted);font-weight:500}
+.wkp b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.wkp i{width:6px;height:6px;border-radius:50%;background:var(--c);margin-top:2px}
+.wkp.is-rest i{background:var(--line)}
+.wkp.is-done b::after{content:"✓";font-size:10px;margin-left:1px;color:var(--c)}
+.wkp.is-today:not(.is-sel) b{text-decoration:underline;text-underline-offset:3px}
+.wkp.is-sel{background:var(--acc,var(--ink));color:var(--accon,var(--paper))}
+.wkp.is-sel small{color:inherit;opacity:.85}
+.wkp.is-sel i{background:currentColor}
+.wkp.is-sel.is-done b::after{color:inherit}
+#week[data-wk="cards"]{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 12px;margin:0 -2px;scroll-padding:0 40px;overscroll-behavior-x:contain}
+#week[data-wk="cards"]::-webkit-scrollbar{display:none}
+.wkc{flex:none;width:84px;text-align:left;border:0;border-top:4px solid var(--c);border-radius:14px;background:var(--surface);color:var(--ink);padding:7px 9px 8px;box-shadow:var(--shadow)}
+.wkc small{display:block;font-size:11px;color:var(--muted)}
+.wkc b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wkc em{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+.wkc.is-done em{color:var(--blue);font-weight:600}
+.wkc.is-rest{border-top-color:var(--line)}
+.wkc.is-sel{box-shadow:0 0 0 2px var(--ink)}
+#week[data-wk="dots"]{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:2px 0 12px}
+#week[data-wk="dots"] .wkd{width:auto}
+.wkd{border:0;background:none;display:grid;justify-items:center;gap:3px;width:36px;padding:4px 0;color:var(--muted)}
+.wkd i{width:12px;height:12px;border-radius:50%;border:2px solid var(--c);background:conic-gradient(var(--c) calc(var(--p) * 360deg),transparent 0)}
+.wkd.is-rest i{border:2px dashed var(--muted);background:none}
+.wkd.is-sel i{width:16px;height:16px;box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--c)}
+.wkd.is-sel.is-rest i{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--muted)}
+.wkd small{font-size:11px;font-weight:500}
+.wkd.is-today small{color:var(--ink);font-weight:700}
+html[data-wk="dots"] .top{grid-template-columns:minmax(0,1fr) 36px 36px}
+html[data-wk="dots"] .top .date{order:-1;text-align:left}
+
+/* Settings: icons, status card, consistent sub-pages */
+.setrowbtn .sic,.setpt .sic{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--mutedbg);color:var(--ink)}
+.setrowbtn .sic svg,.setpt .sic svg{width:18px;height:18px}
+html[data-style="today"] .setrowbtn .sic,html[data-style="today"] .setpt .sic{border-radius:50%;background:color-mix(in srgb,var(--acc) 14%,var(--surface));color:var(--blue)}
+html[data-style="focus"] .setrowbtn .sic,html[data-style="focus"] .setpt .sic{border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,var(--surface));color:var(--blue)}
+.setrowbtn{gap:12px}
+.setrowbtn .sic svg,.setpt .sic svg{transform:none;color:inherit}
+body.tab-settings #week{display:none!important}
+.setpt{display:flex;align-items:center;gap:10px}
+.setpt .sic{width:36px;height:36px}
+.setstat{display:flex;align-items:center;gap:12px;margin:4px 0 6px}
+.setstat>div{flex:1;min-width:0}
+.setstat strong{display:block;font-weight:600}
+.setstat small{display:block;color:var(--muted);font-size:13px}
+.setstat .btn{width:auto;margin:0;flex:none}
+html[data-style="today"] .setgroup,html[data-style="focus"] .setgroup{margin:20px 4px 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+html[data-style="today"] .setnav,html[data-style="focus"] .setnav{padding:0;overflow:hidden}
+html[data-style="today"] .setrowbtn,html[data-style="focus"] .setrowbtn{border-top-color:color-mix(in srgb,var(--line) 70%,transparent)}
+html[data-style="today"] .backbtn,html[data-style="focus"] .backbtn{background:var(--surface);border-radius:999px;padding:6px 14px 6px 10px;margin:2px 0 4px;color:var(--ink);box-shadow:var(--shadow)}
+html[data-style="focus"] .backbtn{border-radius:12px}
+html[data-style="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-weight:600}
 /* Appearance: style picker */
 .stylepick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
 .stopt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:16px;padding:8px;min-width:0}
@@ -2325,14 +2381,22 @@ function renderHeader(){
   sub.textContent=d.toLocaleDateString(undefined,sel===t?{weekday:"long",day:"numeric",month:"long"}:{day:"numeric",month:"long"});
   if(sel!==t){const b=document.createElement("button");b.className="todaybtn";b.textContent="Back to today";b.dataset.act="today";sub.append(" ",b);}
 }
+const WK_IDS=["pills","cards","dots","circles"];
+function wkMode(){const v=themeCfg().wk;return WK_IDS.includes(v)?v:({today:"pills",focus:"cards",classic:"circles"})[styleId()];}
 function renderWeek(){
-  const d=parseKey(sel),mon=addDays(sel,-((d.getDay()+6)%7)),t=todayKey();let h="";
+  const d=parseKey(sel),mon=addDays(sel,-((d.getDay()+6)%7)),t=todayKey(),m=wkMode();let h="";
   for(let i=0;i<7;i++){
-    const k=addDays(mon,i),p=planOf(k),P=plansFor(k)[p],pr=progress(k,p);
-    const label=parseKey(k).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})+", "+P.name+(p!=="rest"?", "+Math.round(pr*100)+"% of sets done":"");
-    h+=`<button class="plate${k===sel?" is-sel":""}${p==="rest"?" is-rest":""}${k===t?" is-today":""}" data-day="${k}" style="--c:${P.color};--p:${pr}" aria-label="${esc(label)}"${k===sel?' aria-current="date"':""}><span class="disc"></span><span class="wd">${"MTWTFSS"[i]}</span></button>`;
+    const k=addDays(mon,i),p=planOf(k),P=plansFor(k)[p],pr=progress(k,p),dt=parseKey(k),rest=p==="rest";
+    const label=dt.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})+", "+P.name+(p!=="rest"?", "+Math.round(pr*100)+"% of sets done":"");
+    const cls=`${k===sel?" is-sel":""}${rest?" is-rest":""}${k===t?" is-today":""}${!rest&&pr>=1?" is-done":""}${!rest&&pr>0&&pr<1?" is-part":""}`,at=`data-day="${k}" style="--c:${P.color};--p:${pr}" aria-label="${esc(label)}"${k===sel?' aria-current="date"':""}`;
+    const wd=dt.toLocaleDateString(undefined,{weekday:"short"}).replace(".","");
+    if(m==="pills")h+=`<button type="button" class="wkp${cls}" ${at}><small>${esc(wd)}</small><b>${dt.getDate()}</b><i></i></button>`;
+    else if(m==="cards")h+=`<button type="button" class="wkc${cls}" ${at}><small>${esc(wd)} ${dt.getDate()}</small><b>${esc(P.name)}</b><em>${rest?"Rest":pr>=1?"Done":pr>0?Math.round(pr*100)+"% done":k<t?"Not logged":k===t?"Today":"Planned"}</em></button>`;
+    else if(m==="dots")h+=`<button type="button" class="wkd${cls}" ${at}><i></i><small>${"MTWTFSS"[i]}</small></button>`;
+    else h+=`<button class="plate${cls}" ${at}><span class="disc"></span><span class="wd">${"MTWTFSS"[i]}</span></button>`;
   }
-  $("week").innerHTML=h;
+  const W=$("week");W.innerHTML=h;W.dataset.wk=m;
+  if(m==="cards"){const s0=W.querySelector(".is-sel");if(s0)W.scrollLeft=Math.max(0,s0.offsetLeft-W.offsetLeft-40);}
 }
 const ICO=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const TABDEF={
@@ -4374,7 +4438,7 @@ function swipeSeg(sg,dir){const bs=[...sg.querySelectorAll(":scope>button")],i=b
 function swipeDay(dir){sel=addDays(sel,dir);render();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
 const GS={x:0,y:0,t:0,el:null,on:false};
 document.addEventListener("touchstart",e=>{if(sheetEl.open||e.touches.length>1){GS.on=false;return;}const t=e.touches[0],tg=e.target;
-  if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog")){GS.on=false;return;}
+  if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog,#week[data-wk=\"cards\"]")){GS.on=false;return;}
   const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&tg.closest("header.top,#week");GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();GS.sy=scrollY;},{passive:true});
 document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.changedTouches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
   if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.5||Date.now()-GS.t>800)return;const dir=dx<0?1:-1;
@@ -4688,7 +4752,7 @@ function palette6(){const T=themeCfg(),st=styleId(),dark=isDark(),row=bg6Row(),b
     "--blue":txt,"--acc":acc,"--accon":onFor(acc),"--segon":dark?mixHex(surface,ink,.16):surface,_dark:dark,_paper:!T.bgc&&!!row[5]};}
 function applyTheme(){
   document.body.classList.toggle("saver",lowPower());
-  const T=themeCfg(),root=document.documentElement,st=styleId();root.dataset.style=st;
+  const T=themeCfg(),root=document.documentElement,st=styleId();root.dataset.style=st;root.dataset.wk=wkMode();
   if(st!=="classic"){const P=palette6();for(const v of THEME_VARS)root.style.setProperty(v,P[v]);root.dataset.theme=P._dark?"dark":"light";document.body.classList.toggle("paperbg",P._paper);
     const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",P["--paper"]);return;}
   document.body.classList.remove("paperbg");for(const v of THEME_VARS)root.style.removeProperty(v);
@@ -4722,6 +4786,7 @@ function settingsBody(){
     if(st==="today")h+=`<p class="lbl" style="margin-top:14px">Tab colours</p><p class="note" style="margin:-4px 0 8px">Each tab uses its own colour for buttons, bars and highlights.</p><div class="daycols">${TAB_ORDER.map(t=>`<label class="daycol"><input type="color" data-ttab="${t}" value="${(T.tabc||{})[t]||TABC[t]}"><span>${TABDEF[t][0]}</span></label>`).join("")}</div>${T.tabc&&Object.keys(T.tabc).length?`<button type="button" class="linkbtn" data-ttabreset="1">Reset tab colours</button>`:""}`;
     else h+=`<p class="lbl" style="margin-top:14px">Accent colour</p><div class="swatches">${FACCS.map(a=>`<button type="button" class="swatch" data-tfacc="${a[0]}" aria-pressed="${(T.facc||"#C9F23E").toLowerCase()===a[0].toLowerCase()}" aria-label="${a[1]} accent" style="--sw:${a[0]}"><span></span><small>${a[1]}</small></button>`).join("")}<label class="swatch custom" aria-label="Custom accent colour"><input type="color" data-tfaccc value="${T.facc||"#C9F23E"}"><small>Custom</small></label></div>`;
   }
+  {const wm=wkMode();h+=`<p class="lbl" style="margin-top:14px">Week at the top</p><div class="seg seg4" role="group" aria-label="Week at the top">${[["pills","Dates"],["cards","Workouts"],["dots","Dots"],["circles","Circles"]].map(([v,l])=>`<button type="button" data-twk="${v}" aria-pressed="${wm===v}">${l}</button>`).join("")}</div>`;}
   h+=`<p class="lbl" style="margin-top:14px">Workout colours</p><div class="daycols">${days.map(id=>`<label class="daycol"><input type="color" data-tday="${id}" value="${cssHex((T.days||{})[id]||base(id).color)}"><span>${esc(PL[id].name)}</span></label>`).join("")}</div>`;
   return h;
 }
@@ -4737,6 +4802,7 @@ bothOn("click",e=>{
   const m=e.target.closest("[data-tmode]");if(m){const T=ensureTheme();if(m.dataset.tmode==="system")delete T.mode;else T.mode=m.dataset.tmode;themeChanged(true);return;}
   const b=e.target.closest("[data-tbg]");if(b){const T=ensureTheme();if(b.dataset.tbg==="default")delete T.bg;else T.bg=b.dataset.tbg;themeChanged(true);return;}
   const a=e.target.closest("[data-tacc]");if(a){const T=ensureTheme();if(a.dataset.tacc==="#2563EB")delete T.accent;else T.accent=a.dataset.tacc;themeChanged(true);return;}
+  const wk=e.target.closest("[data-twk]");if(wk){ensureTheme().wk=wk.dataset.twk;themeChanged(true);return;}
   const sy=e.target.closest("[data-tstyle]");if(sy){const T=ensureTheme(),u=snap(["settings"]);if(sy.dataset.tstyle==="today")delete T.style;else T.style=sy.dataset.tstyle;themeChanged(true);toast({today:"Today style",focus:"Focus style",classic:"Classic style"}[sy.dataset.tstyle]+" on",u);return;}
   const b6=e.target.closest("[data-tbg6]");if(b6){const T=ensureTheme();T.bg6=b6.dataset.tbg6;delete T.bgc;themeChanged(true);return;}
   if(e.target.closest("[data-tbgreset]")){delete ensureTheme().bgc;themeChanged(true);return;}
@@ -5123,8 +5189,12 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="6.1";
+const APP_VERSION="6.2";
 const CHANGELOG=[
+  {v:"6.2",d:"16 October 2026",t:"A new week strip and tidier Settings",items:[
+    "The week at the top has new looks. Dates (the default in Today) shows the day and date with a dot in the workout's colour. Workouts (the default in Focus) shows a card per day with the workout's name and whether it's done; swipe the row sideways for the rest of the week. Dots puts the date on one line and shows each day as a small dot that fills as you log sets. The original circles are still there, and are the default in Classic.",
+    "Change it any time in Settings → Appearance → Week at the top.",
+    "Settings has a cleaner layout: an icon for every section, a status card at the top showing your version and last backup with a Back up button, and matching headings on every page."]},
   {v:"6.1",d:"16 October 2026",t:"Smarter next steps",items:[
     "Next-weight hints: when you hit the top of your rep range on every set, the app suggests a specific weight for next time, like 62.5 kg (+2.5). In Focus, it's filled in for you.",
     "Your week: on Sunday (and Monday, for the week before) Train shows a recap of workouts, sets, volume, average calories and protein, and how your weight changed.",
@@ -5340,13 +5410,20 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["help","Help","Exercise library, how to use the app, training basics",()=>`<button type="button" class="setrowbtn card" style="border:1px solid var(--line);margin-bottom:12px" data-sp="library"><span><strong>Exercise library</strong><small>Look up any of the ${Object.keys(LIB).length} exercises by type, muscle and difficulty</small></span>${IC.chev}</button>`+guideHtml()],
     ["changelog","Change log",`Version ${APP_VERSION}`,()=>changelogHtml()]
   ];}
+const SETIC={appearance:'<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/><path d="M12 21a2.5 2.5 0 0 1 0-5h1.5a2.5 2.5 0 0 0 2.5-2.5"/>',
+ tabs:'<rect x="3" y="15" width="18" height="6" rx="2"/><path d="M7 18h.01M12 18h.01M17 18h.01M4 4h16M4 8h10"/>',units:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+ saver:'<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M22 11v2M7 10v4M10 10v4"/>',backup:'<path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5"/><path d="M12 12v8M9 15l3-3 3 3"/>',
+ personal:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',training:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',diet:'<path d="M5 21c0-9 5-15 14-16-1 9-6 14-14 16zM5 21l7-8"/>',
+ nutrients:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',mealsplit:'<circle cx="12" cy="12" r="9"/><path d="M12 3v9l7 5"/>',health:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+ timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/>',howcalc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>',
+ school:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6M12 17h.01"/>',
+ install:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 7v7M9 11l3 3 3-3"/>',changelog:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>'};
 function renderSettings(){
   const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
   if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="${libFrom||"help"}">‹ ${libFrom==="school"?"Training guide":"Help"}</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
-  else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle">${cur[1]}</h1>${cur[3]()}`;}
-  else{const G=[["App settings",["appearance","tabs","units","saver","backup"]],["Preferences",["personal","training","diet","nutrients","mealsplit","health","timer"]],["Learn and help",["howcalc","school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
-    h+=`<h1 class="pagetitle">Settings</h1><p class="note" style="margin:0 0 6px">Body Builder, version ${APP_VERSION}</p>`+G.map(([t,ids])=>{const xs=ids.map(id=>P.find(x=>x[0]===id)).filter(Boolean);return xs.length?`${t?`<p class="setgroup">${t}</p>`:`<div style="height:14px"></div>`}<div class="card setnav">${xs.map(row).join("")}</div>`:"";}).join("")+`
-  <p class="note">${isLocalMode()?"Your data is saved on this phone only. "+esc(lastBackupTxt())+". See Backup and moving data.":"Changes save to your account and show up on all your devices."}</p>`;}
+  else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle setpt"><i class="sic" aria-hidden="true">${ICO(SETIC[cur[0]]||"")}</i>${cur[1]}</h1>${cur[3]()}`;}
+  else{const G=[["App settings",["appearance","tabs","units","saver","backup"]],["Preferences",["personal","training","diet","nutrients","mealsplit","health","timer"]],["Learn and help",["howcalc","school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><i class="sic" aria-hidden="true">${ICO(SETIC[x[0]]||"")}</i><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
+    h+=`<h1 class="pagetitle">Settings</h1><div class="card setstat"><div><strong>Body Builder ${APP_VERSION}</strong><small>${isLocalMode()?"Saved on this phone only · "+esc(lastBackupTxt()):"Saved to your account, synced across your devices"}</small></div>${isLocalMode()?`<button type="button" class="btn ghost sm" data-sp="backup">Back up</button>`:""}</div>`+G.map(([t,ids])=>{const xs=ids.map(id=>P.find(x=>x[0]===id)).filter(Boolean);return xs.length?`${t?`<p class="setgroup">${t}</p>`:`<div style="height:14px"></div>`}<div class="card setnav">${xs.map(row).join("")}</div>`:"";}).join("");}
   $("panel").innerHTML=h+`</section>`;
 }
 $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.target.closest("[data-nset]");if(!b)return;const S=store.settings,id=b.dataset.nset;
@@ -5425,7 +5502,7 @@ function guideHtml(){
   h+=ch("Eat",`<ul><li>The bar at the top shows calories and protein against your targets.</li><li>Each meal is folded into one line. Tap it to open, then tick what you ate.</li><li>Calories, protein, carbs and fat sit at the top.</li><li>Tap <b>+</b> on a meal to search your meals, recipes and foods. Foods you normally count can be added by the piece, and drinks in <b>ml</b> or grams (Settings → Units). Amounts the app has to guess, like the weight of one egg, are marked as estimates.</li><li><b>Copy food from</b> another day copies one meal or a whole day's food.</li><li><b>Suggest meals</b> plans the rest of your day to hit your targets, and <b>Portion my foods</b> works out amounts for foods you choose. <b>Meal sizes</b> sets how big each meal should be. Plans can go straight to your <b>shopping list</b> on the Spend tab.</li><li>Had a cheat meal? Log a rough estimate instead of weighing everything.</li><li><b>Halal:</b> in Settings → Diet, label or hide foods with alcohol, pork or gelatine. They're also left out of suggested meals.</li><li><b>Nutrients:</b> track fibre, water, vitamins and more with <b>Choose</b>.</li><li><b>Supplements:</b> tick as many as you want from the common list, then add them together. The magnifying glass shows what each is for, when to take it and what to watch out for. The pen adds your own note.</li><li>Swipe a meal right to edit it, left to remove it.</li><li>The <b>food calculator</b> works out any ingredient by weight. Use the <b>meal builder</b> to combine several and save the result as a meal.</li><li><b>Recipes</b> show ingredients and steps. Tap <b>Log 1 serving today</b> after eating one, or add your own.</li></ul>`);
   h+=ch("Body",`<ul><li>Weigh in each morning. The <b>Progress</b> chart shows each weigh-in and the 7-day average. Tap the chart to see the numbers.</li><li><b>Calories burned</b> estimates today's total and what your training has burned since you started.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li>The <b>weekly check-in</b> compares your weight trend with your goal. After two weeks in a row that point the same way, it suggests a small calorie change, never below what's safe for you.</li><li>In the <b>calculator</b>, set your goal to lose, maintain or gain, either in kg a week or calories a day. The app warns you when a goal is aggressive and won't accept one that's unsafe.</li><li><b>Sets per muscle</b>, <b>Strength</b>, <b>Measurements</b>, <b>Progress photos</b> and <b>Notes</b> sit further down.</li></ul>`);
   h+=ch("Spend and History",`<p><b>Spend</b> works out what your food and supplements cost per week, two weeks or month, grouped by store. Add products with how long they last, then tap a store and a product to log a purchase. The <b>shopping list</b> fills from your meal plan, for 1 to 7 days.</p><p><b>History</b> shows a month at a glance. Tap any day to open it.</p>`);
-  h+=ch("Settings and the tab bar",`<p><b>Appearance</b> has three styles: <b>Today</b> (soft and rounded, a colour for each tab), <b>Focus</b> (bold, with the current set and a big Log set button at the top of Train) and <b>Classic</b>. Pick a background, including Paper or any colour you like, and the colours for each tab or the accent. Also here: the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units, region and currency, rest timer, backups, <b>battery saver</b> (fewer animations when your phone is slow or low on battery), <b>how your targets are worked out</b>, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
+  h+=ch("Settings and the tab bar",`<p><b>Appearance</b> has three styles: <b>Today</b> (soft and rounded, a colour for each tab), <b>Focus</b> (bold, with the current set and a big Log set button at the top of Train) and <b>Classic</b>. Pick a background, including Paper or any colour you like, the colours for each tab or the accent, and how the week at the top looks: dates, workout cards, dots or circles. Also here: the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units, region and currency, rest timer, backups, <b>battery saver</b> (fewer animations when your phone is slow or low on battery), <b>how your targets are worked out</b>, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
   h+=ch("Install it as an app",`<p>Body Builder can be installed on iPhone, Android and computers, and then works offline. Step-by-step instructions are in <b>Settings → Install as an app</b>.</p>`);
   h+=ch("Your data and backups",`<p>${isLocalMode()?"Everything is saved on this phone or browser only. Nobody else can see it, and everyone who uses the app has their own data. The app reminds you on the Train tab when it's time for a backup. Use <b>Settings → Backup</b> to save one, and to move to a new phone. Progress photos stay on the phone and aren't in backups.":"Your data is saved to your Claude account and syncs between your devices."}</p>`);
   h+=`<p class="gtitle">Training basics</p>`;
