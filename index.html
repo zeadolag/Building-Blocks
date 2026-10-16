@@ -766,6 +766,13 @@ html[data-style="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-w
   html .itab{flex-direction:row;gap:6px;padding:7px 4px;font-size:12px}
   html .itab svg{width:18px;height:18px}
 }
+.lookpick{display:grid;gap:10px;margin-bottom:14px}
+.stopt.lookopt{flex-direction:row;align-items:center;gap:12px;padding:10px}
+.lookopt .stprev{flex:none;width:96px;height:64px;margin:0}
+.lookopt>span:last-child{min-width:0}
+.lookopt strong{display:block;font-size:16px}
+.lookopt small{display:block;font-size:13px}
+.gpair label{min-width:0}
 /* Routine logo colours per style */
 :root{--logobg:#AF5A38;--logofg:#F6EEE3}
 html[data-style="focus"]{--logobg:#C9F23E;--logofg:#111111}
@@ -3924,6 +3931,7 @@ $("panel").addEventListener("click",e=>{
     if(act==="addcardio"){const f=$("cfA"),o=cardioRead(f);if(!o){const e0=[...f.querySelectorAll("[data-cf]")].find(x=>!x.value.trim());(e0||f.querySelector("[data-cf]")).focus();return;}delete o.calc;const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push(o);persist(docId);render();return;}
     const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t,m:Math.round(m)});persist(docId);render();
   }else if(act==="easyrun"){const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t:"Easy run",m:25});persist(docId);render();
+  }else if(act==="lookgo"){store.settings.lookPicked=1;persist("settings");renderTrain();window.scrollTo(0,0);
   }else if(act==="iconbk"){bkExport();
   }else if(act==="iconok"){store.settings.iconNote=1;persist("settings");renderTrain();
   }else if(act==="recapok"){const m=recapWeek();if(m){store.settings.recapSeen=m;persist("settings");}renderTrain();
@@ -4086,9 +4094,10 @@ $("panel").addEventListener("input",e=>{
   else if(t.id==="fcQ"){fcQ=t.value;const r=$("fcRes");if(r)r.innerHTML=fcList();}
   else if(t.id==="fcG"){const it=allIngr().find(x=>x.n===fcPick),o=$("fcOut");if(it)amtWarn("fc",it);if(it&&o){const a=amtRead("fc",it);o.innerHTML=(a.ug!==1?`<span class="of">${r1(a.g)} g · </span>`:"")+fcOut(it,a.g);}}
   else if(t.dataset.mbg!==undefined){const x=mb[+t.dataset.mbg];if(x){if(x.ug>1){x.q=num(t.value);x.g=x.q*x.ug;}else x.g=num(t.value);const tt=mbTotals(),o=$("mbTot");if(o)o.innerHTML="Total: "+fcOut({k:tt.k,p:tt.p,cb:tt.cb,f:tt.f,fb:tt.fb},100);}}
-  else if(t.dataset.gv&&t.closest(".tcalc")){const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});const pf=S.profile,g=goalSetFromInput(pf,t.value),o=t.closest(".goalbox").querySelector(".gout");
-    if(g==null||t.value.trim()===""){if(o)o.innerHTML=`<p class="note">Type an amount.</p>`;return;}
-    const C=goalCheck(g,pf);t.classList.toggle("bad",C.lvl==="block");if(C.lvl==="block"){if(o)o.innerHTML=goalMsg(g,pf);return;}
+  else if(t.dataset.gv&&t.closest(".tcalc")){const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});const pf=S.profile,mode=t.dataset.gv,g=goalSetFromInput(pf,t.value,mode),box=t.closest(".goalbox"),o=box.querySelector(".gout"),other=box.querySelector(`[data-gv="${mode==="kcal"?"kg":"kcal"}"]`);
+    if(g==null||t.value.trim()===""){if(other)other.value="";if(o)o.innerHTML=`<p class="note">Type an amount.</p>`;return;}
+    if(other)other.value=goalVals(g)[mode==="kcal"?"kg":"kcal"];
+    const C=goalCheck(g,pf);t.classList.toggle("bad",C.lvl==="block");if(other)other.classList.toggle("bad",C.lvl==="block");if(C.lvl==="block"){if(o)o.innerHTML=goalMsg(g,pf);return;}
     pf.goal=Math.round(g);persist("settings");if(o)o.innerHTML=goalMsg(pf.goal,pf);const to=$("tOut");if(to)to.innerHTML=targetsOut(pf);}
   else if(t.dataset.pf&&t.closest(".tcalc")){if(t.dataset.pf==="dob"&&t.value&&!ageOn(t.value)){return;}
     if(t.dataset.pf==="hft"||t.dataset.pf==="hin"){const S=store.settings,box=t.closest(".tcalc"),ft=num((box.querySelector('[data-pf="hft"]')||{}).value),inch=num((box.querySelector('[data-pf="hin"]')||{}).value);S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile.h=String(Math.round((ft*12+inch)*2.54*10)/10);persist("settings");tUpdate(S.profile);return;}const S=store.settings;S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile[t.dataset.pf]=t.value;persist("settings");tUpdate(S.profile);}
@@ -4199,14 +4208,14 @@ function goalMsg(g,pf){const G=goalBase(pf);if(!G)return `<p class="note">Fill i
   if(C.lvl==="warn")return `<p class="note">${base}</p><p class="note gwarn"><b>Careful:</b> that's ${C.why}. ${g<0?"Losing this fast makes muscle loss, tiredness and strong hunger more likely. Keep it short, keep protein high, and check with a doctor if you have any health conditions.":"Beyond about 500 kcal a day, most of the extra weight is fat, not muscle."}</p>`;
   return `<p class="note">${base}</p>`;}
 function goalDir(pf){const g=num(pf.goal);return pf.gdir||(g<0?"lose":g>0?"gain":"keep");}
-function goalVal(pf){const g=num(pf.goal);if(!g)return "";return pf.gm==="kcal"?String(Math.abs(Math.round(g))):String(Math.round(kgWeek(g)*U1w()*100)/100);}
-function goalBox(pf){const d=goalDir(pf),m=pf.gm==="kcal"?"kcal":"kg";
+function goalVals(g){if(!g)return {kcal:"",kg:""};return {kcal:String(Math.abs(Math.round(g))),kg:String(Math.round(kgWeek(g)*U1w()*100)/100)};}
+function goalBox(pf){const d=goalDir(pf),V=goalVals(num(pf.goal));
   return `<div class="goalbox"><span class="lbl">Goal</span><div class="seg seg3" role="group" aria-label="Goal">${[["lose","Lose weight"],["keep","Maintain"],["gain","Gain weight"]].map(([v,l])=>`<button type="button" data-act="gdir" data-v="${v}" aria-pressed="${d===v}">${l}</button>`).join("")}</div>
-  ${d==="keep"?"":`<div class="seg" role="group" aria-label="Set it by"><button type="button" data-act="gmode" data-v="kg" aria-pressed="${m==="kg"}">${U()} per week</button><button type="button" data-act="gmode" data-v="kcal" aria-pressed="${m==="kcal"}">kcal per day</button></div>
-  <label class="sfld" style="margin-top:0"><span class="lbl">${m==="kg"?`How much to ${d==="lose"?"lose":"gain"} a week (${U()})`:`Calories a day ${d==="lose"?"under":"over"} maintenance`}</span><input class="field" data-gv="1" inputmode="decimal" placeholder="${m==="kg"?(U()==="lb"?"e.g. 1":"e.g. 0.3"):"e.g. 400"}" value="${esc(goalVal(pf))}"></label>`}
+  ${d==="keep"?"":`<div class="pair gpair"><label><span class="lbl">kcal a day</span><input class="field" data-gv="kcal" inputmode="numeric" placeholder="e.g. 500" value="${esc(V.kcal)}"></label><label><span class="lbl">${U()} a week</span><input class="field" data-gv="kg" inputmode="decimal" placeholder="${U()==="lb"?"e.g. 1":"e.g. 0.5"}" value="${esc(V.kg)}"></label></div>
+  <p class="note" style="margin:4px 0 0">How many calories a day ${d==="lose"?"under":"over"} maintenance, or how much to ${d==="lose"?"lose":"gain"} a week. Type in either box and the other one fills in.</p>`}
   <div class="gout">${goalMsg(num(pf.goal),pf)}</div></div>`;}
-function goalSetFromInput(pf,v){const d=goalDir(pf),x=num(String(v).replace(",","."));if(!(x>=0))return null;const sign=d==="lose"?-1:d==="gain"?1:0;
-  return sign*(pf.gm==="kcal"?x:x/U1w()*KCAL_KG/7);}
+function goalSetFromInput(pf,v,mode){const d=goalDir(pf),x=num(String(v).replace(",","."));if(!(x>=0))return null;const sign=d==="lose"?-1:d==="gain"?1:0;
+  return sign*(mode==="kcal"?x:x/U1w()*KCAL_KG/7);}
 function tUpdate(pf){document.querySelectorAll(".goalbox .gout").forEach(o=>{o.innerHTML=goalMsg(num(pf.goal),pf);});const o=$("tOut");if(o)o.innerHTML=targetsOut(pf);}
 function profile(){return store.settings.profile||{};}
 function goalRedraw(pf){document.querySelectorAll(".goalbox").forEach(b=>{b.outerHTML=goalBox(pf);});const o=$("tOut");if(o)o.innerHTML=targetsOut(pf);}
@@ -4257,12 +4266,15 @@ function profileFields(pf){
 let welcomeManual=false;
 function welcomeHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
-  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 4</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
+  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 2 of 5</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
     <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
     <button class="btn" data-act="welcomeman">Save and start</button><button class="linkbtn" style="margin-top:10px" data-act="welcomecalc">Work them out from my details instead</button>${restoreLink()}</div>`;
-  return `<div class="card welcome tcalc"><p class="stepl">Step 1 of 4</p><h2 style="font-size:26px">Welcome to Routine</h2>
-    <p class="lbl" style="margin-top:8px">Pick a look</p><div class="stylepick">${[["today","Today","Soft and rounded"],["focus","Focus","Bold, for the gym"],["classic","Classic","Clean and simple"]].map(([v,n,d])=>`<button type="button" class="stopt" data-wstyle="${v}" aria-pressed="${styleId()===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><strong>${n}</strong><small>${d}</small></button>`).join("")}</div>
-    <p class="note" style="margin:-6px 0 12px">You can change it any time in Settings → Appearance. Next, a few details so the app can work out how much you should eat each day. They stay on your device.</p>
+  if(!store.settings.lookPicked)return `<div class="card welcome"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Welcome to Routine</h2>
+    <p class="note" style="margin:6px 0 14px">First, pick how the app looks. You can change it any time in Settings → Appearance.</p>
+    <div class="lookpick">${[["today","Today","Soft and rounded, with a colour for each tab. Calm for everyday use."],["focus","Focus","Bold and dark, with the current set and a big Log set button. Made for the gym floor."],["classic","Classic","Clean and simple, in white, grey and blue."]].map(([v,n,d])=>`<button type="button" class="stopt lookopt" data-wstyle="${v}" aria-pressed="${styleId()===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>${n}</strong><small>${d}</small></span></button>`).join("")}</div>
+    <button class="btn" data-act="lookgo">Continue</button>${restoreLink()}</div>`;
+  return `<div class="card welcome tcalc"><p class="stepl">Step 2 of 5</p><h2 style="font-size:26px">Your details</h2>
+    <p class="note" style="margin:6px 0 12px">A few details so the app can work out how much you should eat each day. They stay on your device.</p>
     ${profileFields(pf)}
     <button class="btn" data-act="welcomego">Save and start</button>
     <button class="linkbtn" style="margin-top:10px" data-act="welcomeskip">I already know my targets</button>
@@ -5054,7 +5066,7 @@ function fitEx(list){const used=new Set(list.filter(e=>canDo(e[0])).map(e=>e[0])
   return out;}
 function equipHtml(onb){
   const S=store.settings,cur=S.equipPreset||(myEquip()?"own":"gym"),have=myEquip()||[];
-  return `<div class="card${onb?" welcome":""}">${onb?`<p class="stepl">Step 3 of 4</p><h2 style="font-size:24px">What equipment do you have?</h2><p class="note" style="margin:6px 0 12px">Your plan only uses exercises you can actually do. You can change this any time in Settings → Training.</p>`:`<p class="note" style="margin:0 0 10px">Exercises that need anything you don't have are marked, and the app suggests swaps. You can still pick them.</p>`}
+  return `<div class="card${onb?" welcome":""}">${onb?`<p class="stepl">Step 4 of 5</p><h2 style="font-size:24px">What equipment do you have?</h2><p class="note" style="margin:6px 0 12px">Your plan only uses exercises you can actually do. You can change this any time in Settings → Training.</p>`:`<p class="note" style="margin:0 0 10px">Exercises that need anything you don't have are marked, and the app suggests swaps. You can still pick them.</p>`}
   <div class="tplgrid">${EQPRESETS.map(([v,t,d])=>`<button type="button" class="tpl" data-act="eqp" data-v="${v}" aria-pressed="${cur===v}"><strong>${t}</strong><small>${d}</small></button>`).join("")}</div>
   ${cur==="own"?`<p class="lbl" style="margin-top:12px">Tick what you have</p><div class="eqgrid">${EQKEYS.map(([k,l])=>`<button type="button" class="toggle mini-t" data-act="eqk" data-v="${k}" aria-pressed="${have.includes(k)}"><span class="box">✓</span><span class="txt"><strong>${l}</strong></span></button>`).join("")}</div>`:""}
   <p class="note">Bodyweight exercises are always included.</p>${onb?`<button class="btn" data-act="eqgo">Continue</button>`:""}</div>`;
@@ -5104,7 +5116,7 @@ const LEVELS=[["new","New to the gym","Less than 6 months. You'll get a ready-ma
   ["some","Some experience","6 months to 2 years. Start from a suggested plan, or from an empty one."],
   ["exp","Experienced","More than 2 years. You build your own workouts. Ready-made plans are still there if you want one."]];
 function levelHtml(){const cur=store.settings.level||"";
-  return `<div class="card welcome"><p class="stepl">Step 2 of 4</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
+  return `<div class="card welcome"><p class="stepl">Step 3 of 5</p><h2 style="font-size:24px">How much gym experience do you have?</h2><p class="note" style="margin:6px 0 12px">This decides whether you start with a ready-made plan. You can change your plan any time.</p>
   ${LEVELS.map(([v,t,d])=>`<button type="button" class="toggle radio" data-act="lvl" data-v="${v}" aria-pressed="${cur===v}"><span class="box">✓</span><span class="txt"><strong>${t}</strong><small>${d}</small></span></button>`).join("")}
   <button class="btn" data-act="lvlgo">Continue</button></div>`;}
 const SPLIT_TPL=[["full3","Full body, 3 days","Mon, Wed, Fri. The best place to start.",["rest","full","rest","full","rest","full","rest"]],
@@ -5128,7 +5140,7 @@ function splitHtml(onb){
   const opts=cur=>[...Object.keys(PL).filter(id=>!["rest","dyn"].includes(id)).map(id=>[id,PL[id].name]),["dyn","Dynamic: choose on the day"],["rest","Rest"],["__new","+ New custom day…"]]
     .map(([v,l])=>`<option value="${v}"${v===cur?" selected":""}>${esc(l)}</option>`).join("");
   const days=D.week.filter(x=>x!=="rest").length;
-  return `<div class="card welcome">${onb?`<p class="stepl">Step 4 of 4</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
+  return `<div class="card welcome">${onb?`<p class="stepl">Step 5 of 5</p>`:""}<h2 style="font-size:24px">Your weekly split</h2>
   <p class="note" style="margin:6px 0 12px">Pick a ready-made week, then change any day you like. ${onb?"You can change all of this later.":""}</p>
   <p class="lbl">Start from</p><div class="tplgrid">${SPLIT_TPL.filter(t=>t[4]!=="nobeg"||store.settings.level!=="new"||D.tpl===t[0]).map(t=>`<button type="button" class="tpl" data-act="spltpl" data-v="${t[0]}" aria-pressed="${D.tpl===t[0]}"><strong>${t[1]}</strong><small>${t[2]}</small></button>`).join("")}</div>
   <p class="lbl" style="margin-top:14px">Each day <span style="float:right">${days} training day${days===1?"":"s"}</span></p>
@@ -5259,8 +5271,11 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="6.4";
+const APP_VERSION="6.41";
 const CHANGELOG=[
+  {v:"6.41",d:"16 October 2026",t:"Look first, linked goal boxes",items:[
+    "Setup now starts by picking a look (Today, Focus or Classic) on its own screen, before your details.",
+    "Your goal has two linked boxes, kcal a day and kg a week. Type in either one and the other fills in, so 700 kcal a day shows 0.64 kg a week."]},
   {v:"6.4",d:"16 October 2026",t:"Scroll through your days",items:[
     "With Dates or Workouts at the top, the week is now a strip you can swipe through, about four months back and two months ahead. Tap a day to open it. The strip stays where you left it, and the month you're looking at shows above it. The first of each month is marked.",
     "Turning your phone sideways: on Android, the installed app now stays upright. iPhones don't let web apps lock the screen, so landscape now has a compact layout instead, with a smaller header and tab bar."]},
