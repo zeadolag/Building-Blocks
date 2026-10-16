@@ -1,6 +1,6 @@
-# Body Builder
+# Routine
 
-A training, food and budget tracker that runs in the browser and can be added to your phone's home screen.
+Routine (formerly Body Builder) is a training, food and budget tracker that runs in the browser and can be added to your phone's home screen.
 
 - **Train:** your weekly split, sets and reps, drop sets, supersets, a rest timer, warm-ups, stretches and a how-to for each exercise
 - **Eat:** meals by slot, a food calculator with about 80 ingredients, a meal builder, and calorie and protein targets

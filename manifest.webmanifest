@@ -1,14 +1,14 @@
 {
-  "name": "Body Builder",
-  "short_name": "Body Builder",
-  "description": "Track your workouts, food, body weight and spending in one place.",
+  "name": "Routine",
+  "short_name": "Routine",
+  "description": "Your training, food and progress in one place.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#EEF1F0",
-  "theme_color": "#EEF1F0",
+  "background_color": "#F6EFE6",
+  "theme_color": "#F6EFE6",
   "icons": [
     {
       "src": "icons/icon-192.png",
