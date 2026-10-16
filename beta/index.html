@@ -745,6 +745,27 @@ html[data-style="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-w
 .iconnote .inhd{display:flex;align-items:center;gap:10px}
 .iconnote .inhd svg{width:30px;height:30px;flex:none}
 .iconnote ol{margin:0;padding-left:20px;font-size:14px;display:grid;gap:4px}
+
+/* Scrolling day picker for Dates and Workouts: swipe through the weeks, tap a day to open it */
+.wkmonth{margin:2px 2px 4px;font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+#week.scroller{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);padding:2px 0 12px}
+#week.scroller::-webkit-scrollbar{display:none}
+#week.scroller>button{scroll-snap-align:center}
+#week[data-wk="pills"]>.wkp{flex:0 0 calc((100% - 24px) / 7)}
+#week.scroller>.wkmon{margin-left:6px}
+.wkp.wk1 small{color:var(--blue);font-weight:700}
+.wkp.wk1.is-sel small{color:inherit}
+/* Landscape on phones: compact header and tab bar so there's room for the content */
+@media (orientation:landscape) and (max-height:520px){
+  html .wrap{padding-top:calc(4px + env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:84px}
+  html .top{padding:0 0 2px}html .top h1{font-size:18px}html .top p{font-size:12px}
+  html .navbtn{width:30px;height:30px}
+  html .wkp{padding:3px 0 4px}html .wkp b{font-size:14px}html .wkp i{margin-top:1px}
+  html .wkc{padding:5px 8px 6px}
+  html .island{bottom:calc(6px + env(safe-area-inset-bottom,0px));padding:3px}
+  html .itab{flex-direction:row;gap:6px;padding:7px 4px;font-size:12px}
+  html .itab svg{width:18px;height:18px}
+}
 /* Routine logo colours per style */
 :root{--logobg:#AF5A38;--logofg:#F6EEE3}
 html[data-style="focus"]{--logobg:#C9F23E;--logofg:#111111}
@@ -2411,20 +2432,31 @@ function renderHeader(){
 const WK_IDS=["pills","cards","dots","circles"];
 function wkMode(){const v=themeCfg().wk;return WK_IDS.includes(v)?v:({today:"pills",focus:"cards",classic:"circles"})[styleId()];}
 function renderWeek(){
-  const d=parseKey(sel),mon=addDays(sel,-((d.getDay()+6)%7)),t=todayKey(),m=wkMode();let h="";
-  for(let i=0;i<7;i++){
-    const k=addDays(mon,i),p=planOf(k),P=plansFor(k)[p],pr=progress(k,p),dt=parseKey(k),rest=p==="rest";
+  const t=todayKey(),m=wkMode(),scroll=m==="pills"||m==="cards",W=$("week");let h="";
+  // Dates and Workouts scroll through many weeks; Dots and Circles show one week
+  let start,end;
+  if(scroll){const lo=[addDays(t,-119),addDays(sel,-14)].sort()[0],hi=[addDays(t,56),addDays(sel,14)].sort().reverse()[0];start=addDays(lo,-((parseKey(lo).getDay()+6)%7));end=addDays(hi,(7-parseKey(hi).getDay())%7);}
+  else{const d=parseKey(sel);start=addDays(sel,-((d.getDay()+6)%7));end=addDays(start,6);}
+  for(let k=start,i=0;k<=end;k=addDays(k,1),i++){
+    const p=planOf(k),P=plansFor(k)[p],pr=progress(k,p),dt=parseKey(k),rest=p==="rest",dow=(dt.getDay()+6)%7;
     const label=dt.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})+", "+P.name+(p!=="rest"?", "+Math.round(pr*100)+"% of sets done":"");
-    const cls=`${k===sel?" is-sel":""}${rest?" is-rest":""}${k===t?" is-today":""}${!rest&&pr>=1?" is-done":""}${!rest&&pr>0&&pr<1?" is-part":""}`,at=`data-day="${k}" style="--c:${P.color};--p:${pr}" aria-label="${esc(label)}"${k===sel?' aria-current="date"':""}`;
-    const wd=dt.toLocaleDateString(undefined,{weekday:"short"}).replace(".","");
-    if(m==="pills")h+=`<button type="button" class="wkp${cls}" ${at}><small>${esc(wd)}</small><b>${dt.getDate()}</b><i></i></button>`;
-    else if(m==="cards")h+=`<button type="button" class="wkc${cls}" ${at}><small>${esc(wd)} ${dt.getDate()}</small><b>${esc(P.name)}</b><em>${rest?"Rest":pr>=1?"Done":pr>0?Math.round(pr*100)+"% done":k<t?"Not logged":k===t?"Today":"Planned"}</em></button>`;
-    else if(m==="dots")h+=`<button type="button" class="wkd${cls}" ${at}><i></i><small>${"MTWTFSS"[i]}</small></button>`;
-    else h+=`<button class="plate${cls}" ${at}><span class="disc"></span><span class="wd">${"MTWTFSS"[i]}</span></button>`;
+    const cls=`${k===sel?" is-sel":""}${rest?" is-rest":""}${k===t?" is-today":""}${!rest&&pr>=1?" is-done":""}${!rest&&pr>0&&pr<1?" is-part":""}${scroll&&dow===0?" wkmon":""}`,at=`data-day="${k}" style="--c:${P.color};--p:${pr}" aria-label="${esc(label)}"${k===sel?' aria-current="date"':""}`;
+    const wd=dt.toLocaleDateString(undefined,{weekday:"short"}).replace(".",""),mo=dt.getDate()===1?dt.toLocaleDateString(undefined,{month:"short"}).replace(".",""):"";
+    if(m==="pills")h+=`<button type="button" class="wkp${cls}${mo?" wk1":""}" ${at}><small>${esc(mo||wd)}</small><b>${dt.getDate()}</b><i></i></button>`;
+    else if(m==="cards")h+=`<button type="button" class="wkc${cls}" ${at}><small>${esc(wd)} ${dt.getDate()}${mo?" "+esc(mo):""}</small><b>${esc(P.name)}</b><em>${rest?"Rest":pr>=1?"Done":pr>0?Math.round(pr*100)+"% done":k<t?"Not logged":k===t?"Today":"Planned"}</em></button>`;
+    else if(m==="dots")h+=`<button type="button" class="wkd${cls}" ${at}><i></i><small>${"MTWTFSS"[dow]}</small></button>`;
+    else h+=`<button class="plate${cls}" ${at}><span class="disc"></span><span class="wd">${"MTWTFSS"[dow]}</span></button>`;
   }
-  const W=$("week");W.innerHTML=h;W.dataset.wk=m;
-  if(m==="cards"){const s0=W.querySelector(".is-sel");if(s0)W.scrollLeft=Math.max(0,s0.offsetLeft-W.offsetLeft-40);}
+  const keep=scroll&&W.dataset.wk===m&&W.children.length?W.scrollLeft:null,prevSel=W._sel;
+  W.innerHTML=h;W.dataset.wk=m;W.classList.toggle("scroller",scroll);W._sel=sel;
+  let mo=$("wkMonth");if(scroll&&!mo){mo=document.createElement("p");mo.id="wkMonth";mo.className="wkmonth";W.before(mo);W.addEventListener("scroll",()=>{if(W._mt)return;W._mt=requestAnimationFrame(()=>{W._mt=0;wkMonthText();});},{passive:true});}
+  if(mo)mo.hidden=!scroll;
+  if(scroll){const s0=W.querySelector(".is-sel");if(s0){const center=()=>{W.scrollLeft=s0.offsetLeft-W.offsetLeft-(W.clientWidth-s0.offsetWidth)/2;};
+      if(keep!=null){W.scrollLeft=keep;const L=s0.offsetLeft-W.offsetLeft;if(prevSel!==sel&&(L<W.scrollLeft||L+s0.offsetWidth>W.scrollLeft+W.clientWidth))center();}else center();}
+    wkMonthText();}
 }
+function wkMonthText(){const W=$("week"),mo=$("wkMonth");if(!W||!mo||mo.hidden)return;const mid=W.scrollLeft+W.clientWidth/2;let best=null;for(const b of W.children){const c=b.offsetLeft-W.offsetLeft+b.offsetWidth/2;if(!best||Math.abs(c-mid)<Math.abs(best.c-mid))best={c,k:b.dataset.day};}
+  if(best){const txt=parseKey(best.k).toLocaleDateString(undefined,{month:"long",year:"numeric"});if(mo.textContent!==txt)mo.textContent=txt;}}
 const ICO=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const TABDEF={
   train:["Train",ICO('<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>')],
@@ -4476,7 +4508,7 @@ function swipeSeg(sg,dir){const bs=[...sg.querySelectorAll(":scope>button")],i=b
 function swipeDay(dir){sel=addDays(sel,dir);render();if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}}
 const GS={x:0,y:0,t:0,el:null,on:false};
 document.addEventListener("touchstart",e=>{if(sheetEl.open||e.touches.length>1){GS.on=false;return;}const t=e.touches[0],tg=e.target;
-  if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog,#week[data-wk=\"cards\"]")){GS.on=false;return;}
+  if(tg.closest&&tg.closest(".swr,#island,#rail,.mwsvg,.chart,input[type=range],.sprow,.amtin,dialog,#week.scroller")){GS.on=false;return;}
   const edge=t.clientX<=28||t.clientX>=innerWidth-28;GS.el=tg.closest&&tg.closest("header.top,#week");GS.edge=edge;GS.on=!!(GS.el||edge);GS.x=t.clientX;GS.y=t.clientY;GS.t=Date.now();GS.sy=scrollY;},{passive:true});
 document.addEventListener("touchend",e=>{if(!GS.on)return;GS.on=false;const t=e.changedTouches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
   if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.5||Date.now()-GS.t>800)return;const dir=dx<0?1:-1;
@@ -5227,8 +5259,11 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="6.31";
+const APP_VERSION="6.4";
 const CHANGELOG=[
+  {v:"6.4",d:"16 October 2026",t:"Scroll through your days",items:[
+    "With Dates or Workouts at the top, the week is now a strip you can swipe through, about four months back and two months ahead. Tap a day to open it. The strip stays where you left it, and the month you're looking at shows above it. The first of each month is marked.",
+    "Turning your phone sideways: on Android, the installed app now stays upright. iPhones don't let web apps lock the screen, so landscape now has a compact layout instead, with a smaller header and tab bar."]},
   {v:"6.31",d:"16 October 2026",t:"New icon reminder",items:[
     "If you use the app from your home screen, Train shows a one-time note on how to get the new Routine icon, with a button to save a backup first. On iPhone, removing the old icon also removes its data, so back up before you do it, then restore after adding it again."]},
   {v:"6.3",d:"16 October 2026",t:"Now called Routine",items:[
@@ -5351,6 +5386,8 @@ const SITE_URL="https://zeadolag.github.io/Building-Blocks/";
 let deferredInstall=null;
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;if(tab==="settings")renderSettings();});
 addEventListener("appinstalled",()=>{deferredInstall=null;toast("Routine is installed");if(tab==="settings")renderSettings();});
+function lockPortrait(){try{if(isInstalled()&&screen.orientation&&screen.orientation.lock&&!store.settings.allowRotate)screen.orientation.lock("portrait").catch(()=>{});}catch(e){}}
+setTimeout(()=>{try{lockPortrait();}catch(e){}},0);
 function isInstalled(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}}
 function installHtml(){
   const ua=navigator.userAgent||"",ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),android=/Android/.test(ua),samsung=/SamsungBrowser/.test(ua),firefox=/Firefox|FxiOS/.test(ua);
