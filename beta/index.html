@@ -742,6 +742,9 @@ html[data-style="today"] .backbtn,html[data-style="focus"] .backbtn{background:v
 html[data-style="focus"] .backbtn{border-radius:12px}
 html[data-style="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-weight:600}
 
+.iconnote .inhd{display:flex;align-items:center;gap:10px}
+.iconnote .inhd svg{width:30px;height:30px;flex:none}
+.iconnote ol{margin:0;padding-left:20px;font-size:14px;display:grid;gap:4px}
 /* Routine logo colours per style */
 :root{--logobg:#AF5A38;--logofg:#F6EEE3}
 html[data-style="focus"]{--logobg:#C9F23E;--logofg:#111111}
@@ -2761,6 +2764,15 @@ $("panel").addEventListener("click",e=>{const w=e.target.closest("[data-wstyle]"
 // Weekly recap: shown on Sunday (and Monday, for the week before) until dismissed
 function weekMon(k){const d=parseKey(k).getDay();return addDays(k,-((d+6)%7));}
 function recapWeek(){const t=todayKey(),d=parseKey(t).getDay();if(d===0)return weekMon(t);if(d===1)return addDays(weekMon(t),-7);return null;}
+// One-time note for people who installed the app before the rename, so they can get the new icon
+function iconNoteHtml(){const S=store.settings;if(S.iconNote||!S.welcomed||showWelcome()||onbStage()||!isLocalMode()||!isInstalled()||sel!==todayKey())return "";
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const logo=document.querySelector(".appbar .logo");
+  return `<div class="card notice iconnote"><div class="inhd">${logo?logo.innerHTML:""}<strong>Body Builder is now Routine</strong></div>
+  <p class="note" style="margin:6px 0 8px">Your home screen still shows the old icon. To get the new one:</p>
+  <ol class="bklist">${ios?`<li><b>Save a backup first.</b> On iPhone, removing the icon also removes the app's data.</li><li>Press and hold the old icon, then remove it from your home screen.</li><li>Open <b>${esc(SITE_URL.replace("https://",""))}</b> in Safari, tap Share, then <b>Add to Home Screen</b>.</li><li>Open it and tap <b>Restore from a backup</b> on the first screen.</li>`
+   :`<li>Android usually updates the icon by itself within a day or two. If it doesn't:</li><li><b>Save a backup first</b>, just in case.</li><li>Uninstall the old app, open <b>${esc(SITE_URL.replace("https://",""))}</b> in Chrome and install it again.</li><li>If your data is missing, tap <b>Restore from a backup</b> on the first screen.</li>`}</ol>
+  <div class="pair" style="margin-top:8px"><button type="button" class="btn" style="margin:0" data-act="iconbk">Save a backup</button><button type="button" class="btn ghost" style="margin:0" data-act="iconok">Done or later</button></div></div>`;}
 function recapHtml(force){const S=store.settings,m=force||recapWeek();if(!m||(!force&&(S.recapSeen===m||sel!==todayKey())))return "";
   let sets=0,vol=0,wd=0,fk=0,fp=0,fd=0;const ws=[],pw=[];
   for(let i=0;i<7;i++){const k=addDays(m,i),d=store.days[k];if(!d)continue;let any=false;
@@ -2787,7 +2799,7 @@ function renderTrain(){
   if(sp&&sp.until&&todayKey()>sp.until)h+=`<div class="card notice"><strong>Your split ended on ${shortDate(sp.until)}</strong><p class="note" style="margin:4px 0 10px">Keep going with the same week, or set up a new split.</p><div class="pair"><button class="btn ghost" style="margin:0" data-act="splitkeep">Keep it going</button><button class="btn" style="margin:0" data-act="splitnew">New split</button></div></div>`;
   if(isBirthday()&&store.settings.bdayShown!==todayKey().slice(0,4)&&sel===todayKey()){const a=ageOn(profile().dob);h+=`<div class="card bday"><span class="bdayic" aria-hidden="true">🎂</span><div><strong>Happy birthday!</strong><p class="note" style="margin:2px 0 8px">${a?`${a} today. `:""}Enjoy your day, rest or train, your call. Your calorie targets now use your new age.</p><button class="btn sm" data-act="bdayok">Thanks</button></div></div>`;}
   {const L=v2&&!editPlan?eqIssues():[];if(L.length)h+=`<div class="card notice"><strong>${L.length} exercise${L.length>1?"s":""} in your plan need${L.length>1?"":"s"} equipment you don't have</strong><p class="note" style="margin:4px 0 10px">Swap ${L.length>1?"them":"it"} for something you can do, or keep ${L.length>1?"them":"it"}.</p><button class="btn ghost sm" data-act="eqreview">Review swaps</button></div>`;}
-  h+=recapHtml();
+  h+=iconNoteHtml()+recapHtml();
   if(store.settings.presetNote)h+=`<div class="card notice"><strong>This is a suggested plan</strong><p class="note" style="margin:4px 0 10px">It was picked for your experience level. Change any exercise, any day, or the whole split whenever you like with the <b>Edit</b> button above.</p><button class="btn ghost sm" data-act="presetok">Got it</button></div>`;
   {const ex=dayExercises(k,p);let tot=0,dn=0;for(const e of ex){const R=rowsInfo(day,e);tot+=R.rc;for(let i=0;i<R.rc;i++)if(R.rws[i]&&R.rws[i].d)dn++;}
    const meta=p==="rest"?"Recovery day":p==="dyn"?"Pick a workout below":ex.length?`${ex.length} exercise${ex.length===1?"":"s"}${dn?` · ${Math.round(dn/tot*100)}% done`:""}`:p==="run"?"Cardio day":"No exercises yet";
@@ -3880,6 +3892,8 @@ $("panel").addEventListener("click",e=>{
     if(act==="addcardio"){const f=$("cfA"),o=cardioRead(f);if(!o){const e0=[...f.querySelectorAll("[data-cf]")].find(x=>!x.value.trim());(e0||f.querySelector("[data-cf]")).focus();return;}delete o.calc;const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push(o);persist(docId);render();return;}
     const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t,m:Math.round(m)});persist(docId);render();
   }else if(act==="easyrun"){const day=ensureDay(k);(day.cardioLog=day.cardioLog||[]).push({t:"Easy run",m:25});persist(docId);render();
+  }else if(act==="iconbk"){bkExport();
+  }else if(act==="iconok"){store.settings.iconNote=1;persist("settings");renderTrain();
   }else if(act==="recapok"){const m=recapWeek();if(m){store.settings.recapSeen=m;persist("settings");}renderTrain();
   }else if(act==="fstep"){const f=b.dataset.f,inp=$("f"+f.toUpperCase());if(!inp)return;const id=document.querySelector('.fcard [data-act="flog"]').dataset.id,flag=(libArr(id)||[])[4],v=num(String(inp.value).replace(",","."))||0;
     const step=f==="w"?(flag==="run"?100:U()==="lb"?5:2.5):({time:5,run:1,dist:10}[flag]||1);let n=Math.max(0,Math.round((v+step*(+b.dataset.d))*100)/100);inp.value=String(n);
@@ -4001,7 +4015,7 @@ $("panel").addEventListener("click",e=>{
   }
   else if(act==="welcome"){S.welcomed=true;persist("settings");renderTrain();}
   else if(act==="welcomeskip"||act==="welcomecalc"){welcomeManual=act==="welcomeskip";renderTrain();}
-  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).length)S.fresh=true;afterTargets();}
+  else if(act==="welcomeman"){if(!(num(S.kcal)>0&&num(S.protein)>0)){toast("Enter your calories and protein");return;}S.welcomed=true;S.iconNote=1;if(isLocalMode()&&!Object.keys(store.days).length)S.fresh=true;afterTargets();}
   else if(act==="gdir"||act==="gmode"||act==="gmax"){S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});const pf=S.profile;
     if(act==="gdir"){const v=b.dataset.v,g=num(pf.goal);pf.gdir=v;if(v==="keep")pf.goal=0;else{const want=v==="lose"?-1:1;if(Math.sign(g)!==want){const G=goalBase(pf),def=v==="lose"?-550:275;pf.goal=G?(def<0?-Math.min(550,Math.floor(G.B.maxCut/5)*5):def):def;}}}
     else if(act==="gmode")pf.gm=b.dataset.v;
@@ -4009,7 +4023,7 @@ $("panel").addEventListener("click",e=>{
     persist("settings");goalRedraw(pf);return;}
   else if(act==="west"){S.profile=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},S.profile||{});S.profile.west=!S.profile.west;if(!S.profile.west)delete S.profile.west;persist("settings");
     const box=b.closest(".tcalc,.personal");if(box&&box.classList.contains("welcome"))renderTrain();else render();}
-  else if(act==="welcomego"){const pf=Object.assign({sex:"m",act:1.55,goal:-550},S.profile||{});
+  else if(act==="welcomego"){S.iconNote=1;const pf=Object.assign({sex:"m",act:1.55,goal:-550},S.profile||{});
     if(!S.profile&&latestWeight())pf.w=latestWeight();
     const r=calcTargets(pf);if(!r){toast("Fill in your birthday, height and weight");const f=["dob","h","w"].map(x=>document.querySelector(`.welcome [data-pf="${x}"]`)).find(f=>f&&!f.value);if(f)f.focus();return;}
     S.profile=pf;S.kcal=Math.round(r.kc/10)*10;S.protein=Math.round(r.prot/5)*5;S.welcomed=true;if(isLocalMode()&&!Object.keys(store.days).filter(k=>k!==todayKey()).length)S.fresh=true;
@@ -5213,8 +5227,10 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="6.3";
+const APP_VERSION="6.31";
 const CHANGELOG=[
+  {v:"6.31",d:"16 October 2026",t:"New icon reminder",items:[
+    "If you use the app from your home screen, Train shows a one-time note on how to get the new Routine icon, with a button to save a backup first. On iPhone, removing the old icon also removes its data, so back up before you do it, then restore after adding it again."]},
   {v:"6.3",d:"16 October 2026",t:"Now called Routine",items:[
     "Body Builder is now Routine, with a new logo: a rounded R that takes your style's colours (rust in Today, volt in Focus, black and white in Classic).",
     "The home screen icon and name change too. On iPhone, you may need to remove the old icon and add the app to your home screen again to see the new one.",
@@ -5602,7 +5618,7 @@ function bkImport(file){
     if(!confirm(`Replace everything ${isLocalMode()?"on this device":"in your account"} with the backup from ${o.saved?new Date(o.saved).toLocaleDateString():"that file"} (${n} day${n===1?"":"s"} of logs)?`))return;
     const old=Object.keys(store.days);
     for(const k of old)delete store.days[k];for(const k of Object.keys(store.settings))delete store.settings[k];
-    Object.assign(store.days,o.days);Object.assign(store.settings,o.settings);store.settings.lastBackup=todayKey();
+    Object.assign(store.days,o.days);Object.assign(store.settings,o.settings);store.settings.lastBackup=todayKey();store.settings.iconNote=1;
     saveLocal();if(mode==="db"){for(const k of new Set([...old,...Object.keys(o.days)]))persist("day-"+k);}persist("settings");
     closeSheet();render();toast("Backup restored");};
   r.readAsText(file);
