@@ -2710,8 +2710,14 @@ function kw(html){if(!kwOn())return html;return String(html).replace(/(<[^>]*>)|
 const SECS={warm:"Warm-up",work:"Workout",cardio:"Cardio",stretch:"Stretches"};
 function layoutCfg(){const L=store.settings.layout||{};const order=(Array.isArray(L.order)?L.order:[]).filter((x,i,a)=>SECS[x]&&a.indexOf(x)===i);for(const x of ["warm","work","cardio","stretch"])if(!order.includes(x))order.push(x);
   const hidden=(Array.isArray(L.hidden)?L.hidden:[]).filter(x=>SECS[x]&&x!=="work");return {order,hidden};}
-function warmList(p,P,v2){const c=(custom().warm||{})[p];if(Array.isArray(c))return c;let WU=v2?(WARMUP[p]||(P.ex.length?GEN_WARM:null)):null;if(WU&&store.settings.fresh)WU=WU.map(n=>n==="Walk to the gym"?"Brisk walk, 3–5 min":n);return WU||[];}
-function stretchList(p,P,v2){const c=(custom().stretch||{})[p];if(Array.isArray(c))return c;return (v2?(STRETCH[p]||(P.ex.length?GEN_STRETCH:null)):null)||[];}
+// Custom days have no preset routine, so build one from the muscles the day's exercises train
+function planMuscles(P){const M=new Map();for(const e of (P&&P.ex)||[]){const L=LIB[e[0]];if(!L)continue;for(const x of L.m||[])M.set(x,(M.get(x)||0)+1);for(const x of L.s||[])M.set(x,(M.get(x)||0)+0.3);}return M;}
+function fitList(P,regs,n){const M=planMuscles(P);if(!M.size)return null;const nw=store.settings.level==="new";
+  const fit=x=>{const m=sinfo(x).m||[];return m.length?m.reduce((t,y)=>t+Math.min(2,M.get(y)||0),0)/m.length:0;};
+  const pool=Object.keys(SINFO).filter(x=>regs.includes(sinfo(x).r)&&!needsOf(WEQ[x]).length&&(nw?(WDIFF[x]||2)<3:(WDIFF[x]||2)>1)&&!/^Stretch each muscle|^Walk to the gym/.test(x)&&fit(x)>0.3).sort((a,b)=>fit(b)-fit(a)||(sinfo(b).m||[]).length-(sinfo(a).m||[]).length);
+  const out=[],seen=new Set();for(const x of pool){const key=(sinfo(x).m||[])[0];if(seen.has(key))continue;seen.add(key);out.push(x);if(out.length>=n)break;}return out.length?out:null;}
+function warmList(p,P,v2){const c=(custom().warm||{})[p];if(Array.isArray(c))return c;let WU=v2?(WARMUP[p]||(P.ex.length?(()=>{const d=fitList(P,["Mobility drills"],3);return d?[GEN_WARM[0],...d,GEN_WARM[2]]:GEN_WARM;})():null)):null;if(WU&&store.settings.fresh)WU=WU.map(n=>n==="Walk to the gym"?"Brisk walk, 3–5 min":n);return WU||[];}
+function stretchList(p,P,v2){const c=(custom().stretch||{})[p];if(Array.isArray(c))return c;return (v2?(STRETCH[p]||(P.ex.length?(fitList(P,["Upper body","Lower body","Back and core"],4)||GEN_STRETCH):null)):null)||[];}
 function ensureRoutine(kind,p,P){const S=store.settings,c=S.custom||(S.custom={}),key=kind==="w"?"warm":"stretch";c[key]=c[key]||{};if(!Array.isArray(c[key][p]))c[key][p]=(kind==="w"?warmList(p,P,true):stretchList(p,P,true)).slice();return c[key][p];}
 // ---------- Exercise cards ----------
 // After hitting the top of the rep range on every set, suggest a specific next weight
@@ -5247,12 +5253,21 @@ sheetEl.addEventListener("click",e=>{if(sheetEl._kind!=="eqreview")return;const 
 function scopeSeg(pn){return `<div class="seg scopeseg" role="group" aria-label="How long to swap"><button type="button" data-scope="today" aria-pressed="true">Just today</button><button type="button" data-scope="plan" aria-pressed="false">From now on</button></div><p class="note scopenote">From now on changes every ${esc(pn)} day from today. Past days stay as they were.</p>`;}
 function routineSwap(kind,i){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],list=routineFor(kind,k,p,P,k>=NEWPLAN),cur=list[i];if(!cur)return;
-  const reg=sinfo(cur).r,opts=Object.keys(SINFO).filter(n=>n!==cur&&sinfo(n).r===reg&&!/^Stretch each muscle|^Walk to the gym/.test(n))
-    .sort((a,b)=>(needsOf(WEQ[a]).length-needsOf(WEQ[b]).length)||((WDIFF[a]||1)-(WDIFF[b]||1))||a.localeCompare(b));
+  const C=sinfo(cur),reg=C.r,cm=new Set(C.m||[]),cs=new Set(C.s||[]),hold=!!C.hold;
+  // how close an option is: same muscles count most, then helpers, same kind (a hold or a moving drill), similar wording, and equipment you have
+  // muscles today's workout trains, so options that prepare them rank higher
+  const dayM=new Map();for(const e of dayExercises(k,p)){const L=LIB[e[0]];if(!L)continue;for(const x of L.m||[])dayM.set(x,(dayM.get(x)||0)+1);for(const x of L.s||[])dayM.set(x,(dayM.get(x)||0)+0.3);}
+  const dayFit=n=>{const m=sinfo(n).m||[];return m.length?m.reduce((t,x)=>t+Math.min(2,dayM.get(x)||0),0)/m.length:0;};
+  const tok=n=>String(n).toLowerCase().split(/[^a-z]+/).filter(t=>t.length>=4&&!["each","side","with","your","slow","easy"].includes(t)),ct=tok(cur);
+  const score=n=>{const I=sinfo(n),m=I.m||[],h=I.s||[];return m.reduce((t,x)=>t+(cm.has(x)?3:cs.has(x)?1:-1),0)+h.reduce((t,x)=>t+(cm.has(x)||cs.has(x)?0.5:0),0)+((!!I.hold)===hold?1:0)+tok(n).filter(t=>ct.some(u=>u.startsWith(t.slice(0,5))||t.startsWith(u.slice(0,5)))).length*0.4-(needsOf(WEQ[n]).length?1.5:0)+dayFit(n)*1.5;};
+  const opts=Object.keys(SINFO).filter(n=>n!==cur&&sinfo(n).r===reg&&!/^Stretch each muscle|^Walk to the gym/.test(n))
+    .sort((a,b)=>score(b)-score(a)||(needsOf(WEQ[a]).length-needsOf(WEQ[b]).length)||((WDIFF[a]||1)-(WDIFF[b]||1))||a.localeCompare(b));
+  const best=cm.size&&opts.length&&(sinfo(opts[0]).m||[]).filter(x=>cm.has(x)).length/cm.size>=0.5?opts[0]:null;
+  const mus=n=>(sinfo(n).m||[]).map(x=>MNAME[x]).filter(Boolean).join(", ");
   const anyNo=opts.some(n=>needsOf(WEQ[n]).length);
   sheetEl._pick=null;
-  openSheet("Swap "+cur,`${scopeSeg(P.name)}<p class="note" style="margin-top:0">Pick something to do instead. Easiest options are at the top.${anyNo?` Items marked <span class="needs">Needs …</span> use equipment that isn't in your setup, but you can still pick them.`:""}</p>
-    <div class="swres">${opts.map(n=>{const nd=needsOf(WEQ[n]);return `<button type="button" class="libitem${nd.length?" cant":""}" data-pick="${esc(n)}" aria-pressed="false"><span><strong>${esc(n)}${(WDIFF[n]||1)<(WDIFF[cur]||1)?` <span class="easier">Easier</span>`:""}</strong><small>${sinfo(n).hold?"Hold "+esc(sinfo(n).hold):esc(reg)}</small>${nd.length?`<span class="needs">${needsText(nd)}</span>`:""}</span><span class="chk">✓</span></button>`;}).join("")}</div>
+  openSheet("Swap "+cur,`${scopeSeg(P.name)}<p class="note" style="margin-top:0">Pick something to do instead. The closest matches are at the top: they work the same muscles, and the ones that prepare what you're training ${p==="rest"?"":"today "}come first.${anyNo?` Items marked <span class="needs">Needs …</span> use equipment that isn't in your setup, but you can still pick them.`:""}</p>
+    <div class="swres">${opts.map(n=>{const nd=needsOf(WEQ[n]);return `<button type="button" class="libitem${nd.length?" cant":""}" data-pick="${esc(n)}" aria-pressed="false"><span><strong>${esc(n)}${n===best?` <span class="closest">Closest match</span>`:""}${(WDIFF[n]||1)<(WDIFF[cur]||1)?` <span class="easier">Easier</span>`:""}</strong><small>${[sinfo(n).hold?"Hold "+esc(sinfo(n).hold):"",mus(n)?esc(mus(n)).replace(/^./,c=>c.toUpperCase()):esc(reg)].filter(Boolean).join(" · ")}</small>${nd.length?`<span class="needs">${needsText(nd)}</span>`:""}</span><span class="chk">✓</span></button>`;}).join("")}</div>
 `,
     [{label:"Swap",fn:()=>{const n=sheetEl._pick;if(!n)return false;const u=snap(["day-"+k,"settings"]),day=ensureDay(k);
       if(sheetEl._scope==="plan"){ensureRoutine(kind,p,P)[i]=n;if(day.rswap&&day.rswap[kind])delete day.rswap[kind][i];persist("settings");}
@@ -5427,8 +5442,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="7.0";
+const APP_VERSION="7.01";
 const CHANGELOG=[
+  {v:"7.01",d:"17 October 2026",t:"Smarter warm-ups",items:["Swapping a warm-up or stretch now puts the closest options first: ones that work the same muscles, and ones that prepare the muscles your workout that day trains (so a leg day ranks hip and leg drills higher). The best one is marked Closest match, like exercise swaps, and each option shows the muscles it works.","Days you build yourself now get their own warm-up and stretches, picked from the muscles that day's exercises train, instead of the same general list every time. Beginners get the gentler versions."]},
   {v:"7.0",d:"17 October 2026",t:"Home, and a calmer app",items:[
     "New Home tab, the first thing you see: calories and macros left on a ring, today's workout with a Start button, quick buttons to log a meal, a set, your weight or an expense, a bar for each day of your week, and your weight trend, best set this week, spending and latest note.",
     "Add your name in Settings → Personal details for a greeting on Home.",
