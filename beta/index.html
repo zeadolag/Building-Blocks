@@ -2145,8 +2145,8 @@ const GLOSS={
   "in the tank":"How many more reps you could have done when you stop a set. Leaving 1–3 in the tank builds muscle almost as well as going to failure, with less fatigue and lower injury risk.",
   "reps in reserve":"How many more reps you could have done when you stop a set. Leaving 1–3 in reserve builds muscle almost as well as going to failure, with less fatigue and lower injury risk.",
   "negatives":"Only doing the lowering part of a move, slowly (3–5 seconds). You can lower more than you can lift, so negatives build strength for moves like pull-ups before you can do a full rep.",
-  "warm-up sets":"Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you.",
-  "ramp-up sets":"Same as light warm-up sets. Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you.",
+  "warm-up sets":"Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you. If you're new, or the exercise is new to you, one easy set with the empty bar or a very light weight is enough.",
+  "ramp-up sets":"Same as light warm-up sets. Lighter sets of your first exercise before the real ones, for example 50% then 75% of your working weight. They prepare your joints and groove the movement without tiring you. If you're new, or the exercise is new to you, one easy set with the empty bar or a very light weight is enough.",
   "round":"In a superset, one round means one set of each exercise in the pair.",
   "progressive overload":"Slowly asking more of your muscles over time: a bit more weight, one more rep, or one more set. It's the main reason you keep getting stronger.",
   "per side":"Do the reps for one side, then the same number for the other side. That counts as one set.",
@@ -2918,14 +2918,27 @@ const SINFO={
   "Stretch each muscle you trained, 30–45 s":{r:"Upper body",m:[],s:[],c:["Pick one stretch for each muscle you worked today and hold it gently, no bouncing."]}
 };
 function sinfo(n){return SINFO[n]||{r:"Other",m:[],s:[],c:[]};}
-function routineHtml(kind,items,done){
+// Warm-up sets for beginners, or for an exercise you've never logged: one easy set, plus how to find your weight
+function warmTarget(n,ctx){if(!ctx)return null;const m=n.match(/light warm-up sets of (.+)$/);if(!m)return null;
+  const ex=dayExercises(ctx.k,ctx.p);if(!ex.length)return null;if(m[1]==="your first exercise")return ex[0][0];
+  const w=m[1].toLowerCase().replace(/s$/,"");const e=ex.find(x=>String(x[1]).toLowerCase().includes(w));return e?e[0]:null;}
+function easyWarm(n,ctx){if(sinfo(n).r!=="Light warm-up sets")return null;const id=warmTarget(n,ctx);
+  if(store.settings.level!=="new"&&!(id&&ctx&&!lastSession(id,ctx.k)))return null;
+  const t=(SW[id]||[])[1];
+  const first=t==="bar"?"One easy set of 10 with just the empty bar.":t==="d"?"One easy set of 10 with the lightest dumbbells, or a very light pair.":t==="m"||t==="c"?"One easy set of 10 on the lightest setting, or a very light weight.":"One easy set of 10 with the empty bar or a very light weight.";
+  return {name:n.replace(/^\d–\d light warm-up sets/,"Light warm-up set"),c:[first,
+    "Sometimes one isn't enough. If your real weight is a lot heavier, more than double what you warmed up with, add a second set at about half your real weight for 5 reps.",
+    "Don't know your real weight yet? Find it on your first set. Start with the suggested weight on the exercise, or one you're sure you can lift 10 times.",
+    "If you could have done 5 or more extra reps, go up a step for the next set. If you couldn't finish the reps, go down a step. The right weight leaves 2–3 reps in the tank.",
+    "Log what you used, and next time the app shows it so you can start from there."]};}
+function routineHtml(kind,items,done,ctx){
   const regions=[];items.forEach((n,i)=>{const r=sinfo(n).r;let g=regions.find(x=>x.r===r);if(!g){g={r,list:[]};regions.push(g);}g.list.push([n,i]);});
   let h="";
   for(const g of regions){
     h+=`<p class="lbl rhead">${esc(g.r)}</p><div class="card routine">`;
-    h+=g.list.map(([n,i])=>{const I=sinfo(n),key=kind+i,open=openHow.has(key),has=(I.c.length||I.m.length)&&!/walk|light cardio/i.test(n);
+    h+=g.list.map(([n,i])=>{const E=kind==="w"?easyWarm(n,ctx):null,I=E?Object.assign({},sinfo(n),{c:E.c}):sinfo(n),key=kind+i,open=openHow.has(key),has=(I.c.length||I.m.length)&&!/walk|light cardio/i.test(n);
       const nd=needsOf(WEQ[n]);
-      return `<div class="ritem"><div class="swr" data-sw="routine" data-k="${kind}" data-i="${i}">${swbg("Swap","")}<div class="sw rrow"><button class="rtick" data-act="${kind==="w"?"warm":"stretch"}" data-i="${i}" aria-pressed="${!!done[i]}" aria-label="Mark ${esc(n)} done">✓</button><span class="rname">${esc(n)}${I.hold?`<small>Hold ${esc(I.hold)}</small>`:""}${I.r==="Light warm-up sets"?`<small>Before your real sets, do the same exercise with a much lighter weight. It gets your joints and muscles ready.</small>`:""}${nd.length?`<small class="needs">${needsText(nd)}</small>`:""}</span>${holdSecs(I.hold)?`<button type="button" class="holdbtn" data-act="hold" data-n="${esc(n)}" aria-label="Start a ${holdSecs(I.hold)} second timer for ${esc(n)}">▶ ${holdSecs(I.hold)} s</button>`:""}${has?`<button class="icob rhow" data-act="rhow" data-k="${key}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="${open?"Hide":"Show"} how to do ${esc(n)}">${IC.search}</button>`:""}${store.settings.swapBtn!==false?`<button type="button" class="icob" data-act="rswap" data-k="${kind}" data-i="${i}" aria-label="Swap ${esc(n)} for something else">${IC.swap}</button>`:""}</div></div>${open?`<div class="howto">${I.m.length?bodyMap(I.m,I.s):""}${I.c.length?`<ol>${I.c.map(c=>`<li>${esc(c)}</li>`).join("")}</ol>`:""}</div>`:""}</div>`;}).join("");
+      return `<div class="ritem"><div class="swr" data-sw="routine" data-k="${kind}" data-i="${i}">${swbg("Swap","")}<div class="sw rrow"><button class="rtick" data-act="${kind==="w"?"warm":"stretch"}" data-i="${i}" aria-pressed="${!!done[i]}" aria-label="Mark ${esc(E?E.name:n)} done">✓</button><span class="rname">${esc(E?E.name:n)}${I.hold?`<small>Hold ${esc(I.hold)}</small>`:""}${I.r==="Light warm-up sets"?`<small>${E?"Before your real sets, one easy set of the same exercise. Tap "+IC.search+" for how to find your weight.":"Before your real sets, do the same exercise with a much lighter weight. It gets your joints and muscles ready."}</small>`:""}${nd.length?`<small class="needs">${needsText(nd)}</small>`:""}</span>${holdSecs(I.hold)?`<button type="button" class="holdbtn" data-act="hold" data-n="${esc(n)}" aria-label="Start a ${holdSecs(I.hold)} second timer for ${esc(n)}">▶ ${holdSecs(I.hold)} s</button>`:""}${has?`<button class="icob rhow" data-act="rhow" data-k="${key}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="${open?"Hide":"Show"} how to do ${esc(n)}">${IC.search}</button>`:""}${store.settings.swapBtn!==false?`<button type="button" class="icob" data-act="rswap" data-k="${kind}" data-i="${i}" aria-label="Swap ${esc(n)} for something else">${IC.swap}</button>`:""}</div></div>${open?`<div class="howto">${I.m.length?bodyMap(I.m,I.s):""}${I.c.length?`<ol>${I.c.map(c=>`<li>${esc(c)}</li>`).join("")}</ol>`:""}</div>`:""}</div>`;}).join("");
     h+=`</div>`;
   }
   return h;
@@ -3081,7 +3094,7 @@ function secWarm({k,p,P,v2,day},before){
   const WU=routineFor("w",k,p,P,v2);if(!WU.length)return "";
   const done=WU.filter((_,i)=>(day.warm||{})[i]).length,H=secHead(k,"warm","Warm-up",done>=WU.length?"Done":`${done} of ${WU.length}`,true,done/WU.length,done>=WU.length);
   if(H.col)return H.html;
-  return H.html+`<p class="note secnote">About 5 minutes. Keep it moving, and save the long holds for after.</p>`+swapHint("warm-ups")+routineHtml("w",WU,day.warm||{});
+  return H.html+`<p class="note secnote">About 5 minutes. Keep it moving, and save the long holds for after.</p>`+swapHint("warm-ups")+routineHtml("w",WU,day.warm||{},{k,p});
 }
 // Workout progress for the summary card and the Focus card
 function workInfo(k){const p=planOf(k),day=store.days[k]||{},todayEx=dayExercises(k,p),planIds=new Set(todayEx.map(e=>e[0])),hiddenIds=hiddenExIds(day);
@@ -5708,8 +5721,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="7.11";
+const APP_VERSION="7.12";
 const CHANGELOG=[
+  {v:"7.12",d:"18 October 2026",t:"Easier warm-up sets for beginners",items:["If you're new to the gym, or haven't logged an exercise before, its warm-up sets line now says one easy set of 10 with the empty bar, the lightest dumbbells or the lightest machine setting, instead of percentages of a weight you don't know yet.","Its how-to explains when to add a second warm-up set, and how to find your real weight on your first set: start light, go up if you had 5 or more reps left, go down if you couldn't finish.","If you picked Some experience or Experienced, you get the usual warm-up again once you've logged the exercise."]},
   {v:"7.11",d:"18 October 2026",t:"Leg press note",items:["The leg press how-to now explains that every machine's sled has its own starting weight before any plates, and suggests saving yours in a note."]},
   {v:"7.1",d:"18 October 2026",t:"A fuller exercise library",items:["59 new exercises, including the everyday ones that were missing: plain Incline bench press, Pull-ups, EZ-bar curl, Dumbbell Romanian deadlift, Trap bar deadlift, Push press, Barbell shrug, Sit-ups, Lying leg raises, Treadmill run and more.","Negatives are now an add-on for any strength exercise. Open an exercise's menu and turn on Negatives to lower slowly on every rep. Bodyweight moves like pull-ups and dips get jump-up-and-lower-slowly instructions; weighted ones get slow lowering with a lighter weight.","Pull-ups show as Pull-ups, with Negatives switched on in the plans that use them. Turn it off once you can do full reps.","Every exercise now has step-by-step instructions and a mistake to avoid. Before, about two thirds only showed the muscles.","Search matches each word, ignores spaces and hyphens, and knows other common names. \"Incline bench press\", \"pull ups\", \"RDL\", \"OHP\", \"french press\" and \"farmers walk\" all find what you'd expect.","Exercises that were filed under Other are now in their proper groups, and a few duplicates are hidden from search. Your history for them is unchanged."]},
   {v:"7.01",d:"17 October 2026",t:"Smarter warm-ups",items:["Swapping a warm-up or stretch now puts the closest options first: ones that work the same muscles, and ones that prepare the muscles your workout that day trains (so a leg day ranks hip and leg drills higher). The best one is marked Closest match, like exercise swaps, and each option shows the muscles it works.","Days you build yourself now get their own warm-up and stretches, picked from the muscles that day's exercises train, instead of the same general list every time. Beginners get the gentler versions."]},
