@@ -44,6 +44,8 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;scrollbar-width:none}
 html::-webkit-scrollbar{display:none}
 *,*::before,*::after{box-sizing:inherit}
+/* fold-out sections pass their content through a slot that drops the inherited sizing, so set it directly */
+details *,details *::before,details *::after{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.5 Geist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -5797,8 +5799,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="7.21";
+const APP_VERSION="7.22";
 const CHANGELOG=[
+  {v:"7.22",d:"29 October 2026",t:"Boxes fit again",items:["Fixed boxes overlapping and buttons sticking out in fold-out sections, like Add your own ingredient in the food calculator and adding a recipe."]},
   {v:"7.21",d:"29 October 2026",t:"Möller's Omega-3",items:["Möller's Omega-3 (cod liver oil) is in the supplement list. Ticking it counts 860 mg of EPA and DHA and 400 IU of vitamin D in your nutrients, and about 41 kcal and 4.6 g of fat in your day. The calories are an estimate, since the label doesn't give them.","Supplements you typed yourself with Möller, cod liver oil or Lebertran in the name count the same way."]},
   {v:"7.2",d:"29 October 2026",t:"More foods, smarter search",items:["66 new foods: more fruit (grapes, strawberries, mango, kiwi, guava, pomegranate…), sunflower and rapeseed oil, cooked chicken and beef mince, toast, Brötchen, cornflakes, rice cakes, tilapia, sardines, mackerel, liver, feta, Gouda, Frischkäse, more beans and lentils, tofu, chia and flax, chocolate, Nutella, jam, sauces, coffee, tea, diet cola and more. There's a new Sweets and snacks group.","Adding to a meal now shows the foods that suit it first: Snack starts with fruit, nuts and yogurt, Breakfast with eggs, bread and dairy.","Filter foods by what they're good for (Snacks, Breakfast, Lunch and dinner, High protein, High fibre, Nuts and seeds) or by type, and sort by protein, protein per calorie, fibre, fewest calories, or a nutrient like magnesium, iron or vitamin C. Works when adding food and in the food calculator.","With the keyboard open, the add-food sheet now sits above it, so you can tap a result without closing the keyboard first.","Your meals can now save carbs and fat. Leave one empty and it's worked out from the calories, marked as an estimate. Editing a meal has the same fields.","Text you type in Your meals, Extra food, recipes and your own ingredients is no longer lost when you switch to another app. Phones sometimes close the app in the background; it now reopens on the same tab with what you typed.","Fixed the carbs on the nuts added in 7.13. They now leave out fibre, like the rest of the app."]},
   {v:"7.13",d:"29 October 2026",t:"More nuts",items:["New in the food list: cashews, walnuts, pistachios, hazelnuts, Brazil nuts, macadamias, pine nuts, mixed nuts, and shelled pumpkin and sunflower seeds, with their nutrients.","Each can be added by the handful (about 28 g, an estimate). Pine nuts and seeds also by the tablespoon (about 9 g).","Values are for plain, unsalted nuts. Salted or honey-roasted ones have more sodium or sugar, so check the pack."]},
