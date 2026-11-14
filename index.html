@@ -1443,6 +1443,28 @@ html[data-style="night"] .egrid .etile .ethd::before{border-radius:10px}
 .seg.segsub button[aria-pressed="true"]{color:var(--blue);font-weight:600}
 html .seg.segsub.hasthumb::before,html .seg.segsub button[aria-pressed="true"]:not(.x),html[data-fam="today"] .seg.segsub.hasthumb::before,html[data-style="focus"] .seg.segsub.hasthumb::before{background:color-mix(in srgb,var(--acc,var(--blue)) 16%,transparent)!important;box-shadow:none;top:2px;bottom:2px}
 html .seg.segsub .segpill{background:color-mix(in srgb,var(--acc,var(--blue)) 16%,transparent)!important;box-shadow:none}
+
+/* 8.42: the row's content slides and fades at the edge, and the action is its own rounded button that grows in the space it leaves */
+.swr.l,.swr.r{-webkit-mask-image:none}
+.swr.l>.sw,.swr.r>.sw{background:transparent!important;border-radius:0!important;box-shadow:none!important}
+.swr.l>.sw{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px);mask-image:linear-gradient(90deg,transparent 0,#000 28px)}
+.swr.r>.sw{-webkit-mask-image:linear-gradient(270deg,transparent 0,#000 28px);mask-image:linear-gradient(270deg,transparent 0,#000 28px)}
+.swr .swbg{top:4px;bottom:4px;border-radius:14px;width:0}
+.swr.l .swbg{right:0;left:auto;width:max(0px,calc(var(--rev) - 10px))}
+.swr.r .swbg{left:0;right:auto;width:max(0px,calc(var(--rev) - 10px))}
+.swr .swbg span,.swr .swbg .swe,.swr .swbg .swd{left:0;right:0;justify-content:center}
+.swr.l .swbg em,.swr.r .swbg em{transform:none}
+html[data-style="soft"] .swr .swbg,html[data-style="today"] .swr .swbg{border-radius:999px}
+html[data-style="journal"] .swr .swbg{border-radius:7px}
+html[data-style="night"] .swr .swbg{border-radius:10px}
+html[data-style="earth"] .swr .swbg{border-radius:16px}
+.swr[data-sw="set"] .swbg{top:2px;bottom:2px}
+/* section headers keep their card while the title slides */
+html[data-fam="today"] .secwrap>.secsw{background:var(--surface)}
+html[data-fam="today"] .secsw>.sw.secbtn,html[data-fam="today"] .secsw.l>.sw.secbtn{background:transparent}
+/* no text-selection magnifier when dragging across charts or swiping rows */
+.chart,.chart *,.chartwrap,.chartwrap *,.swr .sw,.dots7{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.swr .sw :is(input,textarea){-webkit-user-select:text;user-select:text}
 </style>
 </head>
 <body>
@@ -5811,8 +5833,8 @@ function swMove(s,dx){
   const wr=s.wr,side=sg<0?s.wd:s.we,go=eff>80;
   s.fg.style.transform=`translateX(${s.dx}px)`;
   wr.style.setProperty("--rev",eff+"px");
-  wr.style.setProperty("--io",Math.max(0,Math.min(1,(eff-30)/18)).toFixed(2));
-  wr.style.setProperty("--to",Math.max(0,Math.min(1,(eff-side-20)/12)).toFixed(2));
+  wr.style.setProperty("--io",Math.max(0,Math.min(1,(eff-34)/16)).toFixed(2));
+  wr.style.setProperty("--to",Math.max(0,Math.min(1,(eff-10-side-26)/12)).toFixed(2));
   wr.classList.toggle("l",sg<0);wr.classList.toggle("r",sg>0);
   if(go!==wr.classList.contains("go")){wr.classList.toggle("go",go);if(go&&navigator.vibrate)try{navigator.vibrate(5);}catch(_){}}
 }
@@ -6391,8 +6413,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.41";
+const APP_VERSION="8.42";
 const CHANGELOG=[
+  {v:"8.42",d:"14 November 2026",t:"Cleaner swipes",items:["When you swipe a row, its content now slides and fades out at the edge instead of being cut off, and the action shows up as its own rounded button in the space the row leaves, shaped to match your style. It fills with colour once letting go will do the action.","Dragging your finger across a chart, or swiping a row, no longer brings up the text-selection magnifier."]},
   {v:"8.41",d:"14 November 2026",t:"Turn off warm-ups or stretches",items:["Settings → Training has new switches to turn the warm-up or the stretches off for every day. Edit → Page layout does the same.","If you're new or have some experience, the app first explains what you lose by turning them off. Turning them back on is one tap."]},
   {v:"8.4",d:"14 November 2026",t:"Smoother swipes, and warm-ups you can skip",items:["Swiping a row now looks calmer. The colour grows out from the edge as the row slides, the icon appears first and the word fades in once it fits, so nothing gets cut off behind the row. The colour fills in when letting go will do the action. Each style uses its own colours, in light and dark.","Swipe a warm-up or stretch to the left to remove it for today, or swipe the Warm-up or Stretches heading to skip the whole section. You can bring them back with one tap.","If you're new or have some experience, the app first explains why the warm-up or stretches matter and asks if you're sure. You can turn that off for each.","Warm-up, Stretches and the Nutrients card on Eat now slide open and shut instead of jumping, and so does anything else that folds inside a card.","Under Progress, Goals, each nutrient's bar now fills part-way from the food you log, with how much you've had today underneath. Hitting the target still ticks it.","Tapping a meal on Eat shows a rounded highlight that fits the row.","On Spend, the Weekly, Bi-weekly and Monthly switch is now smaller and lighter, so it no longer looks like a copy of the one above it."]},
   {v:"8.33",d:"14 November 2026",t:"Even spacing",items:["Workouts cards in the week strip are now evenly spaced. The extra gap before each Monday is gone there."]},
