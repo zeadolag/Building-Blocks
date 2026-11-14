@@ -1101,7 +1101,7 @@ html[data-fam="today"] .secwrap:not([data-rail="Workout"]){margin:0 0 8px}
 html[data-fam="today"] .secwrap:not([data-rail="Workout"]) .secbtn{background:var(--surface);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm,none)}
 html[data-fam="today"] .secwrap:not([data-rail="Workout"]) .secbtn>.pring,html[data-fam="today"] .secwrap .secbtn>.secic{display:none}
 html[data-fam="today"] .secwrap .secbtn[aria-expanded="true"]{border-radius:16px 16px 16px 16px}
-.afterlbl{margin:18px 2px 8px;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.afterlbl{margin:18px 2px 8px;}.afterlbl:first-child,.dayhead+.afterlbl{margin-top:6px}.afterlbl{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.02em}
 
 /* 7.5: hold an exercise to move it */
 #panel article.ex .exrow,#panel article.ex .exhead,#panel article.ex .sshead{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -3449,9 +3449,9 @@ function renderTrain(){
     $("panel").innerHTML=h;return;}
   const ctx={k,p,day,v2,P};
   const {order,hidden}=layoutCfg(),wi=order.indexOf("warm"),xi=order.indexOf("work");
-  let seenWork=false,afterLbl=false;for(const sec of order){if(hidden.includes(sec))continue;
+  let seenWork=false,afterLbl=false,beforeLbl=false;for(const sec of order){if(hidden.includes(sec))continue;
     if(seenWork&&!afterLbl&&(sec==="cardio"||sec==="stretch")){h+=`<p class="afterlbl">After your workout</p>`;afterLbl=true;}
-    if(sec==="warm")h+=secWarm(ctx,wi<xi);else if(sec==="work"){h+=secWork(ctx);seenWork=true;}else if(sec==="cardio")h+=secCardio(ctx);else if(sec==="stretch")h+=secStretch(ctx);}
+    if(sec==="warm"){const w=secWarm(ctx,wi<xi);if(w&&!seenWork){h+=`<p class="afterlbl">Before your workout</p>`;beforeLbl=true;}h+=w;}else if(sec==="work"){const x=secWork(ctx);if(beforeLbl&&x)h+=`<p class="afterlbl">Your workout</p>`;h+=x;seenWork=true;}else if(sec==="cardio")h+=secCardio(ctx);else if(sec==="stretch")h+=secStretch(ctx);}
   h+=`</section>`;
   $("panel").innerHTML=h;
   runMotion();
@@ -6144,8 +6144,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.2";
+const APP_VERSION="8.21";
 const CHANGELOG=[
+  {v:"8.21",d:"14 November 2026",t:"Train labels",items:["Train now shows Before your workout above the warm-up and Your workout above the exercises, to match After your workout."]},
   {v:"8.2",d:"14 November 2026",t:"Cleaner Eat and Train",items:["Eat is split into Log, Plan and Saved. Log has your calories, nutrients, meals, extra food and supplements. Plan has Suggest meals, meal sizes and the meal builder. Saved has your meals and recipes.","Cheat meal is no longer its own tile. Tap Cheat meal or cheat day? under your calories.","Free day is now Cheat day, and it replaces \"cheat meal, don't count it\", since the two did the same thing. Days you already marked either way show as cheat days.","Train: every exercise is its own card, everything lines up, and Cardio and Stretches sit together under After your workout.","The backup reminder now shows on the Home tab instead of Train.","Progress: Calendar is now called History.","Your real maintenance now needs food logged on at least 2 days in each of the last 4 weeks, so your food average covers the same time as your weight change.","The nutrients note on Eat moved behind the ⓘ."]},
   {v:"8.1",d:"14 November 2026",t:"A shorter Progress tab",items:["Progress is split into Overview, Body, Goals and History, so each part fits on a screen or two.","Body: Measure, Photo and Note buttons open a quick form. Below them you only see what you've logged.","Goals: your targets and goal sit in one card. Tap Recalculate or edit to open the calculator or type your own numbers.","Only the nutrients and deficiencies you track are shown. Add more with + Track a nutrient.","Sections with nothing to show yet shrink to one line.","Less text everywhere. Tap the ⓘ next to a section for the full explanation."]},
   {v:"8.02",d:"14 November 2026",t:"Portrait only",items:["Turning your phone sideways no longer rotates the app. iPhones don't let web apps lock rotation, so Routine shows a \"Turn your phone upright\" screen until you do. On Android the installed app still just stays upright."]},
