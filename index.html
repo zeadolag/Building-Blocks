@@ -729,9 +729,11 @@ html[data-style="focus"] .etile.mealt.done .ethd strong::after{content:" ✓";co
 .wkp.is-sel.is-done b::after{color:inherit}
 #week[data-wk="cards"]{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 12px;margin:0 -2px;scroll-padding:0 40px;overscroll-behavior-x:contain}
 #week[data-wk="cards"]::-webkit-scrollbar{display:none}
-.wkc{flex:none;width:84px;text-align:left;border:0;border-top:4px solid var(--c);border-radius:14px;background:var(--surface);color:var(--ink);padding:7px 9px 8px;box-shadow:var(--shadow)}
-.wkc small{display:block;font-size:11px;color:var(--muted)}
-.wkc b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wkc{flex:none;width:76px;text-align:left;border:0;border-top:3px solid var(--c);border-radius:12px;background:var(--surface);color:var(--ink);padding:5px 8px 6px;box-shadow:var(--shadow);display:grid;gap:1px}
+.wkc small{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:10.5px;line-height:1.3;color:var(--muted)}
+.wkc .wks{font-weight:700;color:var(--blue);font-size:10.5px}
+.wkc.is-today small span:first-child{color:var(--ink);font-weight:700}
+.wkc b{display:block;font-size:12.5px;line-height:1.3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wkc em{display:block;font-style:normal;font-size:11px;color:var(--muted)}
 .wkc.is-done em{color:var(--blue);font-weight:600}
 .wkc.is-rest{border-top-color:var(--line)}
@@ -790,6 +792,7 @@ html[data-fam="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-wei
   html .navbtn{width:30px;height:30px}
   html .wkp{padding:3px 0 4px}html .wkp b{font-size:14px}html .wkp i{margin-top:1px}
   html .wkc{padding:5px 8px 6px}
+  html #week[data-wk="cards"]{gap:6px;padding-bottom:8px}
   html .island{bottom:calc(6px + env(safe-area-inset-bottom,0px));padding:3px}
   html .itab{flex-direction:row;gap:6px;padding:7px 4px;font-size:12px}
   html .itab svg{width:18px;height:18px}
@@ -1364,6 +1367,12 @@ html[data-style="journal"][data-theme="dark"] #panel article.ex.isopen{border-co
 html[data-style="journal"][data-theme="dark"] .island{border-color:color-mix(in srgb,var(--ink) 55%,transparent)}
 html[data-style="soft"][data-theme="dark"] .field{box-shadow:inset 0 2px 5px rgb(0 0 0 / .35)}
 html[data-style="earth"][data-theme="dark"] .field{background:color-mix(in srgb,var(--surface) 60%,var(--paper))}
+
+/* 8.32: Training journal's Workouts strip as little paper index cards */
+html[data-style="journal"] .wkc{border:1px solid var(--line);border-top:3px solid var(--c);box-shadow:none;border-radius:6px}
+html[data-style="journal"] .wkc b{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:13px}
+html[data-style="journal"] .wkc.is-sel{box-shadow:2px 2px 0 var(--ink);border-color:var(--ink);border-top-color:var(--c)}
+html[data-style="journal"] .wkc.is-rest{border-top-style:dashed}
 </style>
 </head>
 <body>
@@ -3026,8 +3035,10 @@ function renderHeader(){
   sub.textContent=d.toLocaleDateString(undefined,sel===t?{weekday:"short",day:"numeric",month:"short"}:{day:"numeric",month:"short",year:d.getFullYear()!==parseKey(t).getFullYear()?"numeric":undefined});
   if(sel!==t){const b=document.createElement("button");b.className="todaybtn";b.textContent="Back to today";b.dataset.act="today";sub.append(" ",b);}
 }
-const WK_IDS=["pills","cards","dots","circles"];
-function wkMode(){const v=themeCfg().wk;return WK_IDS.includes(v)?v:(styleId()==="focus"?"cards":"pills");}
+const WK_IDS=["pills","cards","dots"];
+// each style has its own week strip by default; picking a style goes back to it, and it can still be changed in Settings
+const WK_DEF={today:"pills",soft:"pills",earth:"pills",night:"dots",focus:"dots",journal:"cards"};
+function wkMode(){const v=themeCfg().wk;return WK_IDS.includes(v)?v:(WK_DEF[styleId()]||"pills");}
 function renderWeek(){
   const t=todayKey(),m=wkMode(),scroll=m==="pills"||m==="cards",W=$("week");let h="";
   // Dates and Workouts scroll through many weeks; Dots and Circles show one week
@@ -3040,7 +3051,7 @@ function renderWeek(){
     const cls=`${k===sel?" is-sel":""}${rest?" is-rest":""}${k===t?" is-today":""}${!rest&&pr>=1?" is-done":""}${!rest&&pr>0&&pr<1?" is-part":""}${scroll&&dow===0?" wkmon":""}`,at=`data-day="${k}" style="--c:${P.color};--p:${pr}" aria-label="${esc(label)}"${k===sel?' aria-current="date"':""}`;
     const wd=dt.toLocaleDateString(undefined,{weekday:"short"}).replace(".",""),mo=dt.getDate()===1?dt.toLocaleDateString(undefined,{month:"short"}).replace(".",""):"";
     if(m==="pills")h+=`<button type="button" class="wkp${cls}${mo?" wk1":""}" ${at}><small>${esc(mo||wd)}</small><b>${dt.getDate()}</b><i></i></button>`;
-    else if(m==="cards")h+=`<button type="button" class="wkc${cls}" ${at}><small>${esc(wd)} ${dt.getDate()}${mo?" "+esc(mo):""}</small><b>${esc(P.name)}</b><em>${rest?"Rest":pr>=1?"Done":pr>0?Math.round(pr*100)+"% done":k<t?"Not logged":k===t?"Today":"Planned"}</em></button>`;
+    else if(m==="cards")h+=`<button type="button" class="wkc${cls}" ${at} aria-label="${esc(wd)} ${dt.getDate()}${mo?" "+esc(mo):""}: ${esc(P.name)}, ${rest?"rest day":pr>=1?"done":pr>0?Math.round(pr*100)+"% done":k<t?"not logged":k===t?"today":"planned"}"><small><span>${esc(wd)} ${dt.getDate()}${mo?" "+esc(mo):""}</span>${rest?"":pr>=1?`<span class="wks ok" aria-hidden="true">✓</span>`:pr>0?`<span class="wks" aria-hidden="true">${Math.round(pr*100)}%</span>`:""}</small><b>${esc(P.name)}</b></button>`;
     else if(m==="dots")h+=`<button type="button" class="wkd${cls}" ${at}><i></i><small>${"MTWTFSS"[dow]}</small></button>`;
     else h+=`<button class="plate${cls}" ${at}><span class="disc"></span><span class="wd">${"MTWTFSS"[dow]}</span></button>`;
   }
@@ -3277,7 +3288,7 @@ function singleCard(e,ctx){
   const rt=restFor(id,p,k),uni=v2&&UNI[id];
   ctx._rest=rt&&(sets>1||drop)&&!uni?`<button type="button" class="restbtn restchip" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time."><span class="chip">${IC.watch}${(x=>x<60?x+" s":Math.floor(x/60)+":"+String(x%60).padStart(2,"0"))(Math.round(restSecs(id,p,k)))}</span></button>`:"";
   let h=`<article class="card ex isopen${ctx.cur===id&&styleId()==="focus"&&!fShow.has(k+":"+id)?" fcur":""}" data-ex="${id}">`+headerHtml(e,ctx);ctx._rest="";
-  if(rt&&(sets>1||drop)&&uni)h+=`<button type="button" class="restbtn" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">${IC.watch}${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
+  if(rt&&(sets>1||drop)&&uni)h+=`<button type="button" class="restbtn" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">${IC.watch}${restShort(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
   h+=lastLine(id,k,sets,target,flag,v2)+howtoHtml(id,name)+(tipsOn()&&v2&&tipShow("form")?`<p class="formtip">Focus on form first. If your form starts to slip, the weight is too heavy, so lower it. Too hard right now? Tap the name and choose <b>Swap exercise</b> for an easier option.</p>`:"");
   const {rws,rc,types}=rowsInfo(day,e);let num=0,dropNoted=false;
   for(let i=0;i<rc;i++){const r=rws[i]||{w:"",r:"",d:false},isDrop=types[i]==="d";
@@ -3291,7 +3302,7 @@ function supersetCard(group,ctx){
    const open=key in exState?exState[key]:ctx.cur===gk,all=tot>0&&dn>=tot;
    if(!open)return `<article class="card ex exfold ss${all?" isdone":""}" data-g="${esc(gk)}"><button type="button" class="exrow" data-act="exexp" aria-expanded="false" aria-label="Superset: ${esc(group.map(e=>e[1]).join(" and "))}. Tap to open">${ring(tot?dn/tot:0,all)}<span class="exdt"><strong>${group.map(e=>esc(e[1])).join(" + ")}</strong><small>Superset · ${all?`${tot} sets done`:`${Math.max(...group.map(e=>e[2]))} rounds${dn?` · ${dn} of ${tot} done`:""}`}</small></span>${(()=>{const I=group.map(e=>rowsInfo(day,e)),n=Math.max(...I.map(x=>x.rc));return n&&n<=8?`<span class="sdots" aria-hidden="true">${Array.from({length:n},(_,j)=>`<i${I.every(x=>j>=x.rc||(x.rws[j]&&x.rws[j].d))?' class="on"':""}></i>`).join("")}</span>`:"";})()}${IC.chev}</button></article>`;}
   const last=group[group.length-1],rt=restFor(last[0],p,k)||"60–90 s";
-  let h=`<article class="card ex ss isopen" data-g="${esc(gk)}"><div class="sshead"><p class="sslbl">${kw("Superset")}</p><button type="button" class="icob fold" data-act="excol" aria-label="Fold superset">${IC.chev}</button></div>${kw(`<p class="restline" style="margin:0">Do one set of each back to back, then rest and start the next round.</p>`)}<button type="button" class="restbtn" style="margin-bottom:8px" data-hold="rest" data-id="${last[0]}" aria-label="Rest between rounds: ${secLabel(restSecs(last[0],p,k))}. Tap to start the rest timer, hold to change the time.">Rest between rounds <span class="chip">${IC.watch}${secLabel(restSecs(last[0],p,k))}${restOverride(last[0])?" (yours)":""}</span></button>`;
+  let h=`<article class="card ex ss isopen" data-g="${esc(gk)}"><div class="sshead"><p class="sslbl">${kw("Superset")}</p><button type="button" class="icob fold" data-act="excol" aria-label="Fold superset">${IC.chev}</button></div>${kw(`<p class="restline" style="margin:0">Do one set of each back to back, then rest and start the next round.</p>`)}<button type="button" class="restbtn" style="margin-bottom:8px" data-hold="rest" data-id="${last[0]}" aria-label="Rest between rounds: ${secLabel(restSecs(last[0],p,k))}. Tap to start the rest timer, hold to change the time.">Rest between rounds <span class="chip">${IC.watch}${restShort(restSecs(last[0],p,k))}${restOverride(last[0])?" (yours)":""}</span></button>`;
   group.forEach((e,j)=>{h+=`<div class="ssx" data-ex="${e[0]}">`+headerHtml(e,ctx,L[j])+lastLine(e[0],k,e[2],e[3],e[4],v2)+howtoHtml(e[0],e[1])+`</div>`;});
   const infos=group.map(e=>rowsInfo(day,e)),nums=group.map(()=>0),max=Math.max(...infos.map(x=>x.rc));
   for(let r=0;r<max;r++){
@@ -3348,7 +3359,7 @@ function focusCard(k,W){
   <div class="fsteps${flag==="time"?" one":""}">${flag==="time"?"":fld("w",wl)}${fld("r",rl)}</div>
   <button type="button" class="flog" data-act="flog" data-id="${id}" data-i="${i}">LOG SET</button>
   ${NW&&!prev?`<p class="hint" style="margin:0 0 8px">You hit ${NW.top} reps on every set last time, so try ${fmt1(NW.w)} ${U()} (+${fmt1(NW.inc)}).</p>`:""}
-  <div class="fmeta"><span>${last&&String(last.r||"").trim()?"Last time: "+setText(last,flag):"No earlier record"}</span><span>Rest ${secLabel(restSecs(id,W.p,k))}</span></div>
+  <div class="fmeta"><span>${last&&String(last.r||"").trim()?"Last time: "+setText(last,flag):"No earlier record"}</span><span>Rest ${restShort(restSecs(id,W.p,k))}</span></div>
   ${done.length?`<div class="fdone">${done.map(r=>`<span>${setText(r,flag)}</span>`).join("")}</div>`:""}
   <button type="button" class="fmore" data-act="fshow" data-id="${id}">${fShow.has(k+":"+id)?"Hide the set list":"Show all sets and options"}</button></div>`;}
 function refreshTop(k){if(tab!=="train"||sel!==k)return;
@@ -3419,7 +3430,7 @@ function renderLayoutEdit(k,p,P){
   <div class="buy" style="margin-top:8px"><input class="field" id="rtS" placeholder="Add a stretch" aria-label="New stretch"><button type="button" class="btn" style="margin:0" data-act="rtadd" data-k="s">Add</button></div>
   ${(custom().stretch||{})[p]?`<button class="linkbtn" data-act="rtreset" data-k="s">Back to the suggested stretches</button>`:""}`);
 }
-$("panel").addEventListener("click",e=>{const w=e.target.closest("[data-wstyle]");if(!w)return;const T=ensureTheme();if(w.dataset.wstyle==="today")delete T.style;else T.style=w.dataset.wstyle;persist("settings");applyTheme();document.querySelectorAll("[data-wstyle]").forEach(x=>x.setAttribute("aria-pressed",String(x===w)));});
+$("panel").addEventListener("click",e=>{const w=e.target.closest("[data-wstyle]");if(!w)return;const T=ensureTheme();if(w.dataset.wstyle==="today")delete T.style;else T.style=w.dataset.wstyle;delete T.wk;persist("settings");applyTheme();document.querySelectorAll("[data-wstyle]").forEach(x=>x.setAttribute("aria-pressed",String(x===w)));});
 // Weekly recap: shown on Sunday (and Monday, for the week before) until dismissed
 function weekMon(k){const d=parseKey(k).getDay();return addDays(k,-((d+6)%7));}
 function recapWeek(){const t=todayKey(),d=parseKey(t).getDay();if(d===0)return weekMon(t);if(d===1)return addDays(weekMon(t),-7);return null;}
@@ -5811,7 +5822,7 @@ function settingsBody(){
     if(st==="today")h+=`<p class="lbl" style="margin-top:14px">Tab colours</p><p class="note" style="margin:-4px 0 8px">Each tab uses its own colour for buttons, bars and highlights.</p><div class="daycols">${TAB_ORDER.map(t=>`<label class="daycol"><input type="color" data-ttab="${t}" value="${(T.tabc||{})[t]||TABC[t]}"><span>${TABDEF[t][0]}</span></label>`).join("")}</div>${T.tabc&&Object.keys(T.tabc).length?`<button type="button" class="linkbtn" data-ttabreset="1">Reset tab colours</button>`:""}`;
     else h+=`<p class="lbl" style="margin-top:14px">Accent colour</p><div class="swatches">${FACCS.map(a=>`<button type="button" class="swatch" data-tfacc="${a[0]}" aria-pressed="${(T.facc||"#C9F23E").toLowerCase()===a[0].toLowerCase()}" aria-label="${a[1]} accent" style="--sw:${a[0]}"><span></span><small>${a[1]}</small></button>`).join("")}<label class="swatch custom" aria-label="Custom accent colour"><input type="color" data-tfaccc value="${T.facc||"#C9F23E"}"><small>Custom</small></label></div>`;
   }
-  {const wm=wkMode();h+=`<p class="lbl" style="margin-top:14px">Week at the top</p><div class="seg seg4" role="group" aria-label="Week at the top">${[["pills","Dates"],["cards","Workouts"],["dots","Dots"],["circles","Circles"]].map(([v,l])=>`<button type="button" data-twk="${v}" aria-pressed="${wm===v}">${l}</button>`).join("")}</div>`;}
+  {const wm=wkMode();h+=`<p class="lbl" style="margin-top:14px">Week at the top</p><div class="seg seg3" role="group" aria-label="Week at the top">${[["pills","Dates"],["cards","Workouts"],["dots","Dots"]].map(([v,l])=>`<button type="button" data-twk="${v}" aria-pressed="${wm===v}">${l}</button>`).join("")}</div>`;}
   h+=`<p class="lbl" style="margin-top:14px">Workout colours</p><div class="daycols">${days.map(id=>`<label class="daycol"><input type="color" data-tday="${id}" value="${cssHex((T.days||{})[id]||base(id).color)}"><span>${esc(PL[id].name)}</span></label>`).join("")}</div>`;
   return h;
 }
@@ -5828,7 +5839,7 @@ bothOn("click",e=>{
   const b=e.target.closest("[data-tbg]");if(b){const T=ensureTheme();if(b.dataset.tbg==="default")delete T.bg;else T.bg=b.dataset.tbg;themeChanged(true);return;}
   const a=e.target.closest("[data-tacc]");if(a){const T=ensureTheme();if(a.dataset.tacc==="#2563EB")delete T.accent;else T.accent=a.dataset.tacc;themeChanged(true);return;}
   const wk=e.target.closest("[data-twk]");if(wk){ensureTheme().wk=wk.dataset.twk;themeChanged(true);return;}
-  const sy=e.target.closest("[data-tstyle]");if(sy){const T=ensureTheme(),u=snap(["settings"]);if(sy.dataset.tstyle==="today")delete T.style;else T.style=sy.dataset.tstyle;themeChanged(true);toast(((STYLE_INFO.find(x=>x[0]===sy.dataset.tstyle)||[])[1]||"Style")+" on",u);return;}
+  const sy=e.target.closest("[data-tstyle]");if(sy){const T=ensureTheme(),u=snap(["settings"]);if(sy.dataset.tstyle==="today")delete T.style;else T.style=sy.dataset.tstyle;delete T.wk;themeChanged(true);toast(((STYLE_INFO.find(x=>x[0]===sy.dataset.tstyle)||[])[1]||"Style")+" on",u);return;}
   const b6=e.target.closest("[data-tbg6]");if(b6){const T=ensureTheme();T.bg6=b6.dataset.tbg6;delete T.bgc;themeChanged(true);return;}
   if(e.target.closest("[data-tbgreset]")){delete ensureTheme().bgc;themeChanged(true);return;}
   if(e.target.closest("[data-ttabreset]")){delete ensureTheme().tabc;themeChanged(true);return;}
@@ -6227,8 +6238,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.31";
+const APP_VERSION="8.32";
 const CHANGELOG=[
+  {v:"8.32",d:"14 November 2026",t:"Week strip per style",items:["Each style now has its own week at the top: Dates in Today, Soft and Earth and clay, Dots in Night gym and Focus, and Workouts in Training journal. Picking a style switches to its own; you can still change it in Settings → Appearance.","Workouts cards are smaller: the date and a tick or percentage on one line, the workout name below. In Training journal they look like little index cards.","Circles has been removed. If you used it, you get your style's own week strip.","Rest times on Train drop the word min: 1:30 instead of 1:30 min."]},
   {v:"8.31",d:"14 November 2026",t:"Better dark modes",items:["Dark mode now keeps each style's character instead of just turning everything dark grey.","Training journal: a midnight-blue notebook with the ruled lines still showing, and the exercise you're on outlined in rust with its hard shadow.","Earth and clay: warm clay cards on deep forest green, with the green tab bar kept.","Soft: the background picks up each tab's colour, and cards glow softly in it so they still look lifted.","Today: warmer cocoa cards with a faint top edge, so they stand out from the background.","In every dark style, ticked sets use the style's colour instead of a washed-out grey."]},
   {v:"8.3",d:"14 November 2026",t:"Less scrolling everywhere",items:["Thinner header: the date sits next to the title and the week strip is smaller, so every tab starts higher up.","The week strip no longer drifts to another week when you switch tabs or your phone's address bar hides.","Home: once your workout is done, the big card shrinks to one line. Tick off your supplements right on Home. The week bars are now labelled with each day's workout.","Train: the rest timer is a small chip next to the exercise name. The drop set and form tips show on the first 3 days, then sit behind the ⓘ next to + Drop set.","Eat: nutrients fold into one line (tap to open), with the water button still there. The quick tips show once as a pop-up. A ~ in front of carbs or fat means part of it is estimated.","Progress → Goals: your check-in history, showing what you changed each week.","Spend is split into This week, Shopping list and Products. Products no longer say Not bought yet, and an empty week shows one line.","Settings: Nutrients to track and Health tracking are now one page, Nutrients and health. Install as an app becomes Share the app once it's installed."]},
   {v:"8.21",d:"14 November 2026",t:"Train labels",items:["Train now shows Before your workout above the warm-up and Your workout above the exercises, to match After your workout."]},
@@ -6692,6 +6704,8 @@ function holdSecs(h){if(!h||/rep|breath/i.test(h))return 0;const n=(String(h).ma
 function restOverride(id){const o=(tcfg().ex||{})[id];return o>0?o:0;}
 function restRec(id,p,k){return parseSecs(restFor(id,p,k))||90;}
 function restSecs(id,p,k){return restOverride(id)||(tcfg().def>0?tcfg().def:(styleRest(id)||restRec(id,p,k)));}
+// short rest time for chips: 45 s, 1:30, 2:00 (no "min")
+function restShort(s){s=Math.round(s);return s<60?s+" s":Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
 function secLabel(s){s=Math.round(s);if(s<60)return s+" s";const m=Math.floor(s/60),r=s%60;return r?m+":"+String(r).padStart(2,"0")+" min":m+" min";}
 const clock=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
 const rtEl=document.createElement("div");rtEl.id="rt";rtEl.setAttribute("role","timer");rtEl.setAttribute("aria-live","off");document.body.appendChild(rtEl);
