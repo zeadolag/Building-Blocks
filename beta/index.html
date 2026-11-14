@@ -783,6 +783,7 @@ html[data-fam="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-wei
 #week.scroller>button{scroll-snap-align:center}
 #week[data-wk="pills"]>.wkp{flex:0 0 calc((100% - 24px) / 7)}
 #week.scroller>.wkmon{margin-left:6px}
+#week.scroller[data-wk="cards"]>.wkmon{margin-left:0}
 .wkp.wk1 small{color:var(--blue);font-weight:700}
 .wkp.wk1.is-sel small{color:inherit}
 /* Landscape on phones: compact header and tab bar so there's room for the content */
@@ -6238,8 +6239,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.32";
+const APP_VERSION="8.33";
 const CHANGELOG=[
+  {v:"8.33",d:"14 November 2026",t:"Even spacing",items:["Workouts cards in the week strip are now evenly spaced. The extra gap before each Monday is gone there."]},
   {v:"8.32",d:"14 November 2026",t:"Week strip per style",items:["Each style now has its own week at the top: Dates in Today, Soft and Earth and clay, Dots in Night gym and Focus, and Workouts in Training journal. Picking a style switches to its own; you can still change it in Settings → Appearance.","Workouts cards are smaller: the date and a tick or percentage on one line, the workout name below. In Training journal they look like little index cards.","Circles has been removed. If you used it, you get your style's own week strip.","Rest times on Train drop the word min: 1:30 instead of 1:30 min."]},
   {v:"8.31",d:"14 November 2026",t:"Better dark modes",items:["Dark mode now keeps each style's character instead of just turning everything dark grey.","Training journal: a midnight-blue notebook with the ruled lines still showing, and the exercise you're on outlined in rust with its hard shadow.","Earth and clay: warm clay cards on deep forest green, with the green tab bar kept.","Soft: the background picks up each tab's colour, and cards glow softly in it so they still look lifted.","Today: warmer cocoa cards with a faint top edge, so they stand out from the background.","In every dark style, ticked sets use the style's colour instead of a washed-out grey."]},
   {v:"8.3",d:"14 November 2026",t:"Less scrolling everywhere",items:["Thinner header: the date sits next to the title and the week strip is smaller, so every tab starts higher up.","The week strip no longer drifts to another week when you switch tabs or your phone's address bar hides.","Home: once your workout is done, the big card shrinks to one line. Tick off your supplements right on Home. The week bars are now labelled with each day's workout.","Train: the rest timer is a small chip next to the exercise name. The drop set and form tips show on the first 3 days, then sit behind the ⓘ next to + Drop set.","Eat: nutrients fold into one line (tap to open), with the water button still there. The quick tips show once as a pop-up. A ~ in front of carbs or fat means part of it is estimated.","Progress → Goals: your check-in history, showing what you changed each week.","Spend is split into This week, Shopping list and Products. Products no longer say Not bought yet, and an empty week shows one line.","Settings: Nutrients to track and Health tracking are now one page, Nutrients and health. Install as an app becomes Share the app once it's installed."]},
