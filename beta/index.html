@@ -112,6 +112,30 @@ textarea.field.area{height:auto;min-height:88px;padding:10px 12px;resize:vertica
 .tgrid .of{display:block}
 .pagetitle{font-size:26px;font-weight:600;letter-spacing:-.025em;margin:6px 0 4px}
 .sec-title{font-size:16px;font-weight:600;margin:22px 0 8px}
+.sect{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.infob{width:28px;height:28px;border:0;background:none;color:var(--muted);display:inline-grid;place-items:center;padding:0;border-radius:50%;flex:none;cursor:pointer}
+.infob:active{background:var(--mutedbg)}
+.lblrow{display:flex;align-items:center;justify-content:space-between}.lblrow .infob{width:24px;height:24px;margin:-4px -4px -4px 0}
+.elist{padding-top:4px;padding-bottom:4px}
+.erow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0}
+.erow+.erow{border-top:1px solid var(--line)}
+.erow b{display:block;font-weight:600;font-size:15px}.erow small{display:block;color:var(--muted);font-size:13px;margin-top:1px}
+.logrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.logrow .btn{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:auto;padding:12px 4px;font-size:14px;cursor:pointer}
+.logrow .btn svg{width:22px;height:22px}
+.logrow .btn,html[data-style] .logrow .btn{border-radius:14px}
+.subrow{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.subrow .lbl{display:block}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 10px}
+.mgrid b{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}.mgrid small{display:block;font-size:12.5px;color:var(--muted)}
+.mgrid small.dn{color:var(--green,var(--blue))}
+.tcin{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.npick{border-top:1px solid var(--line)}.npick:first-of-type{border-top:0}
+.npick summary,.nprow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;list-style:none;cursor:pointer}
+.npick summary::-webkit-details-marker{display:none}
+.npick summary span,.nprow span{min-width:0}
+.npick strong,.nprow strong{display:block}.npick small,.nprow small{display:block;color:var(--muted);font-size:13px}
+.npick .btn.sm{margin:0;flex:none;width:auto;padding:0 14px}
+.npick .suggbody{padding:0 0 10px}
 .stepl{margin:0 0 6px;font-size:12px;font-weight:500;color:var(--muted)}
 .welcome{border-color:var(--line)}
 .notice strong{display:block;font-weight:600;font-size:15px}
@@ -2834,7 +2858,7 @@ const keyOf=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const parseKey=k=>{const a=k.split("-").map(Number);return new Date(a[0],a[1]-1,a[2]);};
 const addDays=(k,n)=>{const d=parseKey(k);d.setDate(d.getDate()+n);return keyOf(d);};
 const todayKey=()=>keyOf(new Date());
-let sel=todayKey(),tab="home",progView="body",lastTab="home";
+let sel=todayKey(),tab="home",progView="over",lastTab="home";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>Math.round(n).toLocaleString();
@@ -2925,7 +2949,6 @@ function renderTabContent(){
   if(tab==="home")renderHome();else if(tab==="train")renderTrain();else if(tab==="eat")renderEat();else if(tab==="spend")renderSpend();else if(tab==="settings")renderSettings();
   else renderBody();
 }
-function progSeg(){const p=$("panel");if(!p||p.querySelector(".progseg"))return;p.insertAdjacentHTML("afterbegin",`<div class="seg progseg" role="group" aria-label="Progress"><button type="button" data-prog="body" aria-pressed="${progView!=="cal"}">Body</button><button type="button" data-prog="cal" aria-pressed="${progView==="cal"}">Calendar</button></div>`);}
 function greeting(){const h=new Date().getHours(),n=String((store.settings.profile||{}).name||"").trim();return (h<5?"Good evening":h<12?"Good morning":h<18?"Good afternoon":"Good evening")+(n?", "+n:"");}
 function renderHeader(){
   const d=parseKey(sel),t=todayKey();
@@ -3383,10 +3406,10 @@ function renderHome(){
 $("panel").addEventListener("click",e=>{const b=e.target.closest("[data-hq]");if(!b||tab!=="home")return;const a=b.dataset.hq;
   if(a==="meal"){openTab("eat");const hr=new Date().getHours(),sl=hr<11?"breakfast":hr<15?"lunch":hr<18?"snack":"evening";setTimeout(()=>addFoodSheet(sl),60);}
   else if(a==="set"){openTab("train");setTimeout(()=>{const x=document.querySelector("#panel .fcard")||document.querySelector("#panel article.ex.isopen");if(x)window.scrollTo(0,Math.max(0,x.getBoundingClientRect().top+scrollY-90));},60);}
-  else if(a==="weigh"){progView="body";openTab("body");setTimeout(()=>{const x=document.querySelector('#panel [data-body="weight"]');if(x){window.scrollTo(0,Math.max(0,x.getBoundingClientRect().top+scrollY-140));x.focus({preventScroll:true});}},60);}
+  else if(a==="weigh"){progView="over";openTab("body");setTimeout(()=>{const x=document.querySelector('#panel [data-body="weight"]');if(x){window.scrollTo(0,Math.max(0,x.getBoundingClientRect().top+scrollY-140));x.focus({preventScroll:true});}},60);}
   else if(a==="spend")openTab("spend");
-  else if(a==="train"){progView="body";openTab("body");}
-  else if(a==="note"){progView="body";openTab("body");setTimeout(()=>{const x=$("bnT");if(x)window.scrollTo(0,Math.max(0,x.getBoundingClientRect().top+scrollY-160));},60);}});
+  else if(a==="train"){progView="over";openTab("body");}
+  else if(a==="note"){progView="body";openTab("body");setTimeout(bodyNoteSheet,60);}});
 $("panel").addEventListener("click",e=>{const b=e.target.closest(".hwb[data-day]");if(!b)return;sel=b.dataset.day;render();});
 function renderTrain(){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],day=store.days[k]||{},v2=k>=NEWPLAN;
@@ -4180,41 +4203,48 @@ function dots7(k,fn){let h=`<div class="dots7" aria-hidden="true">`;for(let i=6;
 function last30(k,fn,from){let n=0,tot=0;for(let i=0;i<30;i++){const x=addDays(k,-i);if(from&&x<from)break;tot++;if(fn(x))n++;}return {n,tot};}
 const openSugg=new Set();
 function defsHtml(k){
-  const D=myDefs(),H=hcfg(),labs=store.settings.labs||{};
-  let h=`<h2 class="sec-title" data-rail="Deficiencies">Deficiencies</h2><div class="card">`;
-  if(!D.length)h+=`<p class="note" style="margin-top:0">Been told you're low on something, like iron or vitamin D? Add it here to keep track of ${H.intake&&H.labs?"what you take and your blood test results":H.labs?"your blood test results":"taking your supplement or eating enough of it"}.</p>`;
+  const D=myDefs(),H=hcfg(),labs=store.settings.labs||{};if(!D.length)return "";
+  let h=secT("Deficiencies","defs").replace('class="sec-title sect"','class="sec-title sect" data-rail="Deficiencies"')+`<div class="card">`;
   for(const d of D){const M=defMeta(d),[tn,unit,lo,hi]=d.range||M.test,L=(labs[d.id]||[]).slice().sort((a,b)=>a.k<b.k?-1:1);
     h+=`<div class="defrow"><div class="defhd">${H.intake?`<button class="rtick" data-act="defhit" data-id="${esc(d.id)}" aria-pressed="${defHit(k,d.id)}" aria-label="Took ${esc(M.n)} or ate enough of it ${k===todayKey()?"today":"on this day"}">✓</button>`:""}<span><strong>${esc(M.n)}</strong><small>${H.intake?(()=>{const r=last30(k,x=>defHit(x,d.id),d.start);return `${r.n} of the last ${r.tot} day${r.tot===1?"":"s"}`;})():"Blood test results"}</small></span><button type="button" class="icob" data-act="definfo" data-id="${esc(d.id)}" aria-label="About ${esc(M.n)}">${IC.search}</button><button type="button" class="rm" data-act="defrm" data-id="${esc(d.id)}" aria-label="Stop tracking ${esc(M.n)}">×</button></div>
     ${H.intake?dots7(k,x=>defHit(x,d.id)):""}`;
     if(H.labs){const last=L[L.length-1];
-      if(last){const v=num(last.v),st=lo&&v<lo?"below the typical range":hi&&v>hi?"above the typical range":"in the typical range";
-        h+=`<p class="note" style="margin:8px 0 0"><b style="color:var(--ink)">${tn}: ${esc(last.v)} ${esc(unit)}</b> on ${shortDate(last.k)}, ${st}${L.length>1?`. First test: ${esc(L[0].v)} ${esc(unit)} on ${shortDate(L[0].k)}`:""}.</p>`;
+      if(last){const v=num(last.v),st=lo&&v<lo?"below typical":hi&&v>hi?"above typical":"in range";
+        h+=`<p class="note" style="margin:8px 0 0"><b style="color:var(--ink)">${tn}: ${esc(last.v)} ${esc(unit)}</b> · ${shortDate(last.k)} · ${st}${L.length>1?`<br>First: ${esc(L[0].v)} ${esc(unit)} on ${shortDate(L[0].k)}`:""}</p>`;
         if(L.length>=2){const t0=L[0].k;h+=lineChart("lab-"+d.id,[{name:tn,kind:"line",pts:L.map(x=>({t:dayDiff(t0,x.k),k:x.k,v:num(x.v)}))}],{unit,label:tn+" over time",dec:unit==="mmol/L"?2:1,minPad:0.1});}}
       h+=`<div class="labrow"><input class="field" data-labv="${esc(d.id)}" inputmode="decimal" placeholder="${esc(tn)} (${esc(unit)})" aria-label="${esc(tn)} result"><input class="field" type="date" data-labd="${esc(d.id)}" value="${sel}" aria-label="Test date"><button class="btn sm" style="height:40px" data-act="labadd" data-id="${esc(d.id)}">Add</button></div>
-      <p class="rangeband">Typical range ${lo}–${hi} ${esc(unit)}. Labs differ, so the range on your report is what counts.</p>`;}
+      <p class="rangeband">Typical ${lo}–${hi} ${esc(unit)}. Your lab's range counts.</p>`;}
     h+=`</div>`;}
-  const left=DEFS.filter(x=>!D.some(d=>d.id===x.id));
-  h+=`<div class="pair" style="margin-top:${D.length?10:6}px"><select class="field" id="defPick" aria-label="Nutrient">${left.map(x=>`<option value="${x.id}">${x.n}</option>`).join("")}<option value="other">Something else</option></select><button class="btn ghost" style="margin:0" data-act="defadd">Track it</button></div>
-  <p class="note">This helps you stick to your plan. It's not medical advice, so follow what your doctor tells you, and get retested when they say.</p></div>`;
-  return h;
+  return h+`</div>`;
 }
+function defOther(){const S=store.settings;openSheet("Track something else",fld("Name","dfN","")+`<div class="pair" style="margin-top:8px">${fld("Test unit (optional)","dfU","")}</div>`,[{label:"Add",fn:()=>{const nm=$("dfN").value.trim();if(!nm)return false;S.defs=myDefs().concat([{id:"c"+Date.now().toString(36),n:nm,start:sel,range:[nm,$("dfU").value.trim(),0,0]}]);persist("settings");renderBody();}},{label:"Cancel",cls:"btn ghost"}]);}
+function nutPick(){const on=nutOn(),D=myDefs(),SU=supps(),sg=SUGG.filter(x=>!on.includes(x.id)),df=DEFS.filter(x=>!D.some(d=>d.id===x.id));
+  let b=sg.length?`<p class="lbl" style="margin-top:0">Suggested, all optional</p>`+sg.map(x=>{const I=x.supp&&SUPPLIB.find(s=>s.id===x.supp),inSupp=I&&SU.some(n=>I.re.test(n));
+    return `<details class="npick"><summary><span><strong>${esc(x.n)}</strong><small>${typeof x.goal==="function"?x.goal():esc(x.goal)}</small></span><button type="button" class="btn ghost sm" data-ntrack="${x.id}">Track</button></summary><div class="suggbody"><p><b>Why:</b> ${esc(typeof x.why==="function"?x.why():x.why)}</p><p><b>Where:</b> ${esc(x.food)}</p>${I?`<button type="button" class="btn ghost sm" data-nsupp="${x.id}"${inSupp?" disabled":""}>${inSupp?"In your supplements":"Add to supplements"}</button>`:""}</div></details>`;}).join(""):"";
+  b+=`<p class="lbl"${sg.length?"":' style="margin-top:0"'}>Been told you're low on something?</p>`+df.map(x=>`<div class="npick"><div class="nprow"><span><strong>${esc(x.n)}</strong><small>${esc(x.test[0])} test</small></span><button type="button" class="btn ghost sm" data-dtrack="${x.id}">Track</button></div></div>`).join("")+`<div class="npick"><div class="nprow"><span><strong>Something else</strong></span><button type="button" class="btn ghost sm" data-dtrack="other">Add</button></div></div><p class="note">Tap a suggestion's name for why it helps. Not medical advice.</p>`;
+  openSheet("Track a nutrient",b,[{label:"Close",cls:"btn ghost"}]);}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("dialog [data-ntrack],dialog [data-dtrack],dialog [data-nsupp]");if(!t)return;e.preventDefault();e.stopPropagation();const S=store.settings;
+  if(t.dataset.ntrack){const id=t.dataset.ntrack;S.extrasOn=(S.extrasOn||[]).filter(x=>x!==id).concat([id]);S.nutOff=(S.nutOff||[]).filter(x=>x!==id);persist("settings");closeSheet();renderBody();toast("Tracking "+SUGG.find(x=>x.id===id).n);}
+  else if(t.dataset.dtrack){const id=t.dataset.dtrack;if(id==="other"){defOther();return;}S.defs=myDefs().concat([{id,start:sel}]);persist("settings");closeSheet();renderBody();toast("Tracking "+defMeta({id}).n);}
+  else if(t.dataset.nsupp){const x=SUGG.find(y=>y.id===t.dataset.nsupp),I=x&&SUPPLIB.find(y=>y.id===x.supp);if(!I)return;ensureSupps().push(I.n);suppTrack(I.n);persist("settings");t.disabled=true;t.textContent="In your supplements";toast(I.n.split(",")[0]+" added to your supplements");}
+});
 function suggHit(k,id){const d=store.days[k];if(!d)return false;if((d.xtra||{})[id])return true;if(NUTS.some(n=>n[0]===id)){const t=eatTotals(d);if(nutVal(id,t)>=nutGoal(id,k))return true;}const S=SUGG.find(x=>x.id===id);return !!(S&&S.supp&&suppTaken(d,S.supp));}
 function suggHtml(k){
-  const on=nutOn(),SU=supps();
-  let h=`<h2 class="sec-title" data-rail="Suggested">Suggested nutrients</h2><div class="card"><p class="note" style="margin:0 0 10px">None of these are necessary. They're extras that could help, depending on how you eat and train. Track the ones you want to work on.</p>`;
-  const sugEnd=`<p class="note" style="font-size:12.5px">${regionNote()}</p>`;
-  for(const x of SUGG){const tr=on.includes(x.id),open=openSugg.has(x.id),I=x.supp&&SUPPLIB.find(s=>s.id===x.supp),inSupp=I&&SU.some(n=>I.re.test(n));
-    h+=`<div class="sugg"><div class="sugghd">${tr?`<button class="rtick" data-act="sugghit" data-id="${x.id}" aria-pressed="${suggHit(k,x.id)}" aria-label="Hit ${esc(x.n)} ${k===todayKey()?"today":"on this day"}">✓</button>`:""}<span><strong>${esc(x.n)}<span class="optional">Optional</span></strong><small>${typeof x.goal==="function"?x.goal():esc(x.goal)}</small></span><button type="button" class="icob" data-act="suggopen" data-id="${x.id}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="More about ${esc(x.n)}">${IC.search}</button></div>
-    ${tr?dots7(k,d=>suggHit(d,x.id))+(x.id==="fibre"?`<p class="note" style="margin-top:6px">${r1(eatTotals(store.days[k]||{}).fb)} of ${fibreGoal()} g logged ${k===todayKey()?"today":"that day"}. Foods with fibre values count.</p>`:""):""}
-    ${open?`<div class="suggbody"><p><b>Why it could help:</b> ${esc(typeof x.why==="function"?x.why():x.why)}</p><p><b>Where to get it:</b> ${esc(x.food)}</p><p class="note" style="margin:0">Not necessary for everyone. It might just help.</p>
-      <div class="pair" style="margin-top:8px"><button class="btn ${tr?"ghost":""}" style="margin:0" data-act="suggtrack" data-id="${x.id}">${tr?"Stop tracking":"Track daily"}</button>${I?`<button class="btn ghost" style="margin:0" data-act="suggsupp" data-id="${x.id}"${inSupp?" disabled":""}>${inSupp?"In your supplements":"Add to supplements"}</button>`:""}</div></div>`:""}</div>`;}
-  return h+sugEnd+`</div>`;
+  const on=nutOn(),SU=supps(),T=SUGG.filter(x=>on.includes(x.id));
+  let h=secT("Nutrients","nuts").replace('class="sec-title sect"','class="sec-title sect" data-rail="Nutrients"')+`<div class="card">`;
+  if(!T.length)h+=`<p class="note" style="margin:0 0 4px">Optional extras like fibre, water, creatine or vitamin D.</p>`;
+  for(const x of T){const open=openSugg.has(x.id),I=x.supp&&SUPPLIB.find(s=>s.id===x.supp),inSupp=I&&SU.some(n=>I.re.test(n));
+    h+=`<div class="sugg"><div class="sugghd"><button class="rtick" data-act="sugghit" data-id="${x.id}" aria-pressed="${suggHit(k,x.id)}" aria-label="Hit ${esc(x.n)} ${k===todayKey()?"today":"on this day"}">✓</button><span><strong>${esc(x.n)}</strong><small>${typeof x.goal==="function"?x.goal():esc(x.goal)}</small></span><button type="button" class="icob" data-act="suggopen" data-id="${x.id}" aria-expanded="${open}"${open?' aria-pressed="true"':""} aria-label="More about ${esc(x.n)}">${IC.search}</button></div>
+    ${dots7(k,d=>suggHit(d,x.id))+(x.id==="fibre"?`<p class="note" style="margin-top:6px">${r1(eatTotals(store.days[k]||{}).fb)} of ${fibreGoal()} g ${k===todayKey()?"today":"that day"}</p>`:"")}
+    ${open?`<div class="suggbody"><p><b>Why:</b> ${esc(typeof x.why==="function"?x.why():x.why)}</p><p><b>Where:</b> ${esc(x.food)}</p>
+      <div class="pair" style="margin-top:8px"><button class="btn ghost" style="margin:0" data-act="suggtrack" data-id="${x.id}">Stop tracking</button>${I?`<button class="btn ghost" style="margin:0" data-act="suggsupp" data-id="${x.id}"${inSupp?" disabled":""}>${inSupp?"In your supplements":"Add to supplements"}</button>`:""}</div></div>`:""}</div>`;}
+  return h+`<button type="button" class="btn ghost" data-act="nutpick">+ Track a nutrient</button></div>`;
 }
 function nutSettingsHtml(){const on=nutOn(),S=store.settings;
   return `<p class="note" style="margin-top:0">Choose what shows on the Eat tab. Each one is worked out from the food you log and the supplements you tick.</p>${NUTS.map(([id,l,u])=>`<div class="setrow"><span class="sl">${l}<small>${isLimit(id)?"Stay under":"Your target"}: ${(()=>{const g=nutGoal(id,todayKey());return (u==="L"||g<20?g:fmt(g))+" "+u;})()}${["creatine","omega3","vitd"].includes(id)?", mostly from supplements":""}</small></span><button type="button" class="switch" role="switch" aria-checked="${on.includes(id)}" data-nset="${id}" aria-label="Track ${l}"><i></i></button></div>`).join("")}
   <div class="setrow"><span class="sl">Track supplements I add<small>Adding creatine, vitamin D, omega-3 and so on turns on tracking for it.</small></span><button type="button" class="switch" role="switch" aria-checked="${S.suppAutoTrack!==false}" data-nset="__auto" aria-label="Track supplements I add"><i></i></button></div>`;}
 function healthSettingsHtml(){const H=hcfg(),sw=(key,lab,sub,on)=>`<div class="setrow"><span class="sl">${lab}<small>${sub}</small></span><button type="button" class="switch" role="switch" aria-checked="${on}" data-hset="${key}" aria-label="${lab}"><i></i></button></div>`;
-  return `<div>${sw("intake","Daily intake","Tick off each day you took the supplement or ate enough of it. Shows the last 7 and 30 days.",H.intake)}${sw("labs","Blood test results","Log values from your blood tests and see them on a chart next to the typical range.",H.labs)}</div><p class="note">Add what you want to track on the Body tab, under Deficiencies.</p>`;}
+  return `<div>${sw("intake","Daily intake","Tick off each day you took the supplement or ate enough of it. Shows the last 7 and 30 days.",H.intake)}${sw("labs","Blood test results","Log values from your blood tests and see them on a chart next to the typical range.",H.labs)}</div><p class="note">Add what you want to track under Progress → Goals → Track a nutrient.</p>`;}
 // ---------- Body tab ----------
 let bodyRange="3m",strengthId="";
 const CH={};
@@ -4331,74 +4361,76 @@ function compareKcal(lo,hi){
   const r=(n,u)=>{const a=Math.round(lo/n),b=Math.round(hi/n);return a===b?`${a}`:`${a}–${b}`;};
   const fat=hi>=770?`${(lo/7700).toFixed(1)}–${(hi/7700).toFixed(1)} kg`:`${Math.round(lo/7.7)}–${Math.round(hi/7.7)} g`;
   const food=hi<450?`${r(105)} bananas`:hi<3000?`${r(285)} slices of pizza`:`${r(1100)} whole pizzas`;
-  return `That's about as much energy as <b>${fat} of body fat</b>, or ${food}.`;
+  return `≈ <b>${fat} of body fat</b>, or ${food}`;
 }
-function burnHtml(){
+function burnHtml(empty){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550},profile()),t=todayKey(),R=calcTargets(pf);
   const [lo,hi]=exKcal(t);let firstK=null,sLo=0,sHi=0;
   for(const k of Object.keys(store.days).sort()){if(k>t)continue;const [a,b]=exKcal(k);if(b>0){if(!firstK)firstK=k;sLo+=a;sHi+=b;}}
-  let h=`<h2 class="sec-title">Calories burned</h2><div class="card">`;
-  if(R){h+=`<div><span class="big">${hi>0?fmt(R.bmr+lo)+"–"+fmt(R.bmr+hi):fmt(R.bmr)}</span> <span class="of">kcal today</span></div><p class="note" style="margin-top:2px">Resting burn ${fmt(R.bmr)} kcal${hi>0?` plus ${fmt(lo)}–${fmt(hi)} kcal from today's training and cardio`:", plus whatever training you log today"}. Everyday movement like walking around isn't counted, so your real total is higher.</p>`;}
-  else h+=`<p class="note" style="margin-top:0">Add your age, height and weight under Calculate your targets to see your resting burn.</p>`;
-  if(firstK)h+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><span class="lbl">Since you started on ${parseKey(firstK).toLocaleDateString(undefined,{day:"numeric",month:"long"})}</span><span class="big">${fmt(sLo)}–${fmt(sHi)}</span> <span class="of">kcal from exercise</span><p class="note" style="margin-top:2px">${compareKcal(sLo,sHi)}</p></div>`;
-  else h+=`<p class="note">Log a workout or some cardio and your running total since you started shows up here.</p>`;
-  return h+`<p class="note">Estimates from standard activity values (METs) and your weight, so they're shown as a range.</p></div>`;
+  if(!R&&!firstK){empty.push(["Calories burned","Add your age, height and weight on Goals","burn"]);return "";}
+  let h=secT("Calories burned","burn")+`<div class="card">`;
+  if(R)h+=`<div><span class="big">${hi>0?fmt(R.bmr+lo)+"–"+fmt(R.bmr+hi):fmt(R.bmr)}</span> <span class="of">kcal today</span></div><p class="note" style="margin-top:2px">Resting ${fmt(R.bmr)}${hi>0?` + training ${fmt(lo)}–${fmt(hi)}`:""}</p>`;
+  else h+=`<p class="note" style="margin-top:0">Add your age, height and weight on Goals to see today's burn.</p>`;
+  if(firstK)h+=`<div class="subrow"><span class="lbl">Exercise since ${parseKey(firstK).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</span><span class="big">${fmt(sLo)}–${fmt(sHi)}</span> <span class="of">kcal</span><p class="note" style="margin-top:2px">${compareKcal(sLo,sHi)}</p></div>`;
+  return h+`</div>`;
 }
 function adaptive(){
   const t=todayKey(),start=addDays(t,-27),W=[],F=[];
   for(let i=0;i<28;i++){const k=addDays(start,i),d=store.days[k];if(!d)continue;if(num(d.weight)>0)W.push({x:i,y:toKg(d.weight)});const et=eatTotals(d);if(et.k>0&&!(d.cheat&&(d.cheat.type==="skip"||d.cheat.type==="free")))F.push(et.k);}
-  if(W.length<8||W[W.length-1].x-W[0].x<14||F.length<10)return {need:true,w:W.length,f:F.length};
+  if(W.length<8||W[W.length-1].x-W[0].x<14||F.length<10)return {need:true,w:W.length,f:F.length,span:W.length?W[W.length-1].x-W[0].x:0};
   const n=W.length,mx=W.reduce((a,p)=>a+p.x,0)/n,my=W.reduce((a,p)=>a+p.y,0)/n,slope=W.reduce((a,p)=>a+(p.x-mx)*(p.y-my),0)/W.reduce((a,p)=>a+(p.x-mx)**2,0);
   const intake=F.reduce((a,b)=>a+b,0)/F.length;return {tdee:intake-slope*7700,intake,perWeek:slope*7};
 }
-function adaptiveHtml(){
+function adaptiveHtml(empty){
   const A=adaptive(),pf=Object.assign({goal:-550},profile()),R=calcTargets(Object.assign({sex:"m",act:1.55},pf));
-  let h=`<h2 class="sec-title">Your real maintenance</h2><div class="card">`;
-  if(A.need)return h+`<p class="note" style="margin-top:0">Formulas can be off by 10% or more. After about two weeks of logging, the app works out your real maintenance from how your weight actually changes compared with what you eat.</p><div class="tgrid"><div><span class="big">${Math.min(A.w,8)}/8</span><span class="of">weigh-ins</span></div><div><span class="big">${Math.min(A.f,10)}/10</span><span class="of">days of food logged</span></div></div><p class="note">It needs weigh-ins spread over at least 14 days, and only works well if you log everything you eat.</p></div>`;
-  const U1=U()==="lb"?2.20462:1,fl=R?Math.max(R.floor,Math.round(R.bmr/10)*10):(pf.sex==="f"?1200:1500);
+  if(A.need){empty.push(["Real maintenance",A.w>=8&&A.span<14?`Weigh-ins over 14 days needed (${A.span+1} so far) · ${Math.min(A.f,10)}/10 days of food`:`${Math.min(A.w,8)}/8 weigh-ins · ${Math.min(A.f,10)}/10 days of food`,"maint"]);return "";}
+  let h=secT("Your real maintenance","maint")+`<div class="card">`;
+  const U1=U()==="lb"?2.20462:1,fl=R?Math.max(R.floor,Math.round(R.bmr/10)*10):(pf.sex==="f"?1200:1500),wk=`${(A.perWeek*U1>0?"+":"")+(A.perWeek*U1).toFixed(2)} ${U()}/week`;
   // a result far below resting burn almost always means some food wasn't logged, so don't suggest it
-  if(R&&A.tdee<R.bmr*1.05)return h+`<div><span class="big">${fmt(A.tdee)}</span> <span class="of">kcal a day?</span></div><p class="note" style="margin-top:2px">That's below what your body burns at rest (about ${fmt(R.bmr)} kcal), so some food probably wasn't logged. Over the last 4 weeks you logged about ${fmt(A.intake)} kcal a day and your weight changed by ${(A.perWeek*U1>0?"+":"")+(A.perWeek*U1).toFixed(2)} ${U()} a week. Log everything for a couple of weeks and this will sharpen up.</p></div>`;
+  if(R&&A.tdee<R.bmr*1.05)return h+`<div><span class="big">${fmt(A.tdee)}</span> <span class="of">kcal a day?</span></div><p class="note" style="margin-top:2px">Below your resting burn (${fmt(R.bmr)}), so some food probably wasn't logged. Last 4 weeks: ${fmt(A.intake)} kcal a day, ${wk}. Log everything for a couple of weeks.</p></div>`;
   const sug=Math.max(fl,Math.round((A.tdee+num(pf.goal))/10)*10);
-  return h+`<div><span class="big">${fmt(A.tdee)}</span> <span class="of">kcal a day</span></div><p class="note" style="margin-top:2px">Over the last 4 weeks you ate about ${fmt(A.intake)} kcal a day and your weight changed by ${(A.perWeek*U1>0?"+":"")+(A.perWeek*U1).toFixed(2)} ${U()} a week.${R?` The formula guessed ${fmt(R.tdee)}.`:""}</p>
-  <button class="btn ghost" data-act="adapt" data-v="${sug}">Set my target to ${fmt(sug)} kcal</button><p class="note">That's your real maintenance plus your goal from the calculator. It assumes you logged all your food.</p></div>`;
+  return h+`<div><span class="big">${fmt(A.tdee)}</span> <span class="of">kcal a day</span></div><p class="note" style="margin-top:2px">Last 4 weeks: ${fmt(A.intake)} kcal a day, ${wk}.${R?` Formula said ${fmt(R.tdee)}.`:""}</p>
+  <button class="btn ghost" data-act="adapt" data-v="${sug}">Set my target to ${fmt(sug)} kcal</button></div>`;
 }
-function muscleSetsHtml(k){
+function muscleSetsHtml(k,empty){
   const d0=parseKey(k),mon=addDays(k,-((d0.getDay()+6)%7)),cnt={};
   for(let i=0;i<7;i++){const d=store.days[addDays(mon,i)];if(!d)continue;for(const [id,rows] of Object.entries(d.sets||{})){const n=rows.filter(r=>r.d).length;if(!n)continue;const I=getInfo(id)||{m:[],s:[]},mm=x=>x==="uchest"?"chest":x,M=new Set((I.m||[]).map(mm));for(const m of M)cnt[m]=(cnt[m]||0)+n;for(const m of new Set((I.s||[]).map(mm)))if(!M.has(m))cnt[m]=(cnt[m]||0)+n*0.5;}}
   const rows=Object.entries(cnt).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
-  let h=`<h2 class="sec-title">Sets per muscle this week</h2><div class="card">`;
-  if(!rows.length)return h+`<p class="note" style="margin-top:0">Tick off sets on the Train tab and this shows how much work each muscle got this week.</p></div>`;
+  if(!rows.length){empty.push(["Sets per muscle","Tick off sets on Train","sets"]);return "";}
+  let h=secT("Sets per muscle this week","sets")+`<div class="card">`;
   const max=Math.max(22,...rows.map(r=>r[1]));
   h+=`<div class="msets" role="table" aria-label="Hard sets per muscle this week">`+rows.map(([m,v])=>`<div class="msrow" role="row"><span role="cell">${esc((MNAME[m]||m).replace(/^./,c=>c.toUpperCase()))}</span><span class="mstrack" role="cell"><i class="mszone" style="left:${10/max*100}%;width:${10/max*100}%"></i><i class="msbar" style="width:${Math.min(100,v/max*100)}%"></i></span><b role="cell">${v%1?v.toFixed(1):v}</b></div>`).join("")+`</div>`;
-  return h+`<p class="note"><i class="lg-zone"></i> The shaded band is 10–20 sets, a good weekly range for growth. Helper muscles count as half a set.</p></div>`;
+  return h+`<p class="note"><i class="lg-zone"></i> 10–20 sets is the growth range</p></div>`;
 }
-function strengthHtml(k){
+function strengthHtml(k,empty){
   const ids={};for(const [x,d] of Object.entries(store.days)){if(x>k)continue;for(const [id,rows] of Object.entries(d.sets||{}))if(!["run","dist","time"].includes(libArr(id)[4])&&rows.some(r=>num(r.w)>0&&num(r.r)>0))ids[id]=(ids[id]||0)+1;}
   const list=Object.keys(ids).sort((a,b)=>ids[b]-ids[a]);
-  let h=`<h2 class="sec-title">Strength</h2><div class="card">`;
-  if(!list.length)return h+`<p class="note" style="margin-top:0">Log weights on the Train tab and you can follow each exercise's progress here.</p></div>`;
+  if(!list.length){empty.push(["Strength","Log weights on Train","strength"]);return "";}
+  let h=secT("Strength","strength")+`<div class="card">`;
   if(!list.includes(strengthId))strengthId=list[0];
   const pts=[];const ks=Object.keys(store.days).filter(x=>x<=k).sort();const t0=ks[0];
   for(const x of ks){const rows=((store.days[x].sets||{})[strengthId]||[]).filter(r=>num(r.w)>0&&num(r.r)>0);if(!rows.length)continue;
     let best=null;for(const r of rows){const e=num(r.w)*(1+Math.min(num(r.r),12)/30);if(!best||e>best.e)best={e,r};}
     pts.push({t:dayDiff(t0,x),k:x,v:best.e,note:`best set ${best.r.w} × ${best.r.r}`});}
   h+=`<select class="field" data-strength aria-label="Exercise">${list.map(id=>`<option value="${id}"${id===strengthId?" selected":""}>${esc((LIB[id]||{}).n||id)}</option>`).join("")}</select>`;
-  if(pts.length<2)h+=`<p class="note">Log this exercise on one more day to see a trend.${pts.length?` So far: estimated max ${pts[0].v.toFixed(1)} ${U()} (${esc(pts[0].note)}).`:""}</p>`;
-  else{const d=pts[pts.length-1].v-pts[0].v;h+=`<p class="note" style="margin:10px 0 0"><b>${(d>=0?"+":"")+d.toFixed(1)} ${U()}</b> estimated one-rep max since ${shortDate(pts[0].k)}.</p>`+lineChart("str",[{name:"Estimated one-rep max",kind:"line",pts}],{unit:U(),label:"Estimated one-rep max over time",dec:1,minPad:1});}
-  return h+`<p class="note">Estimated from your best set each day, so you never need to test a real max.</p></div>`;
+  if(pts.length<2)h+=`<p class="note">${pts.length?`Max ≈ ${pts[0].v.toFixed(1)} ${U()} (${esc(pts[0].note)}). `:""}One more day for a trend.</p>`;
+  else{const d=pts[pts.length-1].v-pts[0].v;h+=`<p class="note" style="margin:10px 0 0"><b>${(d>=0?"+":"")+d.toFixed(1)} ${U()}</b> one-rep max since ${shortDate(pts[0].k)}</p>`+lineChart("str",[{name:"Estimated one-rep max",kind:"line",pts}],{unit:U(),label:"Estimated one-rep max over time",dec:1,minPad:1});}
+  return h+`</div>`;
 }
 const MEAS=[["waist","Waist"],["chest","Chest"],["hips","Hips"],["arm","Arm"],["thigh","Thigh"]];
+function measLast(){const first={},last={};for(const x of Object.keys(store.days).sort()){const mm=store.days[x].meas||{};for(const [key] of MEAS)if(num(mm[key])>0){if(first[key]==null)first[key]={v:num(mm[key]),k:x};last[key]={v:num(mm[key]),k:x};}}return {first,last};}
 function measHtml(k){
-  const d=store.days[k]||{},m=d.meas||{},first={},last={};
-  for(const x of Object.keys(store.days).sort()){const mm=store.days[x].meas||{};for(const [key] of MEAS)if(num(mm[key])>0){if(first[key]==null)first[key]={v:num(mm[key]),k:x};last[key]={v:num(mm[key]),k:x};}}
-  const LU=LEN()==="in"?"in":"cm";
-  return `<h2 class="sec-title">Measurements</h2><div class="card"><p class="note" style="margin:0 0 8px">In ${LU==="in"?"inches":"cm"}, measured relaxed, ideally the same day each week. Your waist often shows fat loss better than the scale.</p>
-  <div class="measgrid">${MEAS.map(([key,l])=>{const f=first[key],L=last[key],dd=f&&L&&L.k!==f.k?L.v-f.v:null;return `<label><span class="lbl">${l}</span><input class="field" data-meas="${key}" inputmode="decimal" placeholder="${L?lenShow(L.v):LU}" value="${m[key]?esc(lenShow(m[key])):""}">${dd!=null?`<small class="of">${dd>0?"+":""}${(LU==="in"?dd/2.54:dd).toFixed(1)} ${LU} since ${shortDate(f.k)}</small>`:""}</label>`;}).join("")}</div></div>`;
+  const {first,last}=measLast(),LU=LEN()==="in"?"in":"cm";if(!Object.keys(last).length)return "";
+  return secT("Measurements","meas")+`<div class="card"><div class="mgrid">${MEAS.filter(([key])=>last[key]).map(([key,l])=>{const f=first[key],L=last[key],dd=L.k!==f.k?L.v-f.v:null;return `<div><span class="lbl">${l}</span><b>${esc(lenShow(L.v))}</b> <span class="of">${LU}</span>${dd!=null?`<small class="${dd<0?"dn":"up"}">${dd>0?"+":""}${(LU==="in"?dd/2.54:dd).toFixed(1)}</small>`:""}</div>`;}).join("")}</div><p class="note" style="margin-top:8px">Latest values${Object.values(first).some(f=>f)?`, change since ${shortDate(Object.values(first).map(f=>f.k).sort()[0])}`:""}</p></div>`;
 }
+function measSheet(){const d=store.days[sel]||{},m=d.meas||{},{last}=measLast(),LU=LEN()==="in"?"in":"cm";
+  openSheet(`Measurements, ${sel===todayKey()?"today":shortDate(sel)}`,`<div class="measgrid">${MEAS.map(([key,l])=>`<label><span class="lbl">${l} (${LU})</span><input class="field" data-msh="${key}" inputmode="decimal" placeholder="${last[key]?esc(lenShow(last[key].v)):LU}" value="${m[key]?esc(lenShow(m[key])):""}" data-nofocus="1"></label>`).join("")}</div><p class="note">Relaxed, same day each week.</p>`,
+    [{label:"Save",fn:()=>{const dd=ensureDay(sel);dd.meas=dd.meas||{};sheetEl.querySelectorAll("[data-msh]").forEach(i=>{const v=i.value.replace(",",".").trim();if(v==="")delete dd.meas[i.dataset.msh];else if(num(v)>0)dd.meas[i.dataset.msh]=lenStore(v);});persist("day-"+sel);renderBody();toast("Measurements saved");}},{label:"Cancel",cls:"btn ghost"}]);}
+function bodyNoteSheet(){openSheet(`Note, ${sel===todayKey()?"today":shortDate(sel)}`,`<textarea class="field area" id="bnT" placeholder="How you feel, sleep, an injury, a goal…" aria-label="New note"></textarea>`,
+  [{label:"Save note",fn:()=>{const t=sv("bnT");if(!t){$("bnT").focus();return false;}const S=store.settings;S.bodyNotes=[{k:sel,t,id:Date.now().toString(36)}].concat(Array.isArray(S.bodyNotes)?S.bodyNotes:[]);persist("settings");renderBody();toast("Note saved");}},{label:"Cancel",cls:"btn ghost"}]);setTimeout(()=>{const x=$("bnT");if(x)x.focus();},60);}
 function notesHtml(){
-  const N=Array.isArray(store.settings.bodyNotes)?store.settings.bodyNotes:[];
-  return `<h2 class="sec-title">Notes</h2><div class="card"><textarea class="field area" id="bnT" placeholder="Anything you want to remember: how you feel, sleep, an injury, a goal…" aria-label="New note"></textarea><button class="btn" data-act="bnadd">Save note</button>
-  ${N.length?`<div style="margin-top:10px">${N.map((n,i)=>`<div class="bnote"><div><small class="of">${shortDate(n.k)}</small><p>${esc(n.t).replace(/\n/g,"<br>")}</p></div><button class="rm" data-act="bnrm" data-i="${i}" aria-label="Delete note from ${shortDate(n.k)}">×</button></div>`).join("")}</div>`:""}</div>`;
+  const N=Array.isArray(store.settings.bodyNotes)?store.settings.bodyNotes:[];if(!N.length)return "";
+  return secT("Notes","notes")+`<div class="card">${N.map((n,i)=>`<div class="bnote"><div><small class="of">${shortDate(n.k)}</small><p>${esc(n.t).replace(/\n/g,"<br>")}</p></div><button class="rm" data-act="bnrm" data-i="${i}" aria-label="Delete note from ${shortDate(n.k)}">×</button></div>`).join("")}</div>`;
 }
 // progress photos: stored on the device only (IndexedDB), website version
 const PH={db:null,list:[],urls:{},loaded:false};
@@ -4408,14 +4440,13 @@ function phShrink(file){return new Promise((res,rej)=>{const img=new Image(),u=U
 async function phAdd(file){try{const blob=await phShrink(file),db=await phOpen(),p={id:Date.now().toString(36),k:sel,at:Date.now(),blob};await new Promise((r,j)=>{const tx=db.transaction("p","readwrite");tx.objectStore("p").put(p);tx.oncomplete=r;tx.onerror=j;});PH.list.push(p);PH.urls[p.id]=URL.createObjectURL(blob);PH.list.sort((a,b)=>a.k<b.k?-1:a.k>b.k?1:a.at-b.at);renderBody();toast("Photo saved on this phone");}catch(e){toast("Couldn't save that photo");}}
 async function phDel(id){try{const db=await phOpen();await new Promise(r=>{const tx=db.transaction("p","readwrite");tx.objectStore("p").delete(id);tx.oncomplete=r;});PH.list=PH.list.filter(p=>p.id!==id);renderBody();toast("Photo deleted");}catch(e){}}
 function photosHtml(){
-  let h=`<h2 class="sec-title">Progress photos</h2><div class="card">`;
-  if(!isLocalMode())return h+`<p class="note" style="margin-top:0">Progress photos work in the website version of the app, where they're saved only on your phone.</p></div>`;
-  if(!PH.loaded){phLoad();return h+`<p class="note" style="margin-top:0">Loading…</p></div>`;}
-  const L=PH.list;
-  if(L.length>=2){const a=L[0],b=L[L.length-1];h+=`<p class="lbl" style="margin-top:0">First and latest</p><div class="phcmp"><figure><img src="${PH.urls[a.id]}" alt="Progress photo from ${shortDate(a.k)}"><figcaption>${shortDate(a.k)}</figcaption></figure><figure><img src="${PH.urls[b.id]}" alt="Progress photo from ${shortDate(b.k)}"><figcaption>${shortDate(b.k)}</figcaption></figure></div>`;}
-  if(L.length)h+=`<div class="phgrid">${L.slice().reverse().map(p=>`<button type="button" class="phth" data-act="phview" data-id="${p.id}" aria-label="Photo from ${shortDate(p.k)}"><img src="${PH.urls[p.id]}" alt=""><small>${shortDate(p.k)}</small></button>`).join("")}</div>`;
-  else h+=`<p class="note" style="margin-top:0">Same spot, same light, same time of day, every 2–4 weeks. Photos stay on this phone and aren't in backups.</p>`;
-  return h+`<label class="btn ghost" style="display:grid;place-items:center;cursor:pointer">Add a photo for ${sel===todayKey()?"today":shortDate(sel)}<input type="file" accept="image/*" data-photo hidden></label></div>`;
+  if(!isLocalMode())return "";
+  if(!PH.loaded){phLoad();return "";}
+  const L=PH.list;if(!L.length)return "";
+  let h=secT("Progress photos","photos")+`<div class="card">`;
+  if(L.length>=2){const a=L[0],b=L[L.length-1];h+=`<div class="phcmp"><figure><img src="${PH.urls[a.id]}" alt="Progress photo from ${shortDate(a.k)}"><figcaption>First · ${shortDate(a.k)}</figcaption></figure><figure><img src="${PH.urls[b.id]}" alt="Progress photo from ${shortDate(b.k)}"><figcaption>Latest · ${shortDate(b.k)}</figcaption></figure></div>`;}
+  h+=`<div class="phgrid">${L.slice().reverse().map(p=>`<button type="button" class="phth" data-act="phview" data-id="${p.id}" aria-label="Photo from ${shortDate(p.k)}"><img src="${PH.urls[p.id]}" alt=""><small>${shortDate(p.k)}</small></button>`).join("")}</div>`;
+  return h+`</div>`;
 }
 // ---------- Weekly check-in: compares the weight trend with the goal and suggests a new calorie target ----------
 function ciWindow(end){const w=[],f=[];for(let i=0;i<7;i++){const k=addDays(end,-i),d=store.days[k];if(!d)continue;if(num(d.weight)>0)w.push(toKg(d.weight));const et=eatTotals(d);if(et.k>0&&!(d.cheat&&(d.cheat.type==="skip"||d.cheat.type==="free")))f.push(et.k);}
@@ -4454,29 +4485,80 @@ function ciClick(e){const b=e.target.closest("[data-ci]");if(!b)return;const S=s
   if(a==="set"){S.kcal=+b.dataset.v;persist("settings");render();toast("Daily target set to "+fmt(S.kcal)+" kcal",u);return;}
   persist("settings");const c=b.closest(".cicard");if(c&&typeof collapseThen==="function")collapseThen(c,()=>render());else render();}
 function renderBody(){if(progView==='cal'){renderHistory();return;}renderBody0();progSeg();}
+// short on-screen text; the longer explanations live behind the ⓘ on each section
+const IC_I=`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>`;
+const PINFO={
+  weight:["Morning weight",()=>"Weigh in after the bathroom, before eating. Your weight swings 1–2 kg from day to day because of water, salt and food, so judge progress by the weekly average, not single days."],
+  progress:["Progress",()=>"Dots are your daily weigh-ins and the line is your 7-day average. Tap the chart to see the numbers. Switch between 1 month, 3 months and everything at the top."],
+  burn:["Calories burned",()=>"Today's number is your resting burn plus what today's training and cardio burned. Everyday movement like walking around isn't counted, so your real total is higher. The running total counts exercise since your first logged workout. All of it is estimated from standard activity values (METs) and your weight, so it's shown as a range."],
+  maint:["Your real maintenance",()=>"Formulas can be off by 10% or more. After about two weeks of logging, the app works out your real maintenance from how your weight actually changes compared with what you eat. It needs 8 weigh-ins spread over at least 14 days and 10 days of food, and only works well if you log everything you eat. The suggested target is your real maintenance plus your goal from the calculator."],
+  sets:["Sets per muscle",()=>"Counts the sets you tick off on the Train tab, Monday to Sunday. The shaded band is 10–20 sets, a good weekly range for growth. Helper muscles count as half a set."],
+  strength:["Strength",()=>"Your estimated one-rep max for each exercise, worked out from your best set each day, so you never need to test a real max. Log weights on the Train tab to see it."],
+  meas:["Measurements",()=>`In ${LEN()==="in"?"inches":"cm"}, measured relaxed, ideally on the same day each week. Your waist often shows fat loss better than the scale, because you can lose fat and gain muscle at the same weight.`],
+  photos:["Progress photos",()=>(isLocalMode()?"":"Progress photos work in the website version of the app. ")+"Take them in the same spot, with the same light, at the same time of day, every 2–4 weeks. Photos stay on this phone and aren't in backups."],
+  notes:["Notes",()=>"Anything you want to remember: how you feel, sleep, an injury, a goal. Each note is saved with the day you have selected."],
+  targets:["Daily targets",()=>{const r=calcTargets(Object.assign({sex:"m",act:1.55,goal:-550},profile()));return (r?`Resting burn (BMR) about ${fmt(r.bmr)} kcal, maintenance about ${fmt(r.tdee)} kcal. Protein is ${r.pBasis}. `:"Add your age, height and weight in the calculator to see where your numbers come from. ")+"These are estimates: check your weekly average weight after 2–3 weeks and adjust by 100–200 kcal. Tap a target to see what it means for you.";}],
+  nuts:["Nutrients",()=>"None of these are necessary. They're extras that could help, depending on how you eat and train. Tap the magnifier on one for why it helps and where to get it. "+regionNote()],
+  defs:["Deficiencies",()=>"Been told you're low on something, like iron or vitamin D? Track it to follow what you take, your blood test results, or both (Settings → Health tracking). This helps you stick to your plan. It's not medical advice, so follow what your doctor tells you, and get retested when they say."]
+};
+function infoB(key){const I=PINFO[key];return I?`<button type="button" class="infob" data-pinfo="${key}" aria-label="About ${esc(I[0])}">${IC_I}</button>`:"";}
+function secT(t,key){return `<h2 class="sec-title sect"><span>${t}</span>${infoB(key)}</h2>`;}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-pinfo]");if(!b)return;e.preventDefault();e.stopPropagation();const I=PINFO[b.dataset.pinfo];if(I)openSheet(I[0],`<p style="margin-top:0;line-height:1.5">${I[1]()}</p>`,[{label:"Got it",cls:"btn ghost"}]);},true);
+// sections with nothing to show yet shrink to one line each, gathered in one card
+function emptyCard(rows){if(!rows.length)return "";return `<div class="card elist">${rows.map(([t,txt,key])=>`<div class="erow"><span><b>${t}</b><small>${txt}</small></span>${infoB(key)}</div>`).join("")}</div>`;}
+function progSeg(){const p=$("panel");if(!p||p.querySelector(".progseg"))return;p.insertAdjacentHTML("afterbegin",`<div class="seg seg4 progseg" role="group" aria-label="Progress">${[["over","Overview"],["body","Body"],["goals","Goals"],["cal","Calendar"]].map(([v,l])=>`<button type="button" data-prog="${v}" aria-pressed="${progView===v}">${l}</button>`).join("")}</div>`);}
 function renderBody0(){
-  const k=sel,day=store.days[k]||{},S=store.settings;
+  if(!["over","body","goals"].includes(progView))progView="over";
+  const k=sel;let h=`<section>`;
+  h+=progView==="body"?bodyView(k):progView==="goals"?goalsView(k):overView(k);
+  $("panel").innerHTML=h+`</section>`;
+}
+function overView(k){
+  const day=store.days[k]||{},S=store.settings,empty=[];
   const d=parseKey(k),mon=addDays(k,-((d.getDay()+6)%7)),cur=weekAvg(mon),prev=weekAvg(addDays(mon,-7));
-  let h=`<section><div class="card"><label><span class="lbl">Morning weight (${U()})</span><input class="field" data-body="weight" inputmode="decimal" placeholder="e.g. 84.6" value="${esc(day.weight)}"></label>
-    <p class="note" style="font-size:13px">After the bathroom, before eating. Watch the weekly average, not single days.</p>${(S.profile||{}).west&&!latestWeight()?`<p class="note warnline" style="font-size:13px">Your weight from setup was a guess. Weighing in is strongly recommended so your targets and progress are accurate.</p>`:""}</div>`;
+  let h=`<div class="card"><label><span class="lbl lblrow">Morning weight (${U()})${infoB("weight")}</span><input class="field" data-body="weight" inputmode="decimal" placeholder="e.g. 84.6" value="${esc(day.weight)}"></label>${(S.profile||{}).west&&!latestWeight()?`<p class="note warnline" style="font-size:13px">Your setup weight was a guess. Weigh in so your targets are accurate.</p>`:""}</div>`;
   h+=checkinHtml();
   const {pts,avg}=weightSeries(k);
-  h+=`<h2 class="sec-title">Progress</h2><div class="card"><div class="seg seg3" role="group" aria-label="Time range">${[["1m","1 month"],["3m","3 months"],["all","All"]].map(([v,l])=>`<button type="button" data-act="brange" data-v="${v}" aria-pressed="${bodyRange===v}">${l}</button>`).join("")}</div>`;
-  if(cur!=null){h+=`<div><span class="big">${cur.toFixed(1)} ${U()}</span> <span class="of">average this week</span></div>`;
-    if(prev!=null){const diff=cur-prev,goal=num((S.profile||{}).goal);h+=`<p class="note" style="margin-top:2px">${diff<=0?"Down":"Up"} ${Math.abs(diff).toFixed(1)} ${U()} from last week (${prev.toFixed(1)} ${U()}).${goal<0&&diff>0.2?" Water, salt and new training can all do this, so give it another week before changing anything.":goal<0&&diff<-1?" That's faster than about 1 kg a week. After the first two weeks, think about eating 150–200 kcal more.":""}</p>`;}}
-  h+=pts.length>=2?lineChart("wt",[{name:"Daily weigh-ins",kind:"dots",pts},{name:"7-day average",kind:"line",pts:avg}],{unit:U(),label:`Weight from ${pts[0].v} to ${pts[pts.length-1].v} ${U()}`,dec:1}):`<p class="empty">Log your morning weight on a few days to see your progress here.</p>`;
+  if(pts.length>=2||cur!=null){
+    h+=secT("Progress","progress")+`<div class="card"><div class="seg seg3" role="group" aria-label="Time range">${[["1m","1 month"],["3m","3 months"],["all","All"]].map(([v,l])=>`<button type="button" data-act="brange" data-v="${v}" aria-pressed="${bodyRange===v}">${l}</button>`).join("")}</div>`;
+    if(cur!=null){h+=`<div><span class="big">${cur.toFixed(1)} ${U()}</span> <span class="of">this week</span></div>`;
+      if(prev!=null){const diff=cur-prev,goal=num((S.profile||{}).goal);h+=`<p class="note" style="margin-top:2px">${diff<=0?"Down":"Up"} ${Math.abs(diff).toFixed(1)} from last week (${prev.toFixed(1)}).${goal<0&&diff>0.2?" Water, salt and new training can do this. Give it another week.":goal<0&&diff<-1?" Faster than 1 kg a week: after the first two weeks, eat 150–200 kcal more.":""}</p>`;}}
+    h+=pts.length>=2?lineChart("wt",[{name:"Daily",kind:"dots",pts},{name:"7-day average",kind:"line",pts:avg}],{unit:U(),label:`Weight from ${pts[0].v} to ${pts[pts.length-1].v} ${U()}`,dec:1}):"";
+    h+=`</div>`;}
+  else empty.push(["Progress","Weigh in on a few mornings","progress"]);
+  h+=burnHtml(empty)+adaptiveHtml(empty)+muscleSetsHtml(k,empty)+strengthHtml(k,empty);
+  if(empty.length)h+=`<h2 class="sec-title">Not enough data yet</h2>`+emptyCard(empty);
+  return h;
+}
+function bodyView(k){
+  const local=isLocalMode();
+  let h=`<div class="logrow"><button type="button" class="btn ghost" data-act="measopen">${ICO('<path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/>')}Measure</button>${local?`<label class="btn ghost">${ICO('<rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>')}Photo<input type="file" accept="image/*" data-photo hidden></label>`:`<button type="button" class="btn ghost" data-pinfo="photos">${ICO('<rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>')}Photo</button>`}<button type="button" class="btn ghost" data-act="bnoteopen">${ICO('<path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6M9 17h3"/>')}Note</button></div>`;
+  const empty=[];
+  const m=measHtml(k);if(m)h+=m;else empty.push(["Measurements","Every week or two","meas"]);
+  const p=photosHtml();if(p)h+=p;else empty.push(["Progress photos",local?"Every 2–4 weeks":"Website version only","photos"]);
+  const n=notesHtml();if(n)h+=n;else empty.push(["Notes","How you feel, sleep, injuries","notes"]);
+  if(empty.length)h+=`<h2 class="sec-title">Nothing logged yet</h2>`+emptyCard(empty);
+  return h;
+}
+let tcalcOpen=false;
+function goalsView(k){
+  const S=store.settings,pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile()),g=num(pf.goal),kgw=g*7/7700*(U()==="lb"?2.20462:1);
+  const pace=Math.abs(kgw)<0.05?"Keeping your weight steady":`${g<0?"Losing":"Gaining"} ${Math.abs(kgw).toFixed(2).replace(/0$/,"")} ${U()} a week`;
+  let h=secT("Daily targets","targets")+`<div class="card"><div class="tgrid"><div>${tg("kcal",`<span class="big">${fmt(num(S.kcal)||0)}</span><span class="of">kcal a day</span>`)}</div><div>${tg("protein",`<span class="big">${fmt(num(S.protein)||0)}</span><span class="of">g protein</span>`)}</div></div>
+    <p class="note" style="margin-top:6px">Goal: ${pace}</p><button type="button" class="btn ghost" data-act="tcalc" aria-expanded="${tcalcOpen}">${tcalcOpen?"Done":"Recalculate or edit"}</button>`;
+  if(tcalcOpen)h+=`<div class="tcalc tcin">${profileFields(pf)}<button class="btn" data-act="usetargets">Use as my daily targets</button>
+    <p class="lbl" style="margin-top:14px">Or type your own</p><div class="pair"><label><span class="lbl">${tg("kcal","Calories")}</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(S.kcal)}"></label><label><span class="lbl">${tg("protein","Protein (g)")}</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(S.protein)}"></label></div></div>`;
   h+=`</div>`;
-  h+=burnHtml()+adaptiveHtml()+muscleSetsHtml(k)+strengthHtml(k)+measHtml(k)+photosHtml()+notesHtml();
-  h+=targetsCalcHtml();
-  h+=`<h2 class="sec-title">Daily targets</h2><div class="card"><div class="pair">
-    <label><span class="lbl">${tg("kcal","Calories")}</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(S.kcal)}"></label>
-    <label><span class="lbl">${tg("protein","Protein (g)")}</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(S.protein)}"></label></div><p class="note" style="font-size:13px">Tap any target to see what it means for you.</p></div>`;
-  h+=suggHtml(k)+defsHtml(k)+`</section>`;
-  $("panel").innerHTML=h;
+  h+=suggHtml(k)+defsHtml(k);
+  return h;
 }
 $("panel").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b||tab!=="body")return;const a=b.dataset.act,S=store.settings;
   if(a==="brange"){bodyRange=b.dataset.v;renderBody();}
+  else if(a==="tcalc"){tcalcOpen=!tcalcOpen;renderBody();}
+  else if(a==="measopen")measSheet();
+  else if(a==="bnoteopen")bodyNoteSheet();
+  else if(a==="nutpick")nutPick();
   else if(a==="adapt"){const u=snap(["settings"]);S.kcal=+b.dataset.v;persist("settings");renderBody();toast("Daily target set to "+fmt(S.kcal)+" kcal",u);}
   else if(a==="bnadd"){const t=$("bnT").value.trim();if(!t){$("bnT").focus();return;}S.bodyNotes=[{k:sel,t,id:Date.now().toString(36)}].concat(Array.isArray(S.bodyNotes)?S.bodyNotes:[]);persist("settings");renderBody();toast("Note saved");}
   else if(a==="defhit"||a==="sugghit"){const d=ensureDay(sel),key=a==="defhit"?"defs":"xtra",id=b.dataset.id;d[key]=d[key]||{};const now=a==="defhit"?defHit(sel,id):suggHit(sel,id);
@@ -4971,7 +5053,7 @@ function lookStepHtml(){return `<div class="card welcome"><p class="stepl">Step 
     <button class="btn" data-act="lookgo">Done</button><button class="linkbtn" style="margin-top:10px" data-act="lookgo">Skip for now</button></div>`;}
 function welcomeHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
-  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later with the calculator in the Body tab.</p>
+  if(welcomeManual)return `<div class="card welcome"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Your daily targets</h2><p class="note" style="margin:6px 0 10px">Enter the calories and protein you want to aim for each day. You can work them out later under Progress → Goals.</p>
     <div class="pair"><label><span class="lbl">Calories</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(store.settings.kcal)}"></label><label><span class="lbl">Protein (g)</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(store.settings.protein)}"></label></div>
     <button class="btn" data-act="welcomeman">Save and start</button><button class="linkbtn" style="margin-top:10px" data-act="welcomecalc">Work them out from my details instead</button>${restoreLink()}</div>`;
   return `<div class="card welcome tcalc"><p class="stepl">Step 1 of 5</p><h2 style="font-size:26px">Welcome to Routine</h2>
@@ -4997,7 +5079,7 @@ function snap(ids){
 }
 const sheetEl=document.createElement("dialog");sheetEl.className="sheet";document.body.appendChild(sheetEl);
 sheetEl.addEventListener("click",e=>plannerClick(e));
-sheetEl.addEventListener("click",e=>{if(sheetEl._kind==="copyfood")cpClick(e);});$("panel").addEventListener("click",cpClick);$("panel").addEventListener("click",ciClick);$("panel").addEventListener("click",e=>{const b=e.target.closest("[data-tabgo]");if(b)openTab(b.dataset.tabgo);});
+sheetEl.addEventListener("click",e=>{if(sheetEl._kind==="copyfood")cpClick(e);});$("panel").addEventListener("click",cpClick);$("panel").addEventListener("click",ciClick);$("panel").addEventListener("click",e=>{const b=e.target.closest("[data-tabgo]");if(b){if(b.dataset.tabgo==="body")progView="over";openTab(b.dataset.tabgo);}});
 sheetEl.addEventListener("input",e=>{if(sheetEl._kind!=="planner"||e.target.id!=="plQ")return;PL.q=e.target.value;const r=$("plRes");if(r)r.innerHTML=plResults(PL.picking);});
 sheetEl.addEventListener("close",()=>{sheetEl.classList.remove("tall");});
 sheetEl.addEventListener("input",e=>{if(sheetEl._kind!=="addfood")return;if(e.target.id==="afQ"){afQ=e.target.value;$("afRes").innerHTML=afList();}
@@ -6041,8 +6123,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.02";
+const APP_VERSION="8.1";
 const CHANGELOG=[
+  {v:"8.1",d:"14 November 2026",t:"A shorter Progress tab",items:["Progress is split into Overview, Body, Goals and Calendar, so each part fits on a screen or two.","Body: Measure, Photo and Note buttons open a quick form. Below them you only see what you've logged.","Goals: your targets and goal sit in one card. Tap Recalculate or edit to open the calculator or type your own numbers.","Only the nutrients and deficiencies you track are shown. Add more with + Track a nutrient.","Sections with nothing to show yet shrink to one line.","Less text everywhere. Tap the ⓘ next to a section for the full explanation."]},
   {v:"8.02",d:"14 November 2026",t:"Portrait only",items:["Turning your phone sideways no longer rotates the app. iPhones don't let web apps lock rotation, so Routine shows a \"Turn your phone upright\" screen until you do. On Android the installed app still just stays upright."]},
   {v:"8.01",d:"14 November 2026",t:"Fixes for the new styles",items:["The tab bar stays at the bottom of the screen again instead of scrolling with the page on iPhone.","Text on coloured buttons and the selected tab is easier to read in Soft, Night gym, and dark Training journal and Earth and clay.","Grey hint text is a little darker in the light versions of the new styles, and coloured links stand out more on cards."]},
   {v:"8.0",d:"14 November 2026",t:"Four new styles",items:["Settings → Appearance has four new styles next to Today and Focus. Training journal: ruled paper, ink-blue serif headings, and a stamp when you finish something. Night gym: black and orange, with big condensed numbers you can read mid-set. Soft: chunky rounded type, cards that lift off the page and a colour for each tab. Earth and clay: terracotta, olive and deep green with arch-shaped buttons and bars.","Each style has its own feel when you tap: snappy in Night gym, a little bounce in Soft, calm in Journal and Earth.","Journal, Soft and Earth have light and dark versions that follow your Theme setting. Night gym is always dark.","Classic has been retired. If you used it, the app switches you to Today; pick any style in Settings.","Today is still the default for new users, and new users can pick any of the six during setup."]},
@@ -6402,7 +6485,7 @@ function guideHtml(){
   h+=ch("Train: your plan and layout",`<ul><li><b>Edit</b>, at the top right under the week, opens everything you can change: the order of the sections on the page (so the warm-up can come after), which sections show, your own warm-ups and stretches, the exercises in each workout, and your weekly schedule.</li><li>To add exercises, tap as many as you want in the list (they get a ✓, even across different searches and muscle groups), then tap <b>Add</b>. Use the ↑ and ↓ arrows to reorder them.</li><li><b>Change your weekly split</b> lets you pick a template, set each day, add custom or Dynamic days, and choose how long the split runs.</li><li>On a <b>Dynamic</b> day you pick which workout to do on the day itself.</li><li><b>Tap the workout's name</b> at the top to switch just this day to a different workout. The <b>?</b> next to it explains the workout.</li></ul>`);
   h+=ch("Rest timer",`<p>Starts by itself when you tick a set, with the right rest for that exercise and rep style. Tap the clock to pause, <b>−15</b>/<b>+15</b> to adjust, <kbd>✕</kbd> to skip. Before a drop set or between exercises in a superset it tells you to keep going. Tap the <b>stopwatch</b> time on any exercise to start resting straight away. Hold it to pick a different time for that exercise. Stretches have a <b>▶</b> hold timer.</p><p>On iPhone the beep can't play while the screen is locked, so keep <b>Keep the screen on</b> switched on in Settings → Rest timer, and check the silent switch.</p>`);
   h+=ch("Eat",`<ul><li>The bar at the top shows calories and protein against your targets.</li><li>Each meal is folded into one line. Tap it to open, then tick what you ate.</li><li>Calories, protein, carbs and fat sit at the top.</li><li>Tap <b>+</b> on a meal to search your meals, recipes and foods. Foods that suit that meal come first, so Snack starts with fruit, nuts and yogurt. Filter by what a food is good for (Snacks, Breakfast, High protein…) or its type, and sort by protein, fibre, magnesium or another nutrient. The meal builder has the same filters. Food not in the list? Tap <b>Not in the list? Add your own food</b> at the bottom of the search. Foods you normally count can be added by the piece, and drinks in <b>ml</b> or grams (Settings → Units). Amounts the app has to guess, like the weight of one egg, are marked as estimates.</li><li><b>Copy food from</b> another day copies one meal or a whole day's food.</li><li><b>Suggest meals</b> plans the rest of your day to hit your targets, and <b>Portion my foods</b> works out amounts for foods you choose. <b>Meal sizes</b> sets how big each meal should be. Plans can go straight to your <b>shopping list</b> on the Spend tab.</li><li>Had a cheat meal? Log a rough estimate instead of weighing everything.</li><li><b>Halal:</b> in Settings → Diet, label or hide foods with alcohol, pork or gelatine. They're also left out of suggested meals.</li><li><b>Nutrients:</b> track fibre, water, vitamins and more with <b>Choose</b>.</li><li><b>Supplements:</b> pick one from the common list or add your own, then set the dose: pills × the strength of one pill, or an amount a day in g, mg, ml, teaspoons or tablespoons. The dose counts towards your nutrients, like 2 pills × 1,000 IU of vitamin D. Tap the dose under a supplement to change it. The magnifying glass shows what each is for, when to take it and what to watch out for. The pen adds your own note.</li><li>Swipe a meal right to edit it, left to remove it.</li><li>The <b>meal builder</b> combines several foods into one meal, works out one serving when you cook a batch, and saves it as a meal or recipe.</li><li><b>Recipes</b> show ingredients and steps. Tap <b>Log 1 serving today</b> after eating one, or add your own.</li></ul>`);
-  h+=ch("Progress",`<p>Progress has two parts: <b>Body</b> and <b>Calendar</b>. Switch with the buttons at the top.</p><ul><li>Weigh in each morning. The <b>Progress</b> chart shows each weigh-in and the 7-day average. Tap the chart to see the numbers.</li><li><b>Calories burned</b> estimates today's total and what your training has burned since you started.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li>The <b>weekly check-in</b> compares your weight trend with your goal. After two weeks in a row that point the same way, it suggests a small calorie change, never below what's safe for you.</li><li>In the <b>calculator</b>, set your goal to lose, maintain or gain, either in kg a week or calories a day. The app warns you when a goal is aggressive and won't accept one that's unsafe.</li><li><b>Sets per muscle</b>, <b>Strength</b>, <b>Measurements</b>, <b>Progress photos</b> and <b>Notes</b> sit further down.</li></ul>`);
+  h+=ch("Progress",`<p>Progress has four parts. Switch with the buttons at the top.</p><ul><li><b>Overview:</b> your morning weight, the weekly check-in, your progress chart, calories burned, your real maintenance, sets per muscle and strength.</li><li><b>Body:</b> tap <b>Measure</b>, <b>Photo</b> or <b>Note</b> to log one. What you've logged shows underneath.</li><li><b>Goals:</b> your daily targets and goal. Tap <b>Recalculate or edit</b> to open the calculator or type your own numbers. Nutrients and deficiencies you track are here too. Add more with <b>+ Track a nutrient</b>.</li><li><b>Calendar:</b> every day at a glance.</li></ul><p>Tap the <b>ⓘ</b> next to a section for what it means and how it's worked out. Sections with nothing to show yet shrink to one line until you log enough.</p><ul><li>Weigh in each morning. The chart shows each weigh-in and the 7-day average. Tap it to see the numbers.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li>The <b>weekly check-in</b> compares your weight trend with your goal. After two weeks in a row that point the same way, it suggests a small calorie change, never below what's safe for you.</li><li>In the <b>calculator</b>, set your goal to lose, maintain or gain, either in kg a week or calories a day. The app warns you when a goal is aggressive and won't accept one that's unsafe.</li></ul>`);
   h+=ch("Spend and Calendar",`<p><b>Spend</b> works out what your food and supplements cost per week, two weeks or month, grouped by store. Add products with how long they last, then tap a store and a product to log a purchase. The <b>shopping list</b> fills from your meal plan, for 1 to 7 days.</p><p><b>Calendar</b>, inside Progress, shows a month at a glance. Tap any day to open it.</p>`);
   h+=ch("Settings and the tab bar",`<p><b>Settings</b> is the gear at the top right of every screen, and ✕ closes it. The tab bar shows icons, and the tab you're on shows its name. <b>Appearance</b> has six styles: <b>Today</b> (soft and rounded, a colour for each tab), <b>Focus</b> (bold, with the current set and a big Log set button at the top of Train), <b>Training journal</b> (ruled paper, ink and stamps), <b>Night gym</b> (black and orange, big numbers), <b>Soft</b> (chunky and colourful) and <b>Earth and clay</b> (terracotta, olive and arches). Today and Focus let you pick the background and colours; the other four come with their own. Pick a background, including Paper or any colour you like, the colours for each tab or the accent, and how the week at the top looks: dates, workout cards, dots or circles. Also here: the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units, region and currency, rest timer, backups, <b>battery saver</b> (fewer animations when your phone is slow or low on battery), <b>how your targets are worked out</b>, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
   h+=ch("Install it as an app",`<p>Routine can be installed on iPhone, Android and computers, and then works offline. Step-by-step instructions are in <b>Settings → Install as an app</b>.</p>`);
