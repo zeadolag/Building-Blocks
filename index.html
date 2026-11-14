@@ -995,6 +995,7 @@ dialog.sheet.dragging{transition:none}
 dialog.sheet.closing{transition:transform .18s ease-in}
 body.sheetlock{position:fixed;left:0;right:0;overflow:hidden}
 #rail{display:none!important}
+/* (8.31 dark rules are further down) */
 /* ============ 8.0 styles: Training journal, Night gym, Soft, Earth and clay. They build on Today (data-fam="today"). ============ */
 html[data-style="journal"]{--logobg:#1F2A44;--logofg:#F4EFE6}html[data-style="journal"][data-theme="dark"]{--logobg:#E07A52;--logofg:#121827}
 html[data-style="night"]{--logobg:#FF5A1F;--logofg:#0B0B0C}
@@ -1007,7 +1008,7 @@ html[data-style="earth"]{--logobg:#B85C38;--logofg:#F6EEE3}
 /* Training journal */
 html[data-style="journal"] body{font-family:"Instrument Sans",Geist,system-ui,sans-serif}
 html[data-style="journal"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.appname,.hwk b){font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em;font-variation-settings:"opsz" 72}
-html[data-style="journal"]:not([data-theme="dark"]) body{background-image:repeating-linear-gradient(transparent 0 31px,color-mix(in srgb,var(--line) 75%,transparent) 31px 32px)}
+html[data-style="journal"] body{background-image:repeating-linear-gradient(transparent 0 31px,color-mix(in srgb,var(--line) 75%,transparent) 31px 32px)}
 html[data-style="journal"] :is(.card,.etile){border-radius:10px;box-shadow:none;border:1px solid var(--line)}
 html[data-style="journal"] #panel article.ex.isopen{border:1.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
 html[data-style="journal"] .btn:not(.ghost){background:var(--ink);color:var(--paper)}
@@ -1058,7 +1059,7 @@ html[data-style="earth"] :is(.btn,.tick,.etplus,.hgo){border-radius:22px 22px 8p
 html[data-style="earth"] .secic{border-radius:14px 14px 5px 5px}
 html[data-style="earth"] :is(.hwb .bt,.hwb .bt i){border-radius:99px 99px 4px 4px}
 html[data-style="earth"] .island{background:#24413A;border:0}
-html[data-style="earth"][data-theme="dark"] .island{background:#0F1714;border:1px solid var(--line)}
+html[data-style="earth"][data-theme="dark"] .island{background:#24413A;border:1px solid rgb(255 236 214 / .08)}
 html[data-style="earth"] .itab{color:#A9BDB2}
 html[data-style="earth"] .itab[aria-current="page"]{color:#F6EEE3!important}
 html[data-style="earth"] .ithumb{background:var(--acc)!important;border-radius:20px 20px 8px 8px}
@@ -1353,6 +1354,16 @@ html #week .wkp{padding:3px 0 5px!important;gap:0!important}
 html #week .wkp small{font-size:10.5px!important}
 html #week .wkp b{font-size:15px!important;line-height:1.15!important}
 html #week .wkp i{width:5px!important;height:5px!important;margin-top:2px!important}
+
+/* 8.31: dark versions that keep each style's character */
+html[data-fam="today"][data-theme="dark"] .tick[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--accon)}
+html[data-fam="today"][data-theme="dark"] .sn.drop{background:var(--acc);color:var(--accon)}
+html[data-style="today"][data-theme="dark"] :is(.card,.etile){box-shadow:inset 0 1px 0 rgb(255 236 214 / .06)}
+html[data-style="journal"][data-theme="dark"] :is(.card,.etile){border-color:color-mix(in srgb,var(--ink) 14%,transparent)}
+html[data-style="journal"][data-theme="dark"] #panel article.ex.isopen{border-color:var(--acc);box-shadow:4px 4px 0 var(--acc)}
+html[data-style="journal"][data-theme="dark"] .island{border-color:color-mix(in srgb,var(--ink) 55%,transparent)}
+html[data-style="soft"][data-theme="dark"] .field{box-shadow:inset 0 2px 5px rgb(0 0 0 / .35)}
+html[data-style="earth"][data-theme="dark"] .field{background:color-mix(in srgb,var(--surface) 60%,var(--paper))}
 </style>
 </head>
 <body>
@@ -5728,10 +5739,10 @@ function ensureTheme(){return store.settings.theme||(store.settings.theme={});}
 const darkMQ=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
 const STYLE_IDS=["today","focus","journal","night","soft","earth"];
 // The four 8.0 styles: fixed palettes per light/dark; Soft and Earth colour each tab
-const NEWST={journal:{l:{bg:"#F4EFE6",sf:"#FBF8F2",ink:"#1F2A44",acc:"#B5532E"},d:{bg:"#121827",sf:"#1B2236",ink:"#ECE6DA",acc:"#E07A52"}},
+const NEWST={journal:{l:{bg:"#F4EFE6",sf:"#FBF8F2",ink:"#1F2A44",acc:"#B5532E"},d:{bg:"#131A2C",sf:"#19223A",ink:"#EDE6D8",acc:"#E2855C"}},
   night:{d:{bg:"#0B0B0C",sf:"#151517",ink:"#F2F2F2",acc:"#FF5A1F"}},
-  soft:{l:{bg:"#F6F1EA",sf:"#FFFFFF",ink:"#2B2622"},d:{bg:"#1B1714",sf:"#28221E",ink:"#F3EDE6"},tabs:{home:"#F28C52",train:"#F28C52",eat:"#4FAE6E",body:"#5B8DEF",spend:"#D9A43A",hist:"#8A63C7",settings:"#8C8178"}},
-  earth:{l:{bg:"#F6EEE3",sf:"#EFE3D2",ink:"#24312B"},d:{bg:"#141C18",sf:"#1E2A24",ink:"#EDE3D3"},tabs:{home:"#B85C38",train:"#B85C38",eat:"#6B7A3A",body:"#2F5F52",spend:"#B9862B",hist:"#2F5F52",settings:"#8A6A4F"}}};
+  soft:{l:{bg:"#F6F1EA",sf:"#FFFFFF",ink:"#2B2622"},d:{bg:"#1C1714",sf:"#2D2621",ink:"#F5EEE6"},tabs:{home:"#F28C52",train:"#F28C52",eat:"#4FAE6E",body:"#5B8DEF",spend:"#D9A43A",hist:"#8A63C7",settings:"#8C8178"}},
+  earth:{l:{bg:"#F6EEE3",sf:"#EFE3D2",ink:"#24312B"},d:{bg:"#121A16",sf:"#2B2621",ink:"#F0E6D6"},tabs:{home:"#B85C38",train:"#B85C38",eat:"#6B7A3A",body:"#2F5F52",spend:"#B9862B",hist:"#2F5F52",settings:"#8A6A4F"}}};
 const STFONT={journal:"Fraunces:opsz,wght@9..144,400..700&family=Instrument+Sans:wght@400;500;600;700",night:"Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700",soft:"Nunito:wght@500;600;700;800;900",earth:"DM+Sans:opsz,wght@9..40,400..700"};
 function ensureFont(st){const q=STFONT[st];if(!q||document.getElementById("font-"+st))return;const l=document.createElement("link");l.id="font-"+st;l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+q+"&display=swap";document.head.appendChild(l);}
 const STYLE_INFO=[["today","Today","Soft and rounded, a colour for each tab"],["focus","Focus","Bold, with a big Log set button"],["journal","Training journal","Ruled paper, ink and a stamp for what's done"],["night","Night gym","Black and orange, big scoreboard numbers"],["soft","Soft","Chunky, rounded and colourful"],["earth","Earth and clay","Terracotta and olive, arch shapes"]];
@@ -5750,13 +5761,13 @@ function isDark(){const T=themeCfg(),st=styleId();if(st==="night")return true;if
 function styleAccent(){const T=themeCfg(),st=styleId();if(st==="focus")return T.facc||"#C9F23E";const t=TABDEF[tab]?tab:"train";return (T.tabc||{})[t]||TABC[t]||TABC.train;}
 const THEME_VARS=["--paper","--surface","--ink","--muted","--line","--mutedbg","--ring","--field","--shadow","--shadow-sm","--blue","--acc","--accon","--segon"];
 function paletteNew(st){const N=NEWST[st],dark=isDark(),P=N[dark?"d":"l"]||N.d;let acc=N.tabs?(N.tabs[TABDEF[tab]?tab:"train"]||N.tabs.train):P.acc;if(dark&&N.tabs)acc=mixHex(acc,"#FFFFFF",.15);
-  const b=st==="soft"?mixHex(P.bg,acc,dark?.06:.07):P.bg,surface=P.sf,ink=P.ink,muted=mixHex(ink,b,dark?.42:.34),line=mixHex(b,ink,dark?.16:.13),mutedbg=mixHex(surface,ink,dark?.08:.06);
+  const b=st==="soft"?mixHex(P.bg,acc,dark?.09:.07):P.bg,surface=P.sf,ink=P.ink,muted=mixHex(ink,b,dark?.42:.34),line=mixHex(b,ink,dark?.16:.13),mutedbg=mixHex(surface,ink,dark?.08:.06);
   let txt=acc;for(let t=.1;t<=.8&&contrast(txt,surface)<4.5;t+=.1)txt=mixHex(acc,ink,t);
-  const sh=dark?"none":st==="soft"?"0 10px 22px -12px rgb(80 55 30 / .28), 0 2px 4px rgb(80 55 30 / .06)":st==="earth"?"0 8px 20px -14px rgb(60 40 20 / .35)":"none";
+  const sh=dark?(st==="soft"?`inset 0 1px 0 rgb(255 255 255 / .07), 0 14px 28px -18px ${mixHex(acc,"#000000",.2)}`:st==="earth"?"inset 0 1px 0 rgb(255 236 214 / .07)":"none"):st==="soft"?"0 10px 22px -12px rgb(80 55 30 / .28), 0 2px 4px rgb(80 55 30 / .06)":st==="earth"?"0 8px 20px -14px rgb(60 40 20 / .35)":"none";
   return {"--paper":b,"--surface":surface,"--ink":ink,"--muted":muted,"--line":line,"--mutedbg":mutedbg,"--ring":mixHex(b,ink,.35),"--field":dark?mixHex(b,ink,.04):mixHex(surface,b,.3),"--shadow":sh,"--shadow-sm":dark?"none":"0 2px 8px rgb(70 45 20 / .06)","--blue":txt,"--acc":acc,"--accon":contrast("#FFFFFF",acc)>=contrast("#18222E",acc)?"#FFFFFF":"#18222E","--segon":dark?mixHex(surface,ink,.16):surface,_dark:dark,_paper:false};}
 function palette6(){const T=themeCfg(),st=styleId();if(NEWST[st])return paletteNew(st);const dark=isDark(),row=bg6Row(),b=T.bgc||row[dark?4:3];
   const ink=dark?mixHex(b,"#FFFFFF",.92):mixHex(b,"#000000",.88);
-  const surface=dark?mixHex(b,"#FFFFFF",st==="focus"?.075:.06):(lumHex(b)>.93&&st==="focus"?mixHex(b,"#000000",.035):mixHex(b,"#FFFFFF",.82));
+  const surface=dark?mixHex(b,st==="focus"?"#FFFFFF":"#FFE8D0",st==="focus"?.075:.075):(lumHex(b)>.93&&st==="focus"?mixHex(b,"#000000",.035):mixHex(b,"#FFFFFF",.82));
   const muted=mixHex(ink,b,.45),line=mixHex(b,ink,dark?.15:.11),mutedbg=mixHex(surface,ink,dark?.08:.05);
   let acc=styleAccent();if(dark&&st==="today")acc=mixHex(acc,"#FFFFFF",.16);
   let txt=acc;for(let t=.1;t<=.8&&contrast(txt,surface)<3.4;t+=.1)txt=mixHex(acc,ink,t);
@@ -6216,8 +6227,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.3";
+const APP_VERSION="8.31";
 const CHANGELOG=[
+  {v:"8.31",d:"14 November 2026",t:"Better dark modes",items:["Dark mode now keeps each style's character instead of just turning everything dark grey.","Training journal: a midnight-blue notebook with the ruled lines still showing, and the exercise you're on outlined in rust with its hard shadow.","Earth and clay: warm clay cards on deep forest green, with the green tab bar kept.","Soft: the background picks up each tab's colour, and cards glow softly in it so they still look lifted.","Today: warmer cocoa cards with a faint top edge, so they stand out from the background.","In every dark style, ticked sets use the style's colour instead of a washed-out grey."]},
   {v:"8.3",d:"14 November 2026",t:"Less scrolling everywhere",items:["Thinner header: the date sits next to the title and the week strip is smaller, so every tab starts higher up.","The week strip no longer drifts to another week when you switch tabs or your phone's address bar hides.","Home: once your workout is done, the big card shrinks to one line. Tick off your supplements right on Home. The week bars are now labelled with each day's workout.","Train: the rest timer is a small chip next to the exercise name. The drop set and form tips show on the first 3 days, then sit behind the ⓘ next to + Drop set.","Eat: nutrients fold into one line (tap to open), with the water button still there. The quick tips show once as a pop-up. A ~ in front of carbs or fat means part of it is estimated.","Progress → Goals: your check-in history, showing what you changed each week.","Spend is split into This week, Shopping list and Products. Products no longer say Not bought yet, and an empty week shows one line.","Settings: Nutrients to track and Health tracking are now one page, Nutrients and health. Install as an app becomes Share the app once it's installed."]},
   {v:"8.21",d:"14 November 2026",t:"Train labels",items:["Train now shows Before your workout above the warm-up and Your workout above the exercises, to match After your workout."]},
   {v:"8.2",d:"14 November 2026",t:"Cleaner Eat and Train",items:["Eat is split into Log, Plan and Saved. Log has your calories, nutrients, meals, extra food and supplements. Plan has Suggest meals, meal sizes and the meal builder. Saved has your meals and recipes.","Cheat meal is no longer its own tile. Tap Cheat meal or cheat day? under your calories.","Free day is now Cheat day, and it replaces \"cheat meal, don't count it\", since the two did the same thing. Days you already marked either way show as cheat days.","Train: every exercise is its own card, everything lines up, and Cardio and Stretches sit together under After your workout.","The backup reminder now shows on the Home tab instead of Train.","Progress: Calendar is now called History.","Your real maintenance now needs food logged on at least 2 days in each of the last 4 weeks, so your food average covers the same time as your weight change.","The nutrients note on Eat moved behind the ⓘ."]},
