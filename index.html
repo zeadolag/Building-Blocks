@@ -969,6 +969,20 @@ dialog.sheet.dragging{transition:none}
 dialog.sheet.closing{transition:transform .18s ease-in}
 body.sheetlock{position:fixed;left:0;right:0;overflow:hidden}
 #rail{display:none!important}
+/* 7.54: rounded edges while swiping, and press highlights that sit inside the divider lines */
+.swbg{border-radius:12px}
+.swr.l>.sw,.swr.r>.sw,.swr>.sw.dragging{border-radius:12px}
+#panel article.ex.exfold{--rowbg:var(--surface)}
+html[data-style="today"] #panel article.ex.exfold{--rowbg:var(--paper)}
+#panel article.ex.exfold .swr{border-radius:12px;overflow:hidden}
+#panel article.ex.exfold .swr>.sw{background:transparent}
+#panel article.ex.exfold .swr.l>.sw,#panel article.ex.exfold .swr.r>.sw{background:var(--rowbg)}
+#panel article.ex.exfold .swr:not(.l):not(.r) .swbg{visibility:hidden}
+html[data-style="today"] #panel article.ex.exfold .exrow{padding:9px 8px;margin:3px 0;border-radius:12px}
+html[data-style="today"] #panel article.ex.exfold .swr{margin:3px 0}
+html[data-style="today"] #panel article.ex.exfold .swr>.exrow{margin:0}
+.exrow:active .sdots i:not(.on){background:color-mix(in srgb,var(--ink) 22%,transparent)}
+
 /* 7.5: hold an exercise to move it */
 #panel article.ex .exrow,#panel article.ex .exhead,#panel article.ex .sshead{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #panel article.ex.xshift{transition:transform .2s cubic-bezier(.2,.8,.2,1)}
@@ -3075,7 +3089,7 @@ function singleCard(e,ctx){
    ctx._pct=R.rc?dn/R.rc:0;ctx._all=all;
    if(!open){const N=v=>parseFloat(String(v||"").replace(",","."))||0,top=R.rws.filter(r=>r&&r.d&&N(r.r)>0).sort((a,c)=>N(c.w)-N(a.w)||N(c.r)-N(a.r))[0],kc=dn?kcalRange(exCardKcal(k,id)):"";
      const st=repStyle(id),sub=all?`${R.rc} ${R.rc===1?"set":"sets"} done${top&&!["run","dist"].includes(flag)?" · best "+setText(top,flag):""}${kc?" · "+kc:""}`:`${sets} × ${esc(styledTarget(e))}${drop?" + drop":""}${negOn(e)?" · Negatives":""}${st&&canStyle(e)?" · "+STYLES[st][0]:""}${dn?` · ${dn} of ${R.rc} done`:""}`;
-     return `<article class="card ex exfold${all?" isdone":""}" data-ex="${id}"><button type="button" class="exrow" data-act="exexp" aria-expanded="false" aria-label="${esc(name)}, ${all?"all sets done":dn+" of "+R.rc+" sets done"}. Tap to open">${ring(R.rc?dn/R.rc:0,all)}<span class="exdt"><strong>${esc(name)}</strong><small>${sub}</small></span>${R.rc&&R.rc<=8?`<span class="sdots" aria-hidden="true">${Array.from({length:R.rc},(_,j)=>`<i${R.rws[j]&&R.rws[j].d?' class="on"':""}></i>`).join("")}</span>`:""}${needs(id).length?`<span class="needs sm">${needsText(needs(id))}</span>`:""}${IC.chev}</button></article>`;}}
+     return `<article class="card ex exfold${all?" isdone":""}" data-ex="${id}"><div class="swr" data-sw="ex">${swbg("Swap","Remove today")}<button type="button" class="sw exrow" data-act="exexp" aria-expanded="false" aria-label="${esc(name)}, ${all?"all sets done":dn+" of "+R.rc+" sets done"}. Tap to open">${ring(R.rc?dn/R.rc:0,all)}<span class="exdt"><strong>${esc(name)}</strong><small>${sub}</small></span>${R.rc&&R.rc<=8?`<span class="sdots" aria-hidden="true">${Array.from({length:R.rc},(_,j)=>`<i${R.rws[j]&&R.rws[j].d?' class="on"':""}></i>`).join("")}</span>`:""}${needs(id).length?`<span class="needs sm">${needsText(needs(id))}</span>`:""}${IC.chev}</button></div></article>`;}}
   let h=`<article class="card ex isopen${ctx.cur===id&&styleId()==="focus"&&!fShow.has(k+":"+id)?" fcur":""}" data-ex="${id}">`+headerHtml(e,ctx);
   const rt=restFor(id,p,k),uni=v2&&UNI[id];
   if(rt&&(sets>1||drop))h+=`<button type="button" class="restbtn" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">${IC.watch}${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
@@ -5923,8 +5937,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="7.53";
+const APP_VERSION="7.54";
 const CHANGELOG=[
+  {v:"7.54",d:"14 November 2026",t:"Smoother swipes",items:["Swiping a row now has rounded edges on both sides, so it looks like the row is sliding away rather than being cut off.","Folded exercises can be swiped too: right to swap, left to remove it for today. You no longer have to open an exercise first.","The highlight when you tap a folded exercise now sits neatly between the divider lines instead of running into them."]},
   {v:"7.53",d:"14 November 2026",t:"74 more foods",items:["Plant milks (oat, soy, almond), cheddar, Emmental, kefir, buttermilk, Schmand, whipping cream and condensed milk.","Rye bread, Knäckebrot, baguette, bagels, Brezel, flour, cornstarch, breadcrumbs, semolina, Spätzle, granola, termis and baked beans.","Tomato paste, passata, pickles, pumpkin, leek, celery, radish, spring onion, rocket and parsley, plus BBQ, hot, sweet chili and pesto sauces and balsamic vinegar.","Crisps, butter biscuits, ice cream, halawa and black honey. Plums, cherries, apricots, melon, grapefruit, dried apricots, prunes and coconut. Pangasius, trout, sea bass, herring, calamari, crab sticks, duck and veal. Mango juice.","Foods whose values depend on the recipe, shop or brand are marked (estimate): basbousa, konafa, baklava, cakes, pizza, feteer, fattah, sobia, tamr hindi, sahlab, cereal bars, protein bars and halal fruit gummies. For an exact number, use the label or add your own food."]},
   {v:"7.52",d:"14 November 2026",t:"More meats",items:["New in the food list: sucuk, beef and chicken sausages, beef cold cuts, basterma, turkey and chicken slices, luncheon meat (lanshon), corned beef, beef for stew, burger patties, lamb chops and leg, turkey mince, whole chicken, chicken wings, chicken and beef döner meat, chicken nuggets and fish fingers.","Also labneh, gebna rumi, instant noodles (Indomie), oven fries, gnocchi, croissant, simit, garlic, white cabbage and iceberg lettuce.","Sausages, döner and cold cuts vary a lot by brand and shop. Döner is marked as an estimate; for packaged ones, the label is the most exact."]},
   {v:"7.51",d:"31 October 2026",t:"Moves are for today",items:["Holding and dragging an exercise now only changes the order for that day, not your plan. To change the order for every day of a workout, use the arrows in Edit."]},
