@@ -1307,6 +1307,52 @@ body.saver .island{-webkit-backdrop-filter:none;backdrop-filter:none;background:
 #rail.live .rbubble{opacity:1}
 body.touring #rail{display:none}
 @media (prefers-reduced-motion: reduce){.sw,.swr,#toast,#rt,#rt .ring .fg,.switch i,.ithumb,.seg.hasthumb::before,#tour .tspot,#tour .tcard{transition:none}}
+
+
+/* 8.3 Home */
+.hwkdone{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;padding:12px 14px;margin:0 0 4px;color:var(--ink);font:inherit}
+.hwkdone .hdk{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-weight:700;flex:none}
+.hwkdone b{display:block;font-size:16px}.hwkdone small{display:block;color:var(--muted);font-size:13px}
+.hwkdone>svg{margin-left:auto;color:var(--muted);flex:none}
+.hsupp{margin-top:12px}
+.hsch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.hsch::-webkit-scrollbar{display:none}
+.hspill{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 12px 7px 7px;font:inherit;font-size:13.5px;font-weight:500}
+.hspill .hsb{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:11px;color:transparent}
+.hspill[aria-pressed="true"]{border-color:var(--acc)}
+.hspill[aria-pressed="true"] .hsb{background:var(--acc);border-color:var(--acc);color:var(--accon)}
+.hwb em{font-style:normal;font-size:10px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-3px}
+.hwb.is-sel em{color:var(--ink)}
+.hwnote{margin:6px 0 0;font-size:12px;color:var(--muted)}
+
+/* 8.3 Train: rest timer as a chip next to the exercise name */
+.exicons .restchip{margin:0;padding:0}
+.exicons .restchip .chip,html[data-style] .exicons .restchip .chip{height:34px;padding:0 10px;gap:5px;font-size:14px!important;border-radius:999px}
+html[data-style="night"] .exicons .restchip .chip{border-radius:10px;font-size:17px!important}
+.exicons .restchip .chip svg{width:15px;height:15px}
+.addrow .infob{margin-left:auto}
+
+.spmain small:empty{display:none}
+/* 8.3 Eat */
+.khero2{position:relative}.khinfo{position:absolute;right:-6px;bottom:-8px}
+.nutline{display:flex;align-items:center;gap:10px;padding:6px 14px}
+.nutlbtn{display:flex;align-items:center;gap:10px;flex:1;border:0;background:none;padding:6px 0;text-align:left;font:inherit;color:inherit;min-width:0}
+.nutlbtn span{flex:1;min-width:0}.nutlbtn strong{display:block;font-size:15px}.nutlbtn small{display:block;color:var(--muted);font-size:13px}
+.nutlbtn svg{color:var(--muted);flex:none;transition:transform .2s}.nutlbtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.nuthd .nutlbtn{padding:0}
+.cilist{padding:4px 14px}.cirow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;font-size:14px}.cirow+.cirow{border-top:1px solid var(--line)}.cirow span{color:var(--muted)}.cirow b{font-weight:600}
+/* ============ 8.3: thinner header ============ */
+html .top{padding:2px 0 2px!important;align-items:center}
+html .top .date{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;min-width:0}
+html .top h1,html body.tab-home .top h1{font-size:22px!important;line-height:1.15!important;white-space:nowrap;overflow:visible;flex:none;margin:0}
+html[data-style="night"] .top h1{font-size:26px!important}
+html .top p#dSub{margin:0!important;font-size:13px!important;white-space:nowrap}
+html .top .navbtn{width:34px;height:34px}
+html .wkmonth{display:none!important}
+html #week{margin-top:2px!important;margin-bottom:6px!important;padding-top:0!important;padding-bottom:0!important}
+html #week .wkp{padding:3px 0 5px!important;gap:0!important}
+html #week .wkp small{font-size:10.5px!important}
+html #week .wkp b{font-size:15px!important;line-height:1.15!important}
+html #week .wkp i{width:5px!important;height:5px!important;margin-top:2px!important}
 </style>
 </head>
 <body>
@@ -2966,7 +3012,7 @@ function renderHeader(){
   const d=parseKey(sel),t=todayKey();
   $("dTitle").textContent=sel===t?(tab==="home"?greeting():"Today"):d.toLocaleDateString(undefined,{weekday:"long"});
   const sub=$("dSub");
-  sub.textContent=d.toLocaleDateString(undefined,sel===t?{weekday:"long",day:"numeric",month:"long"}:{day:"numeric",month:"long"});
+  sub.textContent=d.toLocaleDateString(undefined,sel===t?{weekday:"short",day:"numeric",month:"short"}:{day:"numeric",month:"short",year:d.getFullYear()!==parseKey(t).getFullYear()?"numeric":undefined});
   if(sel!==t){const b=document.createElement("button");b.className="todaybtn";b.textContent="Back to today";b.dataset.act="today";sub.append(" ",b);}
 }
 const WK_IDS=["pills","cards","dots","circles"];
@@ -2992,9 +3038,11 @@ function renderWeek(){
   let mo=$("wkMonth");if(scroll&&!mo){mo=document.createElement("p");mo.id="wkMonth";mo.className="wkmonth";W.before(mo);W.addEventListener("scroll",()=>{if(W._mt)return;W._mt=requestAnimationFrame(()=>{W._mt=0;wkMonthText();});},{passive:true});}
   if(mo)mo.hidden=!scroll;
   if(scroll){const s0=W.querySelector(".is-sel");if(s0){const center=()=>{W.scrollLeft=s0.offsetLeft-W.offsetLeft-(W.clientWidth-s0.offsetWidth)/2;};
-      if(keep!=null){W.scrollLeft=keep;const L=s0.offsetLeft-W.offsetLeft;if(prevSel!==sel&&(L<W.scrollLeft||L+s0.offsetWidth>W.scrollLeft+W.clientWidth))center();}else center();}
+      if(keep!=null){W.scrollLeft=keep;const L=s0.offsetLeft-W.offsetLeft;if(L<W.scrollLeft||L+s0.offsetWidth>W.scrollLeft+W.clientWidth)center();}else center();if(!W._fr&&document.fonts&&document.fonts.ready){W._fr=1;document.fonts.ready.then(()=>{const s1=W.querySelector(".is-sel");if(s1){const L=s1.offsetLeft-W.offsetLeft;if(L<W.scrollLeft||L+s1.offsetWidth>W.scrollLeft+W.clientWidth)W.scrollLeft=L-(W.clientWidth-s1.offsetWidth)/2;}});}}
     wkMonthText();}
 }
+// the phone's address bar showing or hiding resizes the page, and scroll snapping can then drift the week strip, so put the selected day back in view
+addEventListener("resize",()=>{clearTimeout(window._wkR);window._wkR=setTimeout(()=>{const W=$("week"),s1=W&&W.querySelector(".is-sel");if(!s1||!W.classList.contains("scroller"))return;const L=s1.offsetLeft-W.offsetLeft;if(L<W.scrollLeft||L+s1.offsetWidth>W.scrollLeft+W.clientWidth)W.scrollLeft=L-(W.clientWidth-s1.offsetWidth)/2;},120);});
 function wkMonthText(){const W=$("week"),mo=$("wkMonth");if(!W||!mo||mo.hidden)return;const mid=W.scrollLeft+W.clientWidth/2;let best=null;for(const b of W.children){const c=b.offsetLeft-W.offsetLeft+b.offsetWidth/2;if(!best||Math.abs(c-mid)<Math.abs(best.c-mid))best={c,k:b.dataset.day};}
   if(best){const txt=parseKey(best.k).toLocaleDateString(undefined,{month:"long",year:"numeric"});if(mo.textContent!==txt)mo.textContent=txt;}}
 const ICO=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -3187,10 +3235,12 @@ function howtoHtml(id,name,note){
 function motionBlock(id){
   return "";
 }
+// explanations shown on the first 3 days you see them, then only behind an info button
+function tipShow(key){const S=store.settings,T=S.tipSeen=S.tipSeen||{},L=T[key]=T[key]||[],t=todayKey();if(L.includes(t))return true;if(L.length>=3)return false;L.push(t);persist("settings");return true;}
 function headerHtml(e,ctx,tag){
   const [id,name,sets,target,flag,drop]=e;
   const st=repStyle(id),tg=styledTarget(e),open=openHow.has(id),hasNote=!!(store.settings.notes||{})[id];
-  let h=`<div class="swr" data-sw="ex">${swbg("Swap","Remove today")}<header class="sw exhead">${tag?`<span class="sstag">${tag}</span>`:ring(ctx._pct||0,ctx._all)}<div class="exttl" data-act="exmenu" role="button" tabindex="0" aria-label="Options for ${esc(name)}"><h3>${esc(dispName(e))}</h3><span class="target">${sets} × ${esc(dispTarget(e,tg))}${negOn(e)?" · Negatives":""}${drop?" + drop":""}${st&&canStyle(e)?` · ${STYLES[st][0]}`:""}${needs(id).length?` <span class="needs">${needsText(needs(id))}</span>`:""}</span></div><span class="exicons"><button type="button" class="icob" data-act="howto" aria-expanded="${open}" aria-label="${open?"Hide":"Show"} how to do ${esc(name)}"${open?' aria-pressed="true"':""}>${IC.search}</button><button type="button" class="icob${hasNote?" has":""}" data-act="note" aria-label="${hasNote?"Edit your note":"Add a note"} for ${esc(name)}">${IC.pen}</button>${tag?"":`<button type="button" class="icob fold" data-act="excol" aria-label="Fold ${esc(name)}">${IC.chev}</button>`}</span></header></div>`;
+  let h=`<div class="swr" data-sw="ex">${swbg("Swap","Remove today")}<header class="sw exhead">${tag?`<span class="sstag">${tag}</span>`:ring(ctx._pct||0,ctx._all)}<div class="exttl" data-act="exmenu" role="button" tabindex="0" aria-label="Options for ${esc(name)}"><h3>${esc(dispName(e))}</h3><span class="target">${sets} × ${esc(dispTarget(e,tg))}${negOn(e)?" · Negatives":""}${drop?" + drop":""}${st&&canStyle(e)?` · ${STYLES[st][0]}`:""}${needs(id).length?` <span class="needs">${needsText(needs(id))}</span>`:""}</span></div><span class="exicons">${ctx._rest||""}<button type="button" class="icob" data-act="howto" aria-expanded="${open}" aria-label="${open?"Hide":"Show"} how to do ${esc(name)}"${open?' aria-pressed="true"':""}>${IC.search}</button><button type="button" class="icob${hasNote?" has":""}" data-act="note" aria-label="${hasNote?"Edit your note":"Add a note"} for ${esc(name)}">${IC.pen}</button>${tag?"":`<button type="button" class="icob fold" data-act="excol" aria-label="Fold ${esc(name)}">${IC.chev}</button>`}</span></header></div>`;
   if(!ctx.planIds.has(id))h+=`<p class="restline">Logged this day, but no longer in this workout.</p>`;
   const note=(store.settings.notes||{})[id];if(note)h+=`<p class="restline"><b>Note:</b> ${esc(note)}</p>`;
   return h;
@@ -3213,15 +3263,16 @@ function singleCard(e,ctx){
    if(!open){const N=v=>parseFloat(String(v||"").replace(",","."))||0,top=R.rws.filter(r=>r&&r.d&&N(r.r)>0).sort((a,c)=>N(c.w)-N(a.w)||N(c.r)-N(a.r))[0],kc=dn?kcalRange(exCardKcal(k,id)):"";
      const st=repStyle(id),sub=all?`${R.rc} ${R.rc===1?"set":"sets"} done${top&&!["run","dist"].includes(flag)?" · best "+setText(top,flag):""}${kc?" · "+kc:""}`:`${sets} × ${esc(styledTarget(e))}${drop?" + drop":""}${negOn(e)?" · Negatives":""}${st&&canStyle(e)?" · "+STYLES[st][0]:""}${dn?` · ${dn} of ${R.rc} done`:""}`;
      return `<article class="card ex exfold${all?" isdone":""}" data-ex="${id}"><div class="swr" data-sw="ex">${swbg("Swap","Remove today")}<button type="button" class="sw exrow" data-act="exexp" aria-expanded="false" aria-label="${esc(name)}, ${all?"all sets done":dn+" of "+R.rc+" sets done"}. Tap to open">${ring(R.rc?dn/R.rc:0,all)}<span class="exdt"><strong>${esc(name)}</strong><small>${sub}</small></span>${R.rc&&R.rc<=8?`<span class="sdots" aria-hidden="true">${Array.from({length:R.rc},(_,j)=>`<i${R.rws[j]&&R.rws[j].d?' class="on"':""}></i>`).join("")}</span>`:""}${needs(id).length?`<span class="needs sm">${needsText(needs(id))}</span>`:""}${IC.chev}</button></div></article>`;}}
-  let h=`<article class="card ex isopen${ctx.cur===id&&styleId()==="focus"&&!fShow.has(k+":"+id)?" fcur":""}" data-ex="${id}">`+headerHtml(e,ctx);
   const rt=restFor(id,p,k),uni=v2&&UNI[id];
-  if(rt&&(sets>1||drop))h+=`<button type="button" class="restbtn" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">${IC.watch}${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
-  h+=lastLine(id,k,sets,target,flag,v2)+howtoHtml(id,name)+(tipsOn()&&v2?`<p class="formtip">Focus on form first. If your form starts to slip, the weight is too heavy, so lower it. Too hard right now? Tap the name and choose <b>Swap exercise</b> for an easier option.</p>`:"");
+  ctx._rest=rt&&(sets>1||drop)&&!uni?`<button type="button" class="restbtn restchip" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time."><span class="chip">${IC.watch}${(x=>x<60?x+" s":Math.floor(x/60)+":"+String(x%60).padStart(2,"0"))(Math.round(restSecs(id,p,k)))}</span></button>`:"";
+  let h=`<article class="card ex isopen${ctx.cur===id&&styleId()==="focus"&&!fShow.has(k+":"+id)?" fcur":""}" data-ex="${id}">`+headerHtml(e,ctx);ctx._rest="";
+  if(rt&&(sets>1||drop)&&uni)h+=`<button type="button" class="restbtn" data-hold="rest" data-id="${id}" aria-label="Rest time for ${esc(name)}: ${secLabel(restSecs(id,p,k))}. Tap to start the rest timer, hold to change the time.">${uni?"Go straight from one "+uni+" to the other, then rest":"Rest between sets"} <span class="chip">${IC.watch}${secLabel(restSecs(id,p,k))}${restOverride(id)?" (yours)":""}</span></button>`;
+  h+=lastLine(id,k,sets,target,flag,v2)+howtoHtml(id,name)+(tipsOn()&&v2&&tipShow("form")?`<p class="formtip">Focus on form first. If your form starts to slip, the weight is too heavy, so lower it. Too hard right now? Tap the name and choose <b>Swap exercise</b> for an easier option.</p>`:"");
   const {rws,rc,types}=rowsInfo(day,e);let num=0,dropNoted=false;
   for(let i=0;i<rc;i++){const r=rws[i]||{w:"",r:"",d:false},isDrop=types[i]==="d";
     h+=setRowHtml(e,i,r,isDrop,isDrop?"↓":String(++num),true);
-    if(isDrop&&!dropNoted&&types[i+1]!=="d"){dropNoted=true;h+=kw(`<p class="restline" style="margin:6px 0 0 4px">↑ Drop set: go straight into it with no rest. Cut the weight about 25–30% and go to failure.</p>`);}}
-  return h+`<div class="addrow"><button class="addset" data-act="addset">+ Set</button>${["run","dist","time"].includes(flag)?"":`<button class="addset" data-act="adddrop">+ Drop set</button>`}</div></article>`;
+    if(isDrop&&!dropNoted&&types[i+1]!=="d"&&tipShow("drop")){dropNoted=true;h+=kw(`<p class="restline" style="margin:6px 0 0 4px">↑ Drop set: go straight into it with no rest. Cut the weight about 25–30% and go to failure.</p>`);}}
+  return h+`<div class="addrow"><button class="addset" data-act="addset">+ Set</button>${["run","dist","time"].includes(flag)?"":`<button class="addset" data-act="adddrop">+ Drop set</button>${typeof infoB==="function"?infoB("drop"):""}`}</div></article>`;
 }
 function supersetCard(group,ctx){
   const {k,p,day,v2}=ctx,L="ABCDEF",gk="ss:"+group[0][7],key=k+":"+gk;
@@ -3394,14 +3445,18 @@ function renderHome(){
   // workout
   {const p=planOf(k),P=plansFor(k)[p],W=workInfo(k),done=W.tot&&W.dn>=W.tot,rest=p==="rest";
    const sub=rest?"Recovery day. Walk, stretch and eat well.":p==="dyn"?"Pick today's workout":!W.tot?(p==="run"?"Cardio day":"No exercises yet"):done?`All ${W.tot} sets done`:`${W.list.length} exercise${W.list.length===1?"":"s"} · ${W.dn?`${W.dn} of ${W.tot} sets done`:`${W.tot} sets`}`;
+   let mins=0;{let a=0,z=0;for(const rws of Object.values(day.sets||{}))for(const r of rws||[])if(r&&r.d&&r.at){a=a?Math.min(a,r.at):r.at;z=Math.max(z,r.at);}if(a&&z>a)mins=Math.round((z-a)/60000);}
+   if(done&&!rest)h+=`<button type="button" class="card hwkdone" data-tabgo="train" style="--c:${P.color}"><span class="hdk">✓</span><span><b>${esc(P.name)} done</b><small>${W.tot} sets${mins?` · ${mins} min`:""}</small></span>${IC.chev}</button>`;else
    h+=`<div class="hwk${rest?" rest":""}" style="--c:${P.color}"><div><small>${k===t?"Today's workout":esc(dayName(k))+"'s workout"}</small><b>${esc(P.name)}</b><small>${sub}</small>${W.tot&&!rest?`<div class="hpl"><i style="width:${Math.round(W.dn/W.tot*100)}%"></i></div>`:""}</div><button type="button" class="hgo" data-tabgo="train">${rest?"View":done?"Review":W.dn?"Continue":"Start"}</button></div>`;}
+  // supplements: tick them off without opening Eat
+  {const SU=supps(),ds=day.supps||{};if(SU.length){const n=SU.filter(x=>ds[x]).length;h+=`<div class="hsupp"><div class="hst"><span>Supplements</span><small>${n} of ${SU.length} taken</small></div><div class="hsch">${SU.map((x,i)=>`<button type="button" class="hspill" data-hsupp="${i}" aria-pressed="${!!ds[x]}"><span class="hsb">✓</span>${esc(String(x).split(",")[0])}</button>`).join("")}</div></div>`;}}
   // quick actions
   h+=`<div class="hqa"><button type="button" data-hq="meal"><i class="o">${TABDEF.eat[1]}</i>Log meal</button><button type="button" data-hq="set"><i>${TABDEF.train[1]}</i>Log set</button><button type="button" data-hq="weigh"><i>${ICO('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 10a3 3 0 0 1 6 0M12 10l1.5-2"/>')}</i>Weigh in</button><button type="button" data-hq="spend"><i>${TABDEF.spend[1]}</i>Expense</button></div>`;
   // this week
   {const mon=weekMon(k);let planned=0,did=0,bars="";
    for(let i=0;i<7;i++){const d=addDays(mon,i),p=planOf(d),P=plansFor(d)[p],pr=progress(d,p),rest=p==="rest";if(!rest){planned++;if(pr>=1)did++;}
-     bars+=`<button type="button" class="hwb${d===k?" is-sel":""}" data-day="${d}" aria-label="${esc(dayName(d))}: ${esc(P.name)}${rest?"":", "+Math.round(pr*100)+"% done"}"><span class="bt" style="background:${rest?"color-mix(in srgb, var(--mutedbg) 45%, transparent)":"color-mix(in srgb, "+P.color+" 16%, var(--mutedbg))"}"><i style="height:${rest?0:Math.round(pr*100)}%;background:${P.color}"></i></span><small>${"MTWTFSS"[i]}</small></button>`;}
-   h+=`<div class="hsec"><div class="hst"><span>This week</span><small>${did} of ${planned} workout${planned===1?"":"s"}</small></div><div class="hweek">${bars}</div></div>`;}
+     bars+=`<button type="button" class="hwb${d===k?" is-sel":""}" data-day="${d}" aria-label="${esc(dayName(d))}: ${esc(P.name)}${rest?"":", "+Math.round(pr*100)+"% done"}"><span class="bt" style="background:${rest?"color-mix(in srgb, var(--mutedbg) 45%, transparent)":"color-mix(in srgb, "+P.color+" 16%, var(--mutedbg))"}"><i style="height:${rest?0:Math.round(pr*100)}%;background:${P.color}"></i></span><small>${"MTWTFSS"[i]}</small><em>${rest?"Rest":esc(String(P.name).split(/[ &+,/]/)[0].slice(0,6))}</em></button>`;}
+   h+=`<div class="hsec"><div class="hst"><span>Workouts this week</span><small>${did} of ${planned} done</small></div><div class="hweek">${bars}</div><p class="hwnote">Each bar fills as you tick off that day's sets</p></div>`;}
   // at a glance: plain rows
   {const rows=[],mon=weekMon(k);
    const W7=[];for(let i=0;i<7;i++){const w=num((store.days[addDays(k,-i)]||{}).weight);if(w>0)W7.push(w);}const P7=[];for(let i=7;i<14;i++){const w=num((store.days[addDays(k,-i)]||{}).weight);if(w>0)P7.push(w);}
@@ -3419,10 +3474,11 @@ $("panel").addEventListener("click",e=>{const b=e.target.closest("[data-hq]");if
   if(a==="meal"){openTab("eat");const hr=new Date().getHours(),sl=hr<11?"breakfast":hr<15?"lunch":hr<18?"snack":"evening";setTimeout(()=>addFoodSheet(sl),60);}
   else if(a==="set"){openTab("train");setTimeout(()=>{const x=document.querySelector("#panel .fcard")||document.querySelector("#panel article.ex.isopen");if(x)window.scrollTo(0,Math.max(0,x.getBoundingClientRect().top+scrollY-90));},60);}
   else if(a==="weigh"){progView="over";openTab("body");setTimeout(()=>{const x=document.querySelector('#panel [data-body="weight"]');if(x){window.scrollTo(0,Math.max(0,x.getBoundingClientRect().top+scrollY-140));x.focus({preventScroll:true});}},60);}
-  else if(a==="spend")openTab("spend");
+  else if(a==="spend"){spV="prod";openTab("spend");}
   else if(a==="train"){progView="over";openTab("body");}
   else if(a==="note"){progView="body";openTab("body");setTimeout(bodyNoteSheet,60);}});
 $("panel").addEventListener("click",e=>{const b=e.target.closest(".hwb[data-day]");if(!b)return;sel=b.dataset.day;render();});
+$("panel").addEventListener("click",e=>{const b=e.target.closest("[data-hsupp]");if(!b||tab!=="home")return;const day=ensureDay(sel),n=supps()[+b.dataset.hsupp];if(!n)return;day.supps=day.supps||{};if(day.supps[n])delete day.supps[n];else day.supps[n]=true;persist("day-"+sel);renderHome();if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}});
 function renderTrain(){
   const k=sel,p=planOf(k),PL=plansFor(k),P=PL[p],day=store.days[k]||{},v2=k>=NEWPLAN;
   let h=`<section style="--c:${P.color};--on:${P.on}">`;
@@ -3529,7 +3585,7 @@ function miniMeter(kind,label,val,target){const pct=target?Math.min(100,val/targ
 function kHero(t,T){const st=styleId();if(st==="classic"||!T.k)return "";const over=t.k>T.k,left=Math.abs(T.k-t.k),pc=Math.min(1,t.k/T.k),M=macroTargets(T.k,T.p);
   const bar=(v,g,col)=>`<div class="hbar"><i style="width:${g?Math.min(100,v/g*100):0}%;background:${col}"></i></div>`;
   return `<div class="khero2"><span class="hr"><svg viewBox="0 0 120 120" width="116" height="116" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--mutedbg)" stroke-width="11"/>${pc>0?`<circle cx="60" cy="60" r="50" fill="none" stroke="${over?"var(--red)":"var(--acc)"}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(pc*314.16).toFixed(1)} 400" transform="rotate(-90 60 60)"/>`:""}</svg><span class="hrc"><b>${fmt(left)}</b><small>${over?"kcal over":"kcal left"}</small></span></span>
-  <span class="hmac"><span>${tg("protein",`<b>${fmt(t.p)}</b> / ${fmt(T.p)} g protein`)}${bar(t.p,T.p,"var(--rustc)")}</span><span>${tg("carbs",`<b>${fmt(t.cb)}</b> / ${fmt(M.cb)} g carbs`)}${bar(t.cb,M.cb,"var(--olivec)")}</span><span>${tg("fat",`<b>${fmt(t.f)}</b> / ${fmt(M.f)} g fat`)}${bar(t.f,M.f,"var(--sandc)")}</span></span></div>`;}
+  <span class="hmac"><span>${tg("protein",`<b>${fmt(t.p)}</b> / ${fmt(T.p)} g protein`)}${bar(t.p,T.p,"var(--rustc)")}</span><span>${tg("carbs",`<b>${t.est&&t.k?"~":""}${fmt(t.cb)}</b> / ${fmt(M.cb)} g carbs`)}${bar(t.cb,M.cb,"var(--olivec)")}</span><span>${tg("fat",`<b>${t.est&&t.k?"~":""}${fmt(t.f)}</b> / ${fmt(M.f)} g fat`)}${bar(t.f,M.f,"var(--sandc)")}</span></span>${t.est&&t.k&&typeof infoB==="function"?`<span class="khinfo">${infoB("est")}</span>`:""}</div>`;}
 function meter(label,val,target,unit){
   const pct=target?Math.min(100,val/target*100):0,over=val>target;
   const diff=Math.abs(target-val);
@@ -3978,9 +4034,9 @@ function renderEat(){
     $("panel").innerHTML=h+`</section>`;return;}
   if(eatView==="saved"){$("panel").innerHTML=h+savedEatHtml()+`</section>`;return;}
   if(freeD)h+=`<div class="card meters freeday"><strong>Cheat day</strong><p class="note" style="margin:2px 0 0">No targets today${t.k?`, ${fmt(t.k)} kcal logged anyway`:""}. Left out of your averages. Back on plan tomorrow.</p><button type="button" class="linkbtn cheatlink" data-act="cheatundo">Back to normal</button></div>`;
-  else{h+=`<div class="card meters">${kHero(t,T)}<div class="mkcal">${meter("",t.k,T.k,"kcal")}</div>${meter("protein",t.p,T.p,"g")}${(()=>{const M=macroTargets(T.k,T.p);return `<div class="pair macros">${miniMeter("carbs","Carbs",t.cb,M.cb)}${miniMeter("fat","Fat",t.f,M.f)}</div>${t.est&&t.k?`<p class="note" style="margin:-6px 0 0;font-size:12px">Part of this is estimated: some foods have no carb and fat values.</p>`:""}`;})()}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}${cheatBtn}</div>`;h+=nutCard(k,t);}
+  else{h+=`<div class="card meters">${kHero(t,T)}<div class="mkcal">${meter("",t.k,T.k,"kcal")}</div>${meter("protein",t.p,T.p,"g")}${(()=>{const M=macroTargets(T.k,T.p);return `<div class="pair macros">${miniMeter("carbs","Carbs",t.cb,M.cb)}${miniMeter("fat","Fat",t.f,M.f)}</div>${t.est&&t.k&&styleId()==="classic"?`<p class="note" style="margin:-6px 0 0;font-size:12px">Part of this is estimated: some foods have no carb and fat values.</p>`:""}`;})()}${T.own?`<p class="note" style="margin:-4px 0 0">Different targets just for this day.</p>`:""}${cheatBtn}</div>`;h+=nutCard(k,t);}
   if(!freeD)h+=copyDayCard(k);
-  if(!S.tipSwipe)h+=`<p class="note tip">Tap a tile to open it, or <b>+</b> to add something fast. Swipe a meal or food left to delete it, right to edit. <button class="linkbtn" data-act="tipok">Got it</button></p>`;
+  if(!S.tipSwipe){S.tipSwipe=true;persist("settings");setTimeout(()=>{if(tab==="eat"&&!sheetEl.open)openSheet("Quick tips",`<p style="margin-top:0;line-height:1.5">Tap a meal to open it, or <b>+</b> to add something fast.</p><p style="line-height:1.5">Swipe a meal or food left to delete it, right to edit.</p>`,[{label:"Got it"}]);},400);}
   h+=`<div class="egrid">`;
   for(const s of SLOTS){
     const cur=chosen(s,day),mine=ex.map((e,i)=>({e,i})).filter(x=>x.e.slot===s.id);let b="";
@@ -4015,6 +4071,7 @@ $("panel").addEventListener("click",e=>{if(tab!=="eat")return;const b=e.target.c
   if(a==="cheatundo"){const d=ensureDay(sel),u=snap(["day-"+sel]);delete d.cheat;delete d.tgt;d.extras=(d.extras||[]).filter(x=>!x.cheat);persist("day-"+sel);renderEat();toast("Back to normal",u);return;}
     if(a==="splitsheet"){openSplitSheet();return;}
   if(a==="water"){const d=ensureDay(sel),u=snap(["day-"+sel]);d.water=Math.round((num(d.water)+num(b.dataset.v))*100)/100;persist("day-"+sel);renderEat();toast("+250 ml water",u);return;}
+  if(a==="nutopen"){nutOpen=!nutOpen;renderEat();return;}
   if(a==="nutset"){tab="settings";setPage="nutrients";render();scrollTo(0,0);return;}
   if(a==="tile"){if(id==="cheat"){cheatSheet();return;}const key=sel+":eat-"+id,was=!!secOpen[key];Object.keys(secOpen).forEach(x=>{if(x.startsWith(sel+":eat-"))delete secOpen[x];});if(!was)secOpen[key]=true;renderEat();
     if(!was)requestAnimationFrame(()=>{const el=document.querySelector(`.etile[data-tile="${id}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<70||r.top>innerHeight*0.55)scrollTo({top:scrollY+r.top-80,behavior:"smooth"});}});}
@@ -4181,8 +4238,11 @@ function nutGoal(id,k){const R=RG(),kg=myKg(),train=k&&!["rest"].includes(planOf
    :id==="zinc"?bySex(R.zn):id==="b12"?R.b12:id==="vitc"?bySex(R.vc):id==="folate"?R.fol:id==="iodine"?R.io:id==="salt"?R.salt:id==="sugar"?Math.round(kc*R.sug/100/4):id==="satfat"?Math.round(kc*0.1/9):id==="alcohol"?bySex(R.al):0;}
 function nutOn(){const S=store.settings,on=(Array.isArray(S.extrasOn)?S.extrasOn:[]).slice(),off=Array.isArray(S.nutOff)?S.nutOff:[];
   if(S.suppAutoTrack!==false&&typeof SUPP2NUT!=="undefined")for(const n of supps()){const I=suppInfo(n),id=I&&SUPP2NUT[I.id];if(id&&!on.includes(id)&&!off.includes(id))on.push(id);}return on;}
+let nutOpen=false;
 function nutCard(k,t){const on=NUTS.filter(n=>nutOn().includes(n[0]));if(!on.length)return "";
-  return `<div class="card nutcard" data-rail="Nutrients"><div class="nuthd"><strong>Nutrients</strong><span style="display:flex;align-items:center;gap:4px">${infoB("eatnuts")}<button type="button" class="linkbtn" style="padding:0" data-act="nutset">Choose</button></span></div>${on.map(([id,l,u])=>{const v=nutVal(id,t),g=nutGoal(id,k),pct=Math.min(1,g?v/g:0),done=v>=g;
+  const ok=on.filter(([id])=>{const v=nutVal(id,t),g=nutGoal(id,k);return isLimit(id)?v<=g:v>=g;}).length,wat=on.some(n=>n[0]==="water");
+  if(!nutOpen)return `<div class="card nutline" data-rail="Nutrients"><button type="button" class="nutlbtn" data-act="nutopen" aria-expanded="false"><span><strong>Nutrients</strong><small>${ok} of ${on.length} on track</small></span>${IC.chev}</button>${wat?`<button type="button" class="wbtn" data-act="water" data-v="0.25" aria-label="Add 250 ml of water">+250 ml</button>`:""}</div>`;
+  return `<div class="card nutcard" data-rail="Nutrients"><div class="nuthd"><button type="button" class="nutlbtn" data-act="nutopen" aria-expanded="true"><span><strong>Nutrients</strong><small>${ok} of ${on.length} on track</small></span>${IC.chev}</button><span style="display:flex;align-items:center;gap:4px">${infoB("eatnuts")}<button type="button" class="linkbtn" style="padding:0" data-act="nutset">Choose</button></span></div>${on.map(([id,l,u])=>{const v=nutVal(id,t),g=nutGoal(id,k),pct=Math.min(1,g?v/g:0),done=v>=g;
     const show=x=>u==="L"||(u==="g"&&x<10)||(u==="µg"&&x<10)||(u==="mg"&&x<20)?(Math.round(x*10)/10).toString():fmt(x);
     const lim=isLimit(id),over=lim&&v>g;
     return `<div class="nutrow${lim?" limit":""}">${tg(id,l)}<div class="nutbar${lim?(over?" over":" under"):done?" done":""}"><span style="width:${(pct*100).toFixed(0)}%"></span></div><span class="nutv">${show(v)}<small>${lim?" of max ":"/"}${show(g)} ${u}</small></span>${id==="water"?`<button type="button" class="wbtn" data-act="water" data-v="0.25" aria-label="Add 250 ml of water">+250 ml</button>`:""}</div>`;}).join("")}
@@ -4518,9 +4578,12 @@ const PINFO={
   photos:["Progress photos",()=>(isLocalMode()?"":"Progress photos work in the website version of the app. ")+"Take them in the same spot, with the same light, at the same time of day, every 2–4 weeks. Photos stay on this phone and aren't in backups."],
   notes:["Notes",()=>"Anything you want to remember: how you feel, sleep, an injury, a goal. Each note is saved with the day you have selected."],
   targets:["Daily targets",()=>{const r=calcTargets(Object.assign({sex:"m",act:1.55,goal:-550},profile()));return (r?`Resting burn (BMR) about ${fmt(r.bmr)} kcal, maintenance about ${fmt(r.tdee)} kcal. Protein is ${r.pBasis}. `:"Add your age, height and weight in the calculator to see where your numbers come from. ")+"These are estimates: check your weekly average weight after 2–3 weeks and adjust by 100–200 kcal. Tap a target to see what it means for you.";}],
+  cihist:["Check-in history",()=>"Each weekly check-in you answered, newest first: the date, and whether you changed your daily calories or kept them. Shows the last 8."],
+  est:["Estimated carbs and fat",()=>"A ~ in front of carbs or fat means part of the number is estimated: some foods you logged, like quick adds with only calories and protein, have no carb and fat values, so the app works them out from the calories."],
+  drop:["Drop sets",()=>"Tap + Drop set to add one after your last set. Go straight into it with no rest: cut the weight by about 25–30% and go to failure. Your form tips in the app work the same way: focus on form first, and if it starts to slip, the weight is too heavy."],
   eatnuts:["Nutrients",()=>"Worked out from food with known values (foods added by weight, saved meals, recipes, quick picks) and the supplements you tick. Typical values, so treat them as a guide. Tap Choose to pick which ones show here."],
   nuts:["Nutrients",()=>"None of these are necessary. They're extras that could help, depending on how you eat and train. Tap the magnifier on one for why it helps and where to get it. "+regionNote()],
-  defs:["Deficiencies",()=>"Been told you're low on something, like iron or vitamin D? Track it to follow what you take, your blood test results, or both (Settings → Health tracking). This helps you stick to your plan. It's not medical advice, so follow what your doctor tells you, and get retested when they say."]
+  defs:["Deficiencies",()=>"Been told you're low on something, like iron or vitamin D? Track it to follow what you take, your blood test results, or both (Settings → Nutrients and health). This helps you stick to your plan. It's not medical advice, so follow what your doctor tells you, and get retested when they say."]
 };
 function infoB(key){const I=PINFO[key];return I?`<button type="button" class="infob" data-pinfo="${key}" aria-label="About ${esc(I[0])}">${IC_I}</button>`:"";}
 function secT(t,key){return `<h2 class="sec-title sect"><span>${t}</span>${infoB(key)}</h2>`;}
@@ -4570,6 +4633,8 @@ function goalsView(k){
   if(tcalcOpen)h+=`<div class="tcalc tcin">${profileFields(pf)}<button class="btn" data-act="usetargets">Use as my daily targets</button>
     <p class="lbl" style="margin-top:14px">Or type your own</p><div class="pair"><label><span class="lbl">${tg("kcal","Calories")}</span><input class="field" data-set="kcal" inputmode="numeric" value="${esc(S.kcal)}"></label><label><span class="lbl">${tg("protein","Protein (g)")}</span><input class="field" data-set="protein" inputmode="numeric" value="${esc(S.protein)}"></label></div></div>`;
   h+=`</div>`;
+  {const C=(Array.isArray(S.checkins)?S.checkins:[]).slice(-8).reverse();
+   if(C.length)h+=secT("Check-in history","cihist")+`<div class="card cilist">${C.map(c=>`<div class="cirow"><span>${shortDate(c.d)}</span><b>${c.to&&c.to!==c.from?`${fmt(c.from)} → ${fmt(c.to)} kcal`:`Kept ${fmt(c.from)} kcal`}</b></div>`).join("")}</div>`;}
   h+=suggHtml(k)+defsHtml(k);
   return h;
 }
@@ -5185,6 +5250,9 @@ function shopClick(e){const b=e.target.closest("[data-shop]");if(!b||tab!=="spen
     r.done=!r.done;S.shop=L;persist("settings");if(p){logBuy(sel,p.n,p.store,num(p.price));}render();if(p)toast(`Ticked off and counted ${p.n}, ${eur(num(p.price))}`,u);}}
 $("panel").addEventListener("click",shopClick);
 $("panel").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="shopN"){e.preventDefault();const b=document.querySelector('[data-shop="add"]');if(b)b.click();}});
+let spV=(()=>{try{return localStorage.getItem("bb-spv")||"over";}catch(_){return "over";}})();
+function spSeg(view){const spT=view==="week"?"This week":view==="fortnight"?"2 weeks":"This month";return `<div class="seg seg3 spview" role="group" aria-label="Spend">${[["over",spT],["shop","Shopping list"],["prod","Products"]].map(([v,l])=>`<button type="button" data-spv="${v}" aria-pressed="${spV===v}">${l}</button>`).join("")}</div>`;}
+$("panel").addEventListener("click",e=>{const b=e.target.closest("[data-spv]");if(!b||tab!=="spend")return;spV=b.dataset.spv;try{localStorage.setItem("bb-spv",spV);}catch(_){}renderSpend();window.scrollTo(0,0);});
 function renderSpend(){
   const view=spendView(),k=sel,{start,len}=periodOf(k,view),end=addDays(start,len-1),S=store.settings;
   spMigrate();
@@ -5194,23 +5262,27 @@ function renderSpend(){
   const label=view==="week"?"this week":view==="fortnight"?"these 2 weeks":"this month";
   const rows=[];for(let i=0;i<len;i++){const dk=addDays(start,i),dd=store.days[dk];((dd&&dd.buys)||[]).forEach((b,j)=>rows.push({dk,j,b,n:buyName(b),s:buyStore(b),e:num(b.e)}));}
   const cat=catalog(start,end),stores=[...new Set(cat.map(c=>c.store).filter(Boolean))];
-  let h=`<datalist id="storeList">${stores.map(s=>`<option value="${esc(s)}">`).join("")}</datalist><section><div class="seg seg3" role="group" aria-label="Budget period"><button data-act="view" data-v="week" aria-pressed="${view==="week"}">Weekly</button><button data-act="view" data-v="fortnight" aria-pressed="${view==="fortnight"}">Bi-weekly</button><button data-act="view" data-v="month" aria-pressed="${view==="month"}">Monthly</button></div>`;
-  h+=`<div class="card spsum"><div><span class="big">${eur(spent)}</span> <span class="of">spent ${label}</span></div><p class="of" style="margin:2px 0 0;font-size:13px">${dfmt(start)} to ${dfmt(end)}</p>
+  let h=`<datalist id="storeList">${stores.map(s=>`<option value="${esc(s)}">`).join("")}</datalist><section>`+spSeg(view);
+  if(spV==="over")h+=`<div class="seg seg3" role="group" aria-label="Budget period"><button data-act="view" data-v="week" aria-pressed="${view==="week"}">Weekly</button><button data-act="view" data-v="fortnight" aria-pressed="${view==="fortnight"}">Bi-weekly</button><button data-act="view" data-v="month" aria-pressed="${view==="month"}">Monthly</button></div>`;
+  if(spV==="over")h+=`<div class="card spsum"><div><span class="big">${eur(spent)}</span> <span class="of">spent ${label}</span></div><p class="of" style="margin:2px 0 0;font-size:13px">${dfmt(start)} to ${dfmt(end)}</p>
     ${plan>0?`<div class="bar${over?" over":""}"><span style="width:${Math.min(100,spent/plan*100)}%"></span></div><div class="left">${over?eur(spent-plan)+" over":eur(plan-spent)+" left"} of your ${bud>0?"budget":"usual spend"} of ${eur(plan)} · <button type="button" class="linkbtn" data-act="spbudget">${bud>0?"Change":"Set a budget"}</button></div>`
       :`<button type="button" class="linkbtn" data-act="spbudget" style="margin-top:8px">Set a budget</button>`}</div>`;
-  h+=shopHtml();
+  if(spV==="shop"){h+=shopHtml().replace(/<h2 class="sec-title"[^>]*>Shopping list<\/h2>/,"")+`</section>`;$("panel").innerHTML=h;return;}
+  if(spV==="prod"){
   // products: the main list
   h+=`<div class="sphead"><h2 class="sec-title">Your products</h2>${cat.length>1?`<div class="seg seg3 spseg" role="group" aria-label="Sort products">${[["store","Store"],["price","Price"],["name","Name"]].map(([v,l])=>`<button type="button" data-spsortp="${v}" aria-pressed="${cSort===v}">${l}</button>`).join("")}</div>`:""}</div>`;
   if(!cat.length)h+=`<div class="card"><p class="note" style="margin:0">Add the things you buy, with their price and store. They stay saved, so next time you just tap one to count it.</p></div>`;
-  else{const row=c=>`<div class="sprow" role="button" tabindex="0" data-act="sptap" data-sphold="prod" data-key="${encodeURIComponent(c.key)}" aria-label="${esc(c.n)}, ${eur(c.price)}. Tap to count it as bought."><span class="spmain"><strong>${esc(c.n)}</strong><small>${cSort!=="store"&&c.store?esc(c.store)+" · ":""}${c.nP?`<span class="spok">✓ ${c.nP>1?c.nP+"× ":""}${label}</span>`:c.last?`Last bought ${agoTxt(c.last)}`:"Not bought yet"}</small></span><span class="spr"><b>${eur(c.price)}</b><span class="spplus" aria-hidden="true">+</span></span></div>`;
+  else{const row=c=>`<div class="sprow" role="button" tabindex="0" data-act="sptap" data-sphold="prod" data-key="${encodeURIComponent(c.key)}" aria-label="${esc(c.n)}, ${eur(c.price)}. Tap to count it as bought."><span class="spmain"><strong>${esc(c.n)}</strong><small>${cSort!=="store"&&c.store?esc(c.store)+" · ":""}${c.nP?`<span class="spok">✓ ${c.nP>1?c.nP+"× ":""}${label}</span>`:c.last?`Last bought ${agoTxt(c.last)}`:""}</small></span><span class="spr"><b>${eur(c.price)}</b><span class="spplus" aria-hidden="true">+</span></span></div>`;
     if(cSort==="store"){const g={};for(const c of cat){const s=c.store||"No store";(g[s]=g[s]||[]).push(c);}
       h+=Object.keys(g).sort((a,b)=>a==="No store"?1:b==="No store"?-1:a.localeCompare(b)).map(s=>{const L=g[s].sort((a,b)=>a.n.localeCompare(b.n)),t=rows.filter(r=>(r.s||"No store")===s).reduce((a,r)=>a+r.e,0);
         return `<div class="card splist"><div class="spgrp"><b>${esc(s)}</b><span>${t?eur(t)+" "+label:""}</span></div>${L.map(row).join("")}</div>`;}).join("");}
     else{const L=cat.slice().sort(cSort==="price"?(a,b)=>b.price-a.price||a.n.localeCompare(b.n):(a,b)=>a.n.localeCompare(b.n));h+=`<div class="card splist">${L.map(row).join("")}</div>`;}
     h+=`<p class="note sphint">Tap a product to count it as bought ${sel===todayKey()?"today":"on "+shortDate(sel)}. Hold it to edit or delete.</p>`;}
-  h+=`<button class="btn spadd" data-act="spadd">${IC.plusbig||"+"} Add product</button>`;
+  h+=`<button class="btn spadd" data-act="spadd">${IC.plusbig||"+"} Add product</button></section>`;$("panel").innerHTML=h;return;}
   // what was counted this period
   const pr=rows.slice().sort((a,b)=>b.dk.localeCompare(a.dk)||b.j-a.j);
+  {let any=pr.length>0;for(let w=1;w<=5&&!any;w++)if(spendFrom(addDays(start,-len*w),len)>0)any=true;
+   if(!any){h+=`<div class="card elist"><div class="erow"><span><b>Nothing counted ${label} yet</b><small>Tap a product under Products when you buy it</small></span></div></div></section>`;$("panel").innerHTML=h;return;}}
   h+=`<h2 class="sec-title">Counted ${label}</h2>`;
   h+=pr.length?`<div class="card splist">${pr.map(r=>`<div class="swr li spsw" data-sw="buy" data-day="${r.dk}" data-i="${r.j}">${swbg("Edit","Remove")}<div class="sw"><div class="sprow small" role="button" tabindex="0" data-act="spbuy" data-sphold="buy" data-day="${r.dk}" data-i="${r.j}"><span class="spmain"><strong>${esc(r.n)}</strong><small>${r.s?esc(r.s)+" · ":""}${shortDate(r.dk)}</small></span><b>${eur(r.e)}</b></div></div></div>`).join("")}</div><p class="note sphint">Swipe left to remove, right to edit. Tap to change the price or day.</p>`
     :`<div class="card"><p class="note" style="margin:0">Nothing counted ${label} yet.</p></div>`;
@@ -6144,8 +6216,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.21";
+const APP_VERSION="8.3";
 const CHANGELOG=[
+  {v:"8.3",d:"14 November 2026",t:"Less scrolling everywhere",items:["Thinner header: the date sits next to the title and the week strip is smaller, so every tab starts higher up.","The week strip no longer drifts to another week when you switch tabs or your phone's address bar hides.","Home: once your workout is done, the big card shrinks to one line. Tick off your supplements right on Home. The week bars are now labelled with each day's workout.","Train: the rest timer is a small chip next to the exercise name. The drop set and form tips show on the first 3 days, then sit behind the ⓘ next to + Drop set.","Eat: nutrients fold into one line (tap to open), with the water button still there. The quick tips show once as a pop-up. A ~ in front of carbs or fat means part of it is estimated.","Progress → Goals: your check-in history, showing what you changed each week.","Spend is split into This week, Shopping list and Products. Products no longer say Not bought yet, and an empty week shows one line.","Settings: Nutrients to track and Health tracking are now one page, Nutrients and health. Install as an app becomes Share the app once it's installed."]},
   {v:"8.21",d:"14 November 2026",t:"Train labels",items:["Train now shows Before your workout above the warm-up and Your workout above the exercises, to match After your workout."]},
   {v:"8.2",d:"14 November 2026",t:"Cleaner Eat and Train",items:["Eat is split into Log, Plan and Saved. Log has your calories, nutrients, meals, extra food and supplements. Plan has Suggest meals, meal sizes and the meal builder. Saved has your meals and recipes.","Cheat meal is no longer its own tile. Tap Cheat meal or cheat day? under your calories.","Free day is now Cheat day, and it replaces \"cheat meal, don't count it\", since the two did the same thing. Days you already marked either way show as cheat days.","Train: every exercise is its own card, everything lines up, and Cardio and Stretches sit together under After your workout.","The backup reminder now shows on the Home tab instead of Train.","Progress: Calendar is now called History.","Your real maintenance now needs food logged on at least 2 days in each of the last 4 weeks, so your food average covers the same time as your weight change.","The nutrients note on Eat moved behind the ⓘ."]},
   {v:"8.1",d:"14 November 2026",t:"A shorter Progress tab",items:["Progress is split into Overview, Body, Goals and History, so each part fits on a screen or two.","Body: Measure, Photo and Note buttons open a quick form. Below them you only see what you've logged.","Goals: your targets and goal sit in one card. Tap Recalculate or edit to open the calculator or type your own numbers.","Only the nutrients and deficiencies you track are shown. Add more with + Track a nutrient.","Sections with nothing to show yet shrink to one line.","Less text everywhere. Tap the ⓘ next to a section for the full explanation."]},
@@ -6284,7 +6357,7 @@ const CHANGELOG=[
   {v:"3.3",d:"9 October 2026",t:"Easier eating and resting",items:["Eat is now a grid of big tiles. Tap one to open it, or + to add food to that meal in seconds","Cheat meal: don't count it, add a rough guess, take a free day, or set different targets for just one day. Those days are left out of your averages","Tap any target, like your calories or protein, to see what it means for you: a ceiling, a minimum, or a number to hit","Suggested nutrients are worked out for you, like your water in litres and your fibre from your calories","Rest timer: tap the time on an exercise to start resting. Hold it to change the time, with a small vibration on phones that support it","The birthday field no longer spills out of its box on iPhone","Single serving calculator: tell the meal builder how many portions a batch makes, log part of a recipe by servings or by weighing your portion, and save a batch as a recipe"]},
   {v:"3.2",d:"9 October 2026",t:"Personal details",items:["Hyrox race prep split template, based on a real Hyrox athlete's week. Only offered if you're not new to the gym","New exercises: incline machine chest press and easy walk","Setup asks for your birthday instead of your age, so your age stays up to date. On your birthday the app says happy birthday","Height, weight and body fat take decimals","Not sure of your weight? Tick the box and your guess is treated as ±2.5 kg. It isn't added to your progress chart, and the app reminds you that weighing in is strongly recommended","New Settings → Preferences → Personal details: change your birthday, height and body fat, log a weigh-in, or correct a starting weight that was wrong without adding a new point to your chart"]},
   {v:"3.1",d:"9 October 2026",t:"Smoother changes",items:["Changing a day's workout asks how: just that day, shift the rest of the week so nothing is lost, or every week from now on. Pick a default in Settings → Preferences → Training","Workout changes show up in History","Opening an exercise folds the one that was open. You can turn this off in Settings → Preferences → Training","The section bar on the right is rebuilt: it no longer misses touches or drifts off centre, the marker moves smoothly as you scroll, and the label uses your accent colour","Ticking a meal no longer folds it and jumps the page","Settings are grouped into App settings, Preferences and Learn and help. School is now called Training guide"]},
-  {v:"3.0",d:"9 October 2026",t:"Simpler, cleaner, faster",items:["Full redesign in the shadcn style, with fewer words on screen","Train: tap the workout's name to change it, and tap ? for the details. The logo now only shows in Settings","Warm-up, stretches and every exercise are folded into one line with a progress circle. The one you're on opens by itself, then folds with a tick when you finish and the next one opens","A bar on the right edge shows where you are on long pages. Hold and slide it to jump between sections","Slide along the tab bar, and along any 1 month / 3 months / All style switch, to change it","Hyrox and hybrid exercises: SkiErg, sled push and pull, burpee broad jumps, sandbag lunges, carries, intervals and more, with metres and minutes for runs and stations","New Hybrid and Hyrox split template","Calories burned are worked out per exercise, using your weight and how far, how long or how many sets you did","Eat: meals and sections fold, Evening is now Dinner, and fibre is shown for every ingredient","Supplements: pick from common ones with what they're for, when to take them and what to watch out for, plus your own notes","Body: track deficiencies like iron or vitamin D by daily intake, blood test results or both (Settings → Health tracking)","Body: suggested nutrients like fibre, omega-3 and magnesium, with why they might help. All optional","Training guide in Settings: compound and isolation exercises, every muscle and what trains it, splits, Hyrox and nutrition","The calculator no longer offers losing 1 kg a week unless your activity level makes it safe","Keywords are shown in your accent colour instead of underlined"]},
+  {v:"3.0",d:"9 October 2026",t:"Simpler, cleaner, faster",items:["Full redesign in the shadcn style, with fewer words on screen","Train: tap the workout's name to change it, and tap ? for the details. The logo now only shows in Settings","Warm-up, stretches and every exercise are folded into one line with a progress circle. The one you're on opens by itself, then folds with a tick when you finish and the next one opens","A bar on the right edge shows where you are on long pages. Hold and slide it to jump between sections","Slide along the tab bar, and along any 1 month / 3 months / All style switch, to change it","Hyrox and hybrid exercises: SkiErg, sled push and pull, burpee broad jumps, sandbag lunges, carries, intervals and more, with metres and minutes for runs and stations","New Hybrid and Hyrox split template","Calories burned are worked out per exercise, using your weight and how far, how long or how many sets you did","Eat: meals and sections fold, Evening is now Dinner, and fibre is shown for every ingredient","Supplements: pick from common ones with what they're for, when to take them and what to watch out for, plus your own notes","Body: track deficiencies like iron or vitamin D by daily intake, blood test results or both (Settings → Nutrients and health)","Body: suggested nutrients like fibre, omega-3 and magnesium, with why they might help. All optional","Training guide in Settings: compound and isolation exercises, every muscle and what trains it, splits, Hyrox and nutrition","The calculator no longer offers losing 1 kg a week unless your activity level makes it safe","Keywords are shown in your accent colour instead of underlined"]},
   {v:"2.71",d:"9 October 2026",t:"Clearer swaps",items:["The best swap is marked Closest match. If nothing is close enough, there is no mark","Swap sheets say matches are based on the muscles each exercise works","Just today or From now on is now at the top of every swap sheet, so it's easy to spot","Ramp-up sets are now called light warm-up sets, with a line explaining what they are"]},
   {v:"2.7",d:"9 October 2026",t:"Equipment, swaps and exercise library",items:["Setup asks what equipment you have (full gym, home with dumbbells, bodyweight only or your own list) and fills your plan with exercises you can do","Change your equipment in Settings → Training. The app then suggests swaps, and you choose Swap or Keep for each","Exercises and warm-ups that need equipment you don't have are marked, but you can still pick them","Swap lists show the closest match first: same main muscles, then easier options, each marked with type and difficulty","Swap warm-ups and stretches for easier ones with the swap button or by swiping right, just for today or every time. A switch in Settings → Training hides the swap buttons","New easier warm-ups and stretches, like an assisted hang with your feet on the floor","Exercise library in Help: search all exercises, filter by type (bodyweight, machine, barbell, dumbbells, cable and more) and muscle group","Coach tips on exercises, like bringing your wrists together at the end of a chest fly"]},
   {v:"2.6",d:"9 October 2026",t:"Install as an app",items:["New Settings page with steps to install Body Builder on iPhone, Android and computers","Android phones get an Install button that opens the phone's own install prompt","Explains offline use, and adds a Share the link button for friends"]},
@@ -6405,13 +6478,13 @@ function setPages(){const S=store.settings,T=themeCfg(),{hidden}=tabCfg(),tc=tcf
     ["training","Training",`${lv} · rep style ${(STYLES[S.repDefault]||["as planned"])[0].toLowerCase()}`,()=>`<div class="card">${trainingSettingsHtml()}</div>`],
     ["personal","Personal details",(()=>{const pf=profile(),a=pf.dob?ageOn(pf.dob):num(pf.a);return [a?a+" years":"",num(pf.h)?fmt1(num(pf.h))+" cm":"",pf.west?"weight is a guess":""].filter(Boolean).join(" · ")||"Birthday, height and weight";})(),()=>personalHtml()],
     ["units","Units and region",`${U()} · ${LEN()==="in"?"ft and in":"cm"} · ${liqML()?"ml":"g for drinks"} · ${curCode()} · ${RG().src}`,()=>`<div class="card">${unitsHtml()}</div>`],
-    ["nutrients","Nutrients to track",(()=>{const n=nutOn().length;return n?n+" tracked on the Eat tab":"Fibre, water, creatine and more";})(),()=>`<div class="card">${nutSettingsHtml()}</div>`],
+    ["nutrients","Nutrients and health",(()=>{const n=nutOn().length,H=hcfg(),hh=[H.intake?"daily intake":"",H.labs?"blood tests":""].filter(Boolean).join(" and ");return (n?n+" tracked":"Fibre, water, creatine and more")+(hh?" · "+hh:"");})(),()=>`<div class="card">${nutSettingsHtml()}</div><h2 class="sec-title">Deficiencies</h2><div class="card">${healthSettingsHtml()}</div>`],
     ["diet","Diet",(()=>{const D=dietCfg(),L=[D.halal?(D.halal==="hide"?"Halal, others hidden":"Halal"):"",D.veg?"Vegetarian":"",D.nofish?"No fish":"",D.nodairy?"No dairy":""].filter(Boolean);return L.join(" · ")||"Halal, vegetarian and more";})(),()=>`<div class="card">${dietSettingsHtml()}</div>`],
     ["mealsplit","Meal sizes",splitLine(),()=>`<div class="card"><p class="note" style="margin-top:0">Choose when you like to eat most, like a big breakfast or most of your food at lunch. Suggested meals, Portion my foods and the Eat tab use this.</p>${mealWheel("mwS")}</div>`],
     ["health","Health tracking",(()=>{const H=hcfg();return [H.intake?"Daily intake":"",H.labs?"Blood tests":""].filter(Boolean).join(" and ")||"Off";})(),()=>`<div class="card">${healthSettingsHtml()}</div>`],
     ["timer","Rest timer",tc.auto===false?"Starts manually":"Starts when you tick a set",()=>`<div class="card">${timerSettingsHtml()}</div>`],
     ["backup","Backup and moving data",isLocalMode()?lastBackupTxt():"Saved to your account · move data to the app",()=>`<div class="card">${backupHtml()}</div>`],
-    ["install","Install as an app",isLocalMode()&&isInstalled()?"Installed":"Home screen, offline use and sharing",()=>installHtml()],
+    ["install",isLocalMode()&&isInstalled()?"Share the app":"Install as an app",isLocalMode()&&isInstalled()?"Send Routine to a friend":"Home screen, offline use and sharing",()=>installHtml()],
     ["howcalc","How your targets are worked out","Calories, protein, carbs, fat and more, with your numbers",()=>howCalcHtml()],
     ["school","Training guide","Compound and isolation, muscles, splits, Hyrox and nutrition",()=>schoolHtml()],
     ["help","Help","Exercise library, how to use the app, training basics",()=>`<button type="button" class="setrowbtn card" style="border:1px solid var(--line);margin-bottom:12px" data-sp="library"><span><strong>Exercise library</strong><small>Look up any of the ${Object.keys(LIB).length} exercises by type, muscle and difficulty</small></span>${IC.chev}</button>`+guideHtml()],
@@ -6429,7 +6502,7 @@ function renderSettings(){
   const P=setPages(),cur=P.find(x=>x[0]===setPage);let h=`<section>`;
   if(setPage==="library"){h+=`<button type="button" class="backbtn" data-sp="${libFrom||"help"}">‹ ${libFrom==="school"?"Training guide":"Help"}</button><h1 class="pagetitle">Exercise library</h1>${libraryHtml()}`;}
   else if(cur){h+=`<button type="button" class="backbtn" data-sp="">‹ Settings</button><h1 class="pagetitle setpt"><i class="sic" aria-hidden="true">${ICO(SETIC[cur[0]]||"")}</i>${cur[1]}</h1>${cur[3]()}`;}
-  else{const G=[["App settings",["appearance","tabs","units","saver","backup"]],["Preferences",["personal","training","diet","nutrients","mealsplit","health","timer"]],["Learn and help",["howcalc","school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><i class="sic" aria-hidden="true">${ICO(SETIC[x[0]]||"")}</i><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
+  else{const G=[["App settings",["appearance","tabs","units","saver","backup"]],["Preferences",["personal","training","diet","nutrients","mealsplit","timer"]],["Learn and help",["howcalc","school","help","install"]],["",["changelog"]]],row=x=>`<button type="button" class="setrowbtn" data-sp="${x[0]}"><i class="sic" aria-hidden="true">${ICO(SETIC[x[0]]||"")}</i><span><strong>${x[1]}</strong><small>${esc(x[2])}</small></span>${IC.chev}</button>`;
     h+=`<h1 class="pagetitle">Settings</h1><div class="card setstat"><div><strong>Routine ${APP_VERSION}</strong><small>${isLocalMode()?"Saved on this phone only · "+esc(lastBackupTxt()):"Saved to your account, synced across your devices"}</small></div>${isLocalMode()?`<button type="button" class="btn ghost sm" data-sp="backup">Back up</button>`:""}</div>`+G.map(([t,ids])=>{const xs=ids.map(id=>P.find(x=>x[0]===id)).filter(Boolean);return xs.length?`${t?`<p class="setgroup">${t}</p>`:`<div style="height:14px"></div>`}<div class="card setnav">${xs.map(row).join("")}</div>`:"";}).join("");}
   $("panel").innerHTML=h+`</section>`;
 }
