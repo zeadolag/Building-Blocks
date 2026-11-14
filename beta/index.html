@@ -1190,6 +1190,7 @@ html{touch-action:manipulation}html,body{overflow-x:clip}@supports not (overflow
 .segpill{position:absolute;z-index:0;border-radius:calc(var(--radius) - 3px);background:var(--surface);box-shadow:var(--shadow-sm);pointer-events:none}:root[data-theme="dark"] .segpill{background:#3F3F46}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .segpill{background:#3F3F46}}.seg{position:relative}.seg>button{position:relative;z-index:1}.seg.segmoving>button[aria-pressed="true"]{background:transparent!important;box-shadow:none!important}
 .tspeek{position:fixed;left:0;right:0;bottom:0;overflow:hidden;background:var(--paper);z-index:5;pointer-events:none;will-change:transform}.tsin{padding:0}
 #panel{will-change:auto}
+html[data-style] .island{-webkit-backdrop-filter:none;backdrop-filter:none}
 body.saver .island{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}
 .bkstat{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
 .bkstat small{color:var(--muted);font-size:13px}
@@ -1244,7 +1245,7 @@ body.saver .island{-webkit-backdrop-filter:none;backdrop-filter:none;background:
 .schoolhero{display:flex;gap:10px;align-items:flex-start}
 
 /* ---------- Tab island (slide to switch) ---------- */
-.island{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;padding:5px;border-radius:999px;background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.island{position:fixed;left:50%;transform:translate3d(-50%,0,0);-webkit-transform:translate3d(-50%,0,0);will-change:transform;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(536px,calc(100% - 20px));display:flex;padding:5px;border-radius:999px;background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:40;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .ithumb{position:absolute;top:5px;bottom:5px;left:calc(5px + var(--i) * (100% - 10px) / var(--n));width:calc((100% - 10px) / var(--n));border-radius:999px;background:var(--mutedbg);transition:left .25s cubic-bezier(.3,.7,.2,1)}
 .island.nothumb .ithumb{opacity:0}
 .island.dragging .ithumb{transition:left .12s ease-out;background:color-mix(in srgb,var(--blue) 16%,var(--mutedbg))}
@@ -1280,9 +1281,9 @@ body.touring #rail{display:none}
   </header>
   <nav class="week" id="week" aria-label="This week"></nav>
   <main id="panel"></main>
-  <nav class="island" id="island" aria-label="Sections"></nav>
   <p class="status" id="status"></p>
 </div>
+<nav class="island" id="island" aria-label="Sections"></nav>
 <script>
 (function(){
 "use strict";
@@ -5571,10 +5572,10 @@ function isDark(){const T=themeCfg(),st=styleId();if(st==="night")return true;if
 function styleAccent(){const T=themeCfg(),st=styleId();if(st==="focus")return T.facc||"#C9F23E";const t=TABDEF[tab]?tab:"train";return (T.tabc||{})[t]||TABC[t]||TABC.train;}
 const THEME_VARS=["--paper","--surface","--ink","--muted","--line","--mutedbg","--ring","--field","--shadow","--shadow-sm","--blue","--acc","--accon","--segon"];
 function paletteNew(st){const N=NEWST[st],dark=isDark(),P=N[dark?"d":"l"]||N.d;let acc=N.tabs?(N.tabs[TABDEF[tab]?tab:"train"]||N.tabs.train):P.acc;if(dark&&N.tabs)acc=mixHex(acc,"#FFFFFF",.15);
-  const b=st==="soft"?mixHex(P.bg,acc,dark?.06:.07):P.bg,surface=P.sf,ink=P.ink,muted=mixHex(ink,b,.42),line=mixHex(b,ink,dark?.16:.13),mutedbg=mixHex(surface,ink,dark?.08:.06);
-  let txt=acc;for(let t=.1;t<=.8&&contrast(txt,surface)<3.4;t+=.1)txt=mixHex(acc,ink,t);
+  const b=st==="soft"?mixHex(P.bg,acc,dark?.06:.07):P.bg,surface=P.sf,ink=P.ink,muted=mixHex(ink,b,dark?.42:.34),line=mixHex(b,ink,dark?.16:.13),mutedbg=mixHex(surface,ink,dark?.08:.06);
+  let txt=acc;for(let t=.1;t<=.8&&contrast(txt,surface)<4.5;t+=.1)txt=mixHex(acc,ink,t);
   const sh=dark?"none":st==="soft"?"0 10px 22px -12px rgb(80 55 30 / .28), 0 2px 4px rgb(80 55 30 / .06)":st==="earth"?"0 8px 20px -14px rgb(60 40 20 / .35)":"none";
-  return {"--paper":b,"--surface":surface,"--ink":ink,"--muted":muted,"--line":line,"--mutedbg":mutedbg,"--ring":mixHex(b,ink,.35),"--field":dark?mixHex(b,ink,.04):mixHex(surface,b,.3),"--shadow":sh,"--shadow-sm":dark?"none":"0 2px 8px rgb(70 45 20 / .06)","--blue":txt,"--acc":acc,"--accon":onFor(acc),"--segon":dark?mixHex(surface,ink,.16):surface,_dark:dark,_paper:false};}
+  return {"--paper":b,"--surface":surface,"--ink":ink,"--muted":muted,"--line":line,"--mutedbg":mutedbg,"--ring":mixHex(b,ink,.35),"--field":dark?mixHex(b,ink,.04):mixHex(surface,b,.3),"--shadow":sh,"--shadow-sm":dark?"none":"0 2px 8px rgb(70 45 20 / .06)","--blue":txt,"--acc":acc,"--accon":contrast("#FFFFFF",acc)>=contrast("#18222E",acc)?"#FFFFFF":"#18222E","--segon":dark?mixHex(surface,ink,.16):surface,_dark:dark,_paper:false};}
 function palette6(){const T=themeCfg(),st=styleId();if(NEWST[st])return paletteNew(st);const dark=isDark(),row=bg6Row(),b=T.bgc||row[dark?4:3];
   const ink=dark?mixHex(b,"#FFFFFF",.92):mixHex(b,"#000000",.88);
   const surface=dark?mixHex(b,"#FFFFFF",st==="focus"?.075:.06):(lumHex(b)>.93&&st==="focus"?mixHex(b,"#000000",.035):mixHex(b,"#FFFFFF",.82));
@@ -6037,8 +6038,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.0";
+const APP_VERSION="8.01";
 const CHANGELOG=[
+  {v:"8.01",d:"14 November 2026",t:"Fixes for the new styles",items:["The tab bar stays at the bottom of the screen again instead of scrolling with the page on iPhone.","Text on coloured buttons and the selected tab is easier to read in Soft, Night gym, and dark Training journal and Earth and clay.","Grey hint text is a little darker in the light versions of the new styles, and coloured links stand out more on cards."]},
   {v:"8.0",d:"14 November 2026",t:"Four new styles",items:["Settings → Appearance has four new styles next to Today and Focus. Training journal: ruled paper, ink-blue serif headings, and a stamp when you finish something. Night gym: black and orange, with big condensed numbers you can read mid-set. Soft: chunky rounded type, cards that lift off the page and a colour for each tab. Earth and clay: terracotta, olive and deep green with arch-shaped buttons and bars.","Each style has its own feel when you tap: snappy in Night gym, a little bounce in Soft, calm in Journal and Earth.","Journal, Soft and Earth have light and dark versions that follow your Theme setting. Night gym is always dark.","Classic has been retired. If you used it, the app switches you to Today; pick any style in Settings.","Today is still the default for new users, and new users can pick any of the six during setup."]},
   {v:"7.6",d:"14 November 2026",t:"Calmer screens",items:["Train: the big orange sets card is gone. Your progress is now a slim bar under the workout name, with sets done next to the exercise count, and it updates as you tick sets. Home still has the full workout card.","Eat: every tile has its own icon, and the subtitles are shorter so titles like Meal builder stay on one line.","Home: the This week chart shows a slim bar for every day, filling up as you train, instead of tiny stubs in an empty space.","Small progress rings no longer show a cramped percentage: an empty ring before you start, the ring filling as you go, and a tick when done.","Nutrient names on Eat are plain text now, so only the bars carry colour."]},
   {v:"7.54",d:"14 November 2026",t:"Smoother swipes",items:["Swiping a row now has rounded edges on both sides, so it looks like the row is sliding away rather than being cut off.","Folded exercises can be swiped too: right to swap, left to remove it for today. You no longer have to open an exercise first.","The highlight when you tap a folded exercise now sits neatly between the divider lines instead of running into them."]},
