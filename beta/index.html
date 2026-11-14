@@ -573,28 +573,28 @@ dialog.sheet.tall{max-height:94vh}
 .warnline{color:var(--amber)}
 /* ============ 6.0 styles: Today (default) and Focus. Classic keeps the rules above. ============ */
 .tsum,.fcard,.khero,.sdots{display:none}
-html[data-style="today"] body{font-family:"Bricolage Grotesque",Geist,ui-sans-serif,system-ui,sans-serif;font-variation-settings:"opsz" 14}
-html[data-style="today"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.tsum b,.appname){font-variation-settings:"opsz" 72;letter-spacing:-.02em}
-html[data-style="today"] :is(.card,.etile){border:0;border-radius:22px;box-shadow:var(--shadow)}
-html[data-style="today"] .etile.done{border:0}
-html[data-style="today"] .ethd{border-radius:20px}
-html[data-style="today"] .btn{border-radius:999px;background:var(--acc);color:var(--accon)}
-html[data-style="today"] .btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
-html[data-style="today"] :is(.field,.toggle){border-radius:14px}
-html[data-style="today"] .toggle{border:1.5px solid var(--line);box-shadow:none}
-html[data-style="today"] :is(.navbtn,.tick,.sn,.icob){border-radius:50%}
-html[data-style="today"] :is(.chip,.editbtn,.btn.sm){border-radius:999px}
-html[data-style="today"] .bar{height:10px}
-html[data-style="today"] .bar span{background:var(--acc)}
-html[data-style="today"] .seg,html[data-style="today"] .seg button{border-radius:999px}
-html[data-style="today"] .seg button[aria-pressed="true"],html[data-style="today"] .seg.hasthumb::before,html[data-style="today"] .segpill{background:var(--segon)!important;border-radius:999px}
-html[data-style="today"] .island{background:var(--surface);border:0;box-shadow:0 10px 30px rgb(60 40 20 / .12)}
-html[data-style="today"][data-theme="dark"] .island{box-shadow:none;border:1px solid var(--line)}
-html[data-style="today"] .ithumb{background:color-mix(in srgb,var(--acc) 16%,transparent)}
-html[data-style="today"] .itab[aria-current="page"]{color:var(--blue)}
-html[data-style="today"] dialog.sheet{border-radius:26px 26px 0 0;border-top:0}
-html[data-style="today"] .plancard{background:color-mix(in srgb,var(--acc) 9%,var(--surface));border:0}
-html[data-style="today"] .tip{border-radius:16px}
+html[data-fam="today"] body{font-family:"Bricolage Grotesque",Geist,ui-sans-serif,system-ui,sans-serif;font-variation-settings:"opsz" 14}
+html[data-fam="today"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.tsum b,.appname){font-variation-settings:"opsz" 72;letter-spacing:-.02em}
+html[data-fam="today"] :is(.card,.etile){border:0;border-radius:22px;box-shadow:var(--shadow)}
+html[data-fam="today"] .etile.done{border:0}
+html[data-fam="today"] .ethd{border-radius:20px}
+html[data-fam="today"] .btn{border-radius:999px;background:var(--acc);color:var(--accon)}
+html[data-fam="today"] .btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+html[data-fam="today"] :is(.field,.toggle){border-radius:14px}
+html[data-fam="today"] .toggle{border:1.5px solid var(--line);box-shadow:none}
+html[data-fam="today"] :is(.navbtn,.tick,.sn,.icob){border-radius:50%}
+html[data-fam="today"] :is(.chip,.editbtn,.btn.sm){border-radius:999px}
+html[data-fam="today"] .bar{height:10px}
+html[data-fam="today"] .bar span{background:var(--acc)}
+html[data-fam="today"] .seg,html[data-fam="today"] .seg button{border-radius:999px}
+html[data-fam="today"] .seg button[aria-pressed="true"],html[data-fam="today"] .seg.hasthumb::before,html[data-fam="today"] .segpill{background:var(--segon)!important;border-radius:999px}
+html[data-fam="today"] .island{background:var(--surface);border:0;box-shadow:0 10px 30px rgb(60 40 20 / .12)}
+html[data-fam="today"][data-theme="dark"] .island{box-shadow:none;border:1px solid var(--line)}
+html[data-fam="today"] .ithumb{background:color-mix(in srgb,var(--acc) 16%,transparent)}
+html[data-fam="today"] .itab[aria-current="page"]{color:var(--blue)}
+html[data-fam="today"] dialog.sheet{border-radius:26px 26px 0 0;border-top:0}
+html[data-fam="today"] .plancard{background:color-mix(in srgb,var(--acc) 9%,var(--surface));border:0}
+html[data-fam="today"] .tip{border-radius:16px}
 
 html[data-style="focus"] body{font-family:Archivo,Geist,ui-sans-serif,system-ui,sans-serif}
 html[data-style="focus"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.tsum b,.fcard h3,.fcard .fnum){font-stretch:115%;font-weight:750;letter-spacing:-.01em}
@@ -618,12 +618,12 @@ body.paperbg{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 html[data-theme="dark"] body.paperbg{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 /* workout summary card */
-html[data-style="today"] .tsum{display:block;background:var(--acc);color:var(--accon);border-radius:22px;padding:14px 16px;margin:4px 0 12px}
+html[data-fam="today"] .tsum{display:block;background:var(--acc);color:var(--accon);border-radius:22px;padding:14px 16px;margin:4px 0 12px}
 .tsum b{display:block;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
 .tsum small{display:block;font-size:13.5px;opacity:.85;margin:1px 0 10px}
 .tpill{height:9px;border-radius:99px;background:color-mix(in srgb,currentColor 25%,transparent);overflow:hidden}
 .tpill i{display:block;height:100%;border-radius:99px;background:currentColor}
-html[data-style="today"] .secwrap[data-rail="Workout"],html[data-style="focus"] .secwrap[data-rail="Workout"]{display:none}
+html[data-fam="today"] .secwrap[data-rail="Workout"],html[data-style="focus"] .secwrap[data-rail="Workout"]{display:none}
 html[data-style="focus"] .tsum{display:flex;align-items:center;gap:12px;margin:2px 0 12px}
 html[data-style="focus"] .tsum .tsl{flex:none}
 html[data-style="focus"] .tsum b{font-size:13px;font-weight:700;background:var(--surface);border-radius:999px;padding:5px 11px}
@@ -631,10 +631,10 @@ html[data-style="focus"] .tsum small{display:none}
 html[data-style="focus"] .tsum .tpill{flex:1;height:5px;color:var(--acc);background:var(--mutedbg)}
 
 /* set dots on folded exercises (Today) */
-html[data-style="today"] .exrow .sdots{display:flex;gap:4px;flex:none}
+html[data-fam="today"] .exrow .sdots{display:flex;gap:4px;flex:none}
 .sdots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
 .sdots i.on{background:var(--c,var(--acc))}
-html[data-style="today"] .exrow:has(.sdots) .pring{display:none}
+html[data-fam="today"] .exrow:has(.sdots) .pring{display:none}
 
 /* Focus: the current set */
 html[data-style="focus"] .fcard{display:block;background:var(--surface);border-radius:22px;padding:16px;margin:0 0 12px}
@@ -659,26 +659,26 @@ html[data-style="focus"] #panel article.ex.fcur{display:none}
 .fmore{border:0;background:none;padding:8px 0 0;color:var(--blue);font-size:13.5px;font-weight:600}
 
 /* Eat: calories hero */
-html[data-style="today"] .khero,html[data-style="focus"] .khero{display:grid;place-items:center;position:relative;margin:0 0 4px}
-html[data-style="today"] .meters .mkcal,html[data-style="focus"] .meters .mkcal{display:none}
+html[data-fam="today"] .khero,html[data-style="focus"] .khero{display:grid;place-items:center;position:relative;margin:0 0 4px}
+html[data-fam="today"] .meters .mkcal,html[data-style="focus"] .meters .mkcal{display:none}
 .khero svg{display:none;max-width:100%;height:auto}
-html[data-style="today"] .khero .kg{display:block}
+html[data-fam="today"] .khero .kg{display:block}
 html[data-style="focus"] .khero .kr{display:block}
 .khero .kc{position:absolute;text-align:center;line-height:1.25}
-html[data-style="today"] .khero .kc{bottom:2px}
+html[data-fam="today"] .khero .kc{bottom:2px}
 .khero .kc b{display:block;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.05}
 .khero .kc small{font-size:13px;color:var(--muted)}
 .khero .kc em{display:block;font-style:normal;font-size:12.5px;margin-top:2px}
 
 /* Eat: meals as a timeline (Today) or a list (Focus) */
-html[data-style="today"] .egrid .etile.mealt,html[data-style="focus"] .egrid .etile.mealt{grid-column:1/-1;min-height:0}
-html[data-style="today"] .egrid .etile.mealt{margin-left:24px}
-html[data-style="today"] .etile.mealt::before{content:"";position:absolute;left:-21px;top:19px;width:10px;height:10px;border-radius:50%;background:var(--line);box-shadow:0 0 0 3px var(--paper);z-index:1}
-html[data-style="today"] .etile.mealt.done::before{background:var(--acc)}
-html[data-style="today"] .etile.mealt:not(.lastmeal)::after{content:"";position:absolute;left:-17px;top:30px;bottom:-24px;width:2px;background:var(--line)}
-html[data-style="today"] .etile.mealt .etic,html[data-style="focus"] .etile.mealt .etic{display:none}
-html[data-style="today"] .etile.mealt:not(.open) .ethd,html[data-style="focus"] .etile.mealt:not(.open) .ethd{flex-direction:row;align-items:center;gap:10px;padding-right:56px}
-html[data-style="today"] .etile.mealt:not(.open) .ethd small,html[data-style="focus"] .etile.mealt:not(.open) .ethd small{width:auto;margin-left:auto;text-align:right}
+html[data-fam="today"] .egrid .etile.mealt,html[data-style="focus"] .egrid .etile.mealt{grid-column:1/-1;min-height:0}
+html[data-fam="today"] .egrid .etile.mealt{margin-left:24px}
+html[data-fam="today"] .etile.mealt::before{content:"";position:absolute;left:-21px;top:19px;width:10px;height:10px;border-radius:50%;background:var(--line);box-shadow:0 0 0 3px var(--paper);z-index:1}
+html[data-fam="today"] .etile.mealt.done::before{background:var(--acc)}
+html[data-fam="today"] .etile.mealt:not(.lastmeal)::after{content:"";position:absolute;left:-17px;top:30px;bottom:-24px;width:2px;background:var(--line)}
+html[data-fam="today"] .etile.mealt .etic,html[data-style="focus"] .etile.mealt .etic{display:none}
+html[data-fam="today"] .etile.mealt:not(.open) .ethd,html[data-style="focus"] .etile.mealt:not(.open) .ethd{flex-direction:row;align-items:center;gap:10px;padding-right:56px}
+html[data-fam="today"] .etile.mealt:not(.open) .ethd small,html[data-style="focus"] .etile.mealt:not(.open) .ethd small{width:auto;margin-left:auto;text-align:right}
 
 html[data-style="focus"] .etile.mealt.done .ethd strong::after{content:" ✓";color:var(--blue);font-size:.85em}
 .nhb{display:inline-block;font-size:11px;font-weight:600;color:var(--red);border:1px solid color-mix(in srgb,var(--red) 40%,transparent);border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:1px}
@@ -725,7 +725,7 @@ html[data-wk="dots"] .top .date{order:-1;text-align:left}
 /* Settings: icons, status card, consistent sub-pages */
 .setrowbtn .sic,.setpt .sic{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--mutedbg);color:var(--ink)}
 .setrowbtn .sic svg,.setpt .sic svg{width:18px;height:18px}
-html[data-style="today"] .setrowbtn .sic,html[data-style="today"] .setpt .sic{border-radius:50%;background:color-mix(in srgb,var(--acc) 14%,var(--surface));color:var(--blue)}
+html[data-fam="today"] .setrowbtn .sic,html[data-fam="today"] .setpt .sic{border-radius:50%;background:color-mix(in srgb,var(--acc) 14%,var(--surface));color:var(--blue)}
 html[data-style="focus"] .setrowbtn .sic,html[data-style="focus"] .setpt .sic{border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,var(--surface));color:var(--blue)}
 .setrowbtn{gap:12px}
 .setrowbtn .sic svg,.setpt .sic svg{transform:none;color:inherit}
@@ -737,12 +737,12 @@ body.tab-settings #week{display:none!important}
 .setstat strong{display:block;font-weight:600}
 .setstat small{display:block;color:var(--muted);font-size:13px}
 .setstat .btn{width:auto;margin:0;flex:none}
-html[data-style="today"] .setgroup,html[data-style="focus"] .setgroup{margin:20px 4px 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-html[data-style="today"] .setnav,html[data-style="focus"] .setnav{padding:0;overflow:hidden}
-html[data-style="today"] .setrowbtn,html[data-style="focus"] .setrowbtn{border-top-color:color-mix(in srgb,var(--line) 70%,transparent)}
-html[data-style="today"] .backbtn,html[data-style="focus"] .backbtn{background:var(--surface);border-radius:999px;padding:6px 14px 6px 10px;margin:2px 0 4px;color:var(--ink);box-shadow:var(--shadow)}
+html[data-fam="today"] .setgroup,html[data-style="focus"] .setgroup{margin:20px 4px 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+html[data-fam="today"] .setnav,html[data-style="focus"] .setnav{padding:0;overflow:hidden}
+html[data-fam="today"] .setrowbtn,html[data-style="focus"] .setrowbtn{border-top-color:color-mix(in srgb,var(--line) 70%,transparent)}
+html[data-fam="today"] .backbtn,html[data-style="focus"] .backbtn{background:var(--surface);border-radius:999px;padding:6px 14px 6px 10px;margin:2px 0 4px;color:var(--ink);box-shadow:var(--shadow)}
 html[data-style="focus"] .backbtn{border-radius:12px}
-html[data-style="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-weight:600}
+html[data-fam="today"] #panel .lbl,html[data-style="focus"] #panel .lbl{font-weight:600}
 
 .iconnote .inhd{display:flex;align-items:center;gap:10px}
 .iconnote .inhd svg{width:30px;height:30px;flex:none}
@@ -812,8 +812,8 @@ body.saver .ithumb{transition:none!important}
 .hbar{height:5px;border-radius:9px;background:var(--mutedbg);margin-top:3px;overflow:hidden}
 .hbar i{display:block;height:100%;border-radius:9px}
 .hwk{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--rustc);color:#fff;border-radius:24px;padding:14px 16px;margin:0 0 4px}
-html[data-style="today"] .hwk{background:var(--acc,var(--rustc));color:var(--accon,#fff)}
-html[data-style="today"] body.tab-home .hwk,html[data-style="today"] .home .hwk{background:var(--rustc);color:#fff}
+html[data-fam="today"] .hwk{background:var(--acc,var(--rustc));color:var(--accon,#fff)}
+html[data-fam="today"] body.tab-home .hwk,html[data-fam="today"] .home .hwk{background:var(--rustc);color:#fff}
 html[data-style="focus"] .hwk{background:var(--surface);color:var(--ink);border:1px solid color-mix(in srgb,var(--acc) 45%,var(--line))}
 html[data-style="classic"] .hwk{background:var(--ink);color:var(--paper)}
 .hwk small{display:block;font-size:12.5px;opacity:.85}
@@ -852,29 +852,29 @@ html[data-style="classic"] .hqa i{background:var(--mutedbg);color:var(--ink)}
 .hrow>svg{color:var(--muted);transform:rotate(-90deg);flex:none}
 /* Eat: ring with macros replaces the gauge and the separate bars */
 .khero2{display:none}
-html[data-style="today"] .khero2,html[data-style="focus"] .khero2{display:grid;grid-template-columns:116px minmax(0,1fr);gap:14px;align-items:center}
-html[data-style="today"] .meters .khero,html[data-style="focus"] .meters .khero,
-html[data-style="today"] .meters .mkcal,html[data-style="focus"] .meters .mkcal,
-html[data-style="today"] .meters>div:has(>.meter-top),html[data-style="focus"] .meters>div:has(>.meter-top),
-html[data-style="today"] .meters .macros,html[data-style="focus"] .meters .macros{display:none!important}
+html[data-fam="today"] .khero2,html[data-style="focus"] .khero2{display:grid;grid-template-columns:116px minmax(0,1fr);gap:14px;align-items:center}
+html[data-fam="today"] .meters .khero,html[data-style="focus"] .meters .khero,
+html[data-fam="today"] .meters .mkcal,html[data-style="focus"] .meters .mkcal,
+html[data-fam="today"] .meters>div:has(>.meter-top),html[data-style="focus"] .meters>div:has(>.meter-top),
+html[data-fam="today"] .meters .macros,html[data-style="focus"] .meters .macros{display:none!important}
 /* Today: fewer boxes */
-html[data-style="today"] .plancard,html[data-style="today"] .nutcard{background:none!important;box-shadow:none!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;padding:14px 0 6px!important}
-html[data-style="today"] .egrid{display:block}
-html[data-style="today"] .egrid .etile{background:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0;min-height:0;margin:0}
-html[data-style="today"] .egrid .etile .ethd{flex-direction:row;align-items:center;gap:10px;padding:12px 56px 12px 0;border-radius:0}
-html[data-style="today"] .egrid .etile .ethd small{width:auto;margin-left:auto;text-align:right}
-html[data-style="today"] .egrid .etile .etplus{top:50%;transform:translateY(-50%)}
-html[data-style="today"] .egrid .etile.open{background:var(--surface);border-radius:22px;border-top:0;box-shadow:var(--shadow);padding:0 12px 12px;margin:8px 0}
-html[data-style="today"] .egrid .etile.open .etplus{top:12px;transform:none}
-html[data-style="today"] .egrid .etile.mealt{margin-left:0}
-html[data-style="today"] .etile.mealt::before{left:2px;top:50%;transform:translateY(-50%);box-shadow:none}
-html[data-style="today"] .etile.mealt .ethd{padding-left:22px}
-html[data-style="today"] .etile.mealt::after{display:none}
-html[data-style="today"] .etile.mealt.open::before{display:none}
-html[data-style="today"] .etile.mealt.open .ethd{padding-left:0}
-html[data-style="today"] #panel article.ex.exfold{background:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0;margin:0}
-html[data-style="today"] #panel article.ex.exfold .exrow{padding:12px 2px}
-html[data-style="today"] body.tab-body #panel>section>.card:not(:first-of-type):not(.cicard):not(.notice){background:none;box-shadow:none;border:0;border-radius:0;padding:4px 0 8px}
+html[data-fam="today"] .plancard,html[data-fam="today"] .nutcard{background:none!important;box-shadow:none!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;padding:14px 0 6px!important}
+html[data-fam="today"] .egrid{display:block}
+html[data-fam="today"] .egrid .etile{background:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0;min-height:0;margin:0}
+html[data-fam="today"] .egrid .etile .ethd{flex-direction:row;align-items:center;gap:10px;padding:12px 56px 12px 0;border-radius:0}
+html[data-fam="today"] .egrid .etile .ethd small{width:auto;margin-left:auto;text-align:right}
+html[data-fam="today"] .egrid .etile .etplus{top:50%;transform:translateY(-50%)}
+html[data-fam="today"] .egrid .etile.open{background:var(--surface);border-radius:22px;border-top:0;box-shadow:var(--shadow);padding:0 12px 12px;margin:8px 0}
+html[data-fam="today"] .egrid .etile.open .etplus{top:12px;transform:none}
+html[data-fam="today"] .egrid .etile.mealt{margin-left:0}
+html[data-fam="today"] .etile.mealt::before{left:2px;top:50%;transform:translateY(-50%);box-shadow:none}
+html[data-fam="today"] .etile.mealt .ethd{padding-left:22px}
+html[data-fam="today"] .etile.mealt::after{display:none}
+html[data-fam="today"] .etile.mealt.open::before{display:none}
+html[data-fam="today"] .etile.mealt.open .ethd{padding-left:0}
+html[data-fam="today"] #panel article.ex.exfold{background:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0;margin:0}
+html[data-fam="today"] #panel article.ex.exfold .exrow{padding:12px 2px}
+html[data-fam="today"] body.tab-body #panel>section>.card:not(:first-of-type):not(.cicard):not(.notice){background:none;box-shadow:none;border:0;border-radius:0;padding:4px 0 8px}
 /* Routine logo colours per style */
 :root{--logobg:#AF5A38;--logofg:#F6EEE3}
 html[data-style="focus"]{--logobg:#C9F23E;--logofg:#111111}
@@ -882,7 +882,7 @@ html[data-style="classic"]{--logobg:#18181B;--logofg:#FFFFFF}
 html[data-style="classic"][data-theme="dark"]{--logobg:#FAFAFA;--logofg:#09090B}
 .logo svg{display:block}
 .wordmark{font-weight:700;letter-spacing:-.02em;font-size:19px}
-html[data-style="today"] .wordmark{font-variation-settings:"opsz" 72}
+html[data-fam="today"] .wordmark{font-variation-settings:"opsz" 72}
 html[data-style="focus"] .wordmark{font-stretch:112%}
 /* Appearance: style picker */
 .stylepick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
@@ -969,16 +969,86 @@ dialog.sheet.dragging{transition:none}
 dialog.sheet.closing{transition:transform .18s ease-in}
 body.sheetlock{position:fixed;left:0;right:0;overflow:hidden}
 #rail{display:none!important}
+/* ============ 8.0 styles: Training journal, Night gym, Soft, Earth and clay. They build on Today (data-fam="today"). ============ */
+html[data-style="journal"]{--logobg:#1F2A44;--logofg:#F4EFE6}html[data-style="journal"][data-theme="dark"]{--logobg:#E07A52;--logofg:#121827}
+html[data-style="night"]{--logobg:#FF5A1F;--logofg:#0B0B0C}
+html[data-style="soft"]{--logobg:#F28C52;--logofg:#FFFFFF}
+html[data-style="earth"]{--logobg:#B85C38;--logofg:#F6EEE3}
+.stprev.journal{background:#F4EFE6;background-image:repeating-linear-gradient(#F4EFE6 0 9px,#E0D5C3 9px 10px)}.stprev.journal i:nth-child(1){background:#1F2A44;height:14px;border-radius:3px;width:70%}.stprev.journal i:nth-child(2){background:#B5532E;width:40%}.stprev.journal i:nth-child(3){background:#1F2A44;width:55%;opacity:.35}
+.stprev.night{background:#0B0B0C}.stprev.night i:nth-child(1){background:#F2F2F2;height:14px;border-radius:2px;width:55%}.stprev.night i:nth-child(2){background:#FF5A1F;width:80%;border-radius:2px}.stprev.night i:nth-child(3){background:#26262A;width:65%;border-radius:2px}
+.stprev.soft{background:#FDF1E9}.stprev.soft i:nth-child(1){background:#F28C52;height:14px;border-radius:8px}.stprev.soft i:nth-child(2){background:#fff;width:80%;box-shadow:0 2px 4px rgba(80,55,30,.15)}.stprev.soft i:nth-child(3){background:#4FAE6E;width:45%}
+.stprev.earth{background:#F6EEE3}.stprev.earth i:nth-child(1){background:#B85C38;height:14px;border-radius:9px 9px 3px 3px}.stprev.earth i:nth-child(2){background:#6B7A3A;width:70%}.stprev.earth i:nth-child(3){background:#24413A;width:50%}
+/* Training journal */
+html[data-style="journal"] body{font-family:"Instrument Sans",Geist,system-ui,sans-serif}
+html[data-style="journal"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.appname,.hwk b){font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em;font-variation-settings:"opsz" 72}
+html[data-style="journal"]:not([data-theme="dark"]) body{background-image:repeating-linear-gradient(transparent 0 31px,color-mix(in srgb,var(--line) 75%,transparent) 31px 32px)}
+html[data-style="journal"] :is(.card,.etile){border-radius:10px;box-shadow:none;border:1px solid var(--line)}
+html[data-style="journal"] #panel article.ex.isopen{border:1.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+html[data-style="journal"] .btn:not(.ghost){background:var(--ink);color:var(--paper)}
+html[data-style="journal"] .tick[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+html[data-style="journal"] .pring.done{background:transparent!important;color:var(--acc)!important;border:2px solid var(--acc);transform:rotate(-12deg)}
+html[data-style="journal"] .island{background:var(--paper);border:1.5px solid var(--ink);box-shadow:none;border-radius:16px}
+html[data-style="journal"] :is(.ithumb,.itab){border-radius:11px}
+html[data-style="journal"] .ithumb{background:color-mix(in srgb,var(--acc) 16%,transparent)!important}
+html[data-style="journal"] :is(.btn,.tick,.icob,.etplus){transition:transform .25s ease}
+html[data-style="journal"] :is(.btn,.tick,.icob,.etplus):active{transform:scale(.97)}
+/* Night gym */
+html[data-style="night"] body{font-family:Inter,Geist,system-ui,sans-serif}
+html[data-style="night"] :is(.top h1,.dname,.pagetitle,.big,.hwk b,.appname){font-family:"Barlow Condensed",Archivo,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.01em;font-variation-settings:normal}
+html[data-style="night"] :is(.sheet-t,h3,.sec-title,.ethd strong){font-family:Inter,sans-serif;font-weight:600;letter-spacing:-.01em;font-variation-settings:normal}
+html[data-style="night"] .dname{font-size:34px}
+html[data-style="night"] :is(.card,.etile){border-radius:16px;box-shadow:none;border:0}
+html[data-style="night"] .btn:not(.ghost){border-radius:12px;background:var(--acc);color:#0B0B0C}
+html[data-style="night"] .set .field{font-family:"Barlow Condensed",Archivo,sans-serif;font-size:22px;font-weight:700}
+html[data-style="night"] :is(.tick,.sn,.icob,.navbtn){border-radius:10px}
+html[data-style="night"] .tick[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#0B0B0C}
+html[data-style="night"] .restbtn .chip{font-family:"Barlow Condensed",Archivo,sans-serif;font-size:20px;border-radius:10px}
+html[data-style="night"] :is(.lbl,.daymeta){letter-spacing:.05em}
+html[data-style="night"] .island{border-radius:18px;background:#111113;border:1px solid #26262A;box-shadow:none}
+html[data-style="night"] :is(.ithumb,.itab){border-radius:13px}
+html[data-style="night"] .ithumb{background:color-mix(in srgb,var(--acc) 18%,transparent)!important}
+html[data-style="night"] .itab[aria-current="page"]{color:var(--acc)}
+html[data-style="night"] :is(.btn,.tick,.icob,.etplus){transition:transform .08s ease-out}
+html[data-style="night"] :is(.btn,.tick,.icob,.etplus):active{transform:scale(.93)}
+/* Soft */
+html[data-style="soft"] :is(body,button,input,select,textarea){font-family:Nunito,system-ui,sans-serif}
+html[data-style="soft"] body{font-weight:600}
+html[data-style="soft"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.appname,.hwk b){font-family:Nunito,sans-serif;font-weight:900;letter-spacing:-.01em;font-variation-settings:normal}
+html[data-style="soft"] :is(.card,.etile){border-radius:28px}
+html[data-style="soft"]:not([data-theme="dark"]) :is(.card,.etile){box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 10px 22px -12px rgba(80,55,30,.28),0 2px 4px rgba(80,55,30,.06)}
+html[data-style="soft"] .field{border-radius:16px}
+html[data-style="soft"]:not([data-theme="dark"]) .field{box-shadow:inset 0 2px 4px rgba(80,55,30,.08)}
+html[data-style="soft"] :is(.tick,.icob,.navbtn,.sn){border-radius:16px}
+html[data-style="soft"] .btn{border-radius:999px;font-weight:800}
+html[data-style="soft"] .ithumb{background:var(--acc)!important}
+html[data-style="soft"] .itab[aria-current="page"]{color:var(--accon)!important}
+html[data-style="soft"] :is(.btn,.tick,.chip,.icob,.etplus){transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+html[data-style="soft"] :is(.btn,.tick,.chip,.icob,.etplus):active{transform:scale(.92)}
+/* Earth and clay */
+html[data-style="earth"] body{font-family:"DM Sans",Geist,system-ui,sans-serif}
+html[data-style="earth"] :is(.top h1,.dname,.pagetitle,.sheet-t,h3,.big,.sec-title,.ethd strong,.appname,.hwk b){font-family:"Bricolage Grotesque",sans-serif;font-weight:700}
+html[data-style="earth"] :is(.card,.etile){border-radius:22px}
+html[data-style="earth"] :is(.btn,.tick,.etplus,.hgo){border-radius:22px 22px 8px 8px}
+html[data-style="earth"] .secic{border-radius:14px 14px 5px 5px}
+html[data-style="earth"] :is(.hwb .bt,.hwb .bt i){border-radius:99px 99px 4px 4px}
+html[data-style="earth"] .island{background:#24413A;border:0}
+html[data-style="earth"][data-theme="dark"] .island{background:#0F1714;border:1px solid var(--line)}
+html[data-style="earth"] .itab{color:#A9BDB2}
+html[data-style="earth"] .itab[aria-current="page"]{color:#F6EEE3!important}
+html[data-style="earth"] .ithumb{background:var(--acc)!important;border-radius:20px 20px 8px 8px}
+html[data-style="earth"] :is(.btn,.tick,.icob,.etplus){transition:transform .25s ease}
+html[data-style="earth"] :is(.btn,.tick,.icob,.etplus):active{transform:scale(.97)}
+
 /* 7.6: calmer Train progress, tidy Eat tiles, readable week chart, plain rings and nutrient names */
-html[data-style="today"] .tsum{display:none}
+html[data-fam="today"] .tsum{display:none}
 .dbar{display:none}
-html[data-style="today"] .dbar{display:block;grid-column:1/-1;height:6px;border-radius:99px;background:var(--mutedbg);margin:8px 0 0 20px;overflow:hidden}
-html[data-style="today"] .dbar i{display:block;height:100%;border-radius:99px;background:var(--acc);transition:width .3s}
+html[data-fam="today"] .dbar{display:block;grid-column:1/-1;height:6px;border-radius:99px;background:var(--mutedbg);margin:8px 0 0 20px;overflow:hidden}
+html[data-fam="today"] .dbar i{display:block;height:100%;border-radius:99px;background:var(--acc);transition:width .3s}
 .pring.zero::before{inset:3px}
 .ethd strong{white-space:nowrap}
 .ethd small{min-width:0}
 .etile.open .ethd small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 0;text-align:right}
-html[data-style="today"] .ethd small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-fam="today"] .ethd small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nutrow .tgt,html[data-style] .nutrow .tgt{color:var(--ink)}
 .hwb .bt{width:14px;border-radius:99px}
 .hwb .bt i{border-radius:99px}
@@ -987,14 +1057,14 @@ html[data-style="today"] .ethd small{overflow:hidden;text-overflow:ellipsis;whit
 .swbg{border-radius:12px}
 .swr.l>.sw,.swr.r>.sw,.swr>.sw.dragging{border-radius:12px}
 #panel article.ex.exfold{--rowbg:var(--surface)}
-html[data-style="today"] #panel article.ex.exfold{--rowbg:var(--paper)}
+html[data-fam="today"] #panel article.ex.exfold{--rowbg:var(--paper)}
 #panel article.ex.exfold .swr{border-radius:12px;overflow:hidden}
 #panel article.ex.exfold .swr>.sw{background:transparent}
 #panel article.ex.exfold .swr.l>.sw,#panel article.ex.exfold .swr.r>.sw{background:var(--rowbg)}
 #panel article.ex.exfold .swr:not(.l):not(.r) .swbg{visibility:hidden}
-html[data-style="today"] #panel article.ex.exfold .exrow{padding:9px 8px;margin:3px 0;border-radius:12px}
-html[data-style="today"] #panel article.ex.exfold .swr{margin:3px 0}
-html[data-style="today"] #panel article.ex.exfold .swr>.exrow{margin:0}
+html[data-fam="today"] #panel article.ex.exfold .exrow{padding:9px 8px;margin:3px 0;border-radius:12px}
+html[data-fam="today"] #panel article.ex.exfold .swr{margin:3px 0}
+html[data-fam="today"] #panel article.ex.exfold .swr>.exrow{margin:0}
 .exrow:active .sdots i:not(.on){background:color-mix(in srgb,var(--ink) 22%,transparent)}
 
 /* 7.5: hold an exercise to move it */
@@ -2861,7 +2931,7 @@ function renderHeader(){
   if(sel!==t){const b=document.createElement("button");b.className="todaybtn";b.textContent="Back to today";b.dataset.act="today";sub.append(" ",b);}
 }
 const WK_IDS=["pills","cards","dots","circles"];
-function wkMode(){const v=themeCfg().wk;return WK_IDS.includes(v)?v:({today:"pills",focus:"cards",classic:"circles"})[styleId()];}
+function wkMode(){const v=themeCfg().wk;return WK_IDS.includes(v)?v:(styleId()==="focus"?"cards":"pills");}
 function renderWeek(){
   const t=todayKey(),m=wkMode(),scroll=m==="pills"||m==="cards",W=$("week");let h="";
   // Dates and Workouts scroll through many weeks; Dots and Circles show one week
@@ -4893,7 +4963,7 @@ function profileFields(pf){
 let welcomeManual=false;
 function lookStepHtml(){return `<div class="card welcome"><p class="stepl">Step 5 of 5</p><h2 style="font-size:24px">Pick a look</h2>
     <p class="note" style="margin:6px 0 14px">Last one, and optional. You can change it any time in Settings → Appearance.</p>
-    <div class="lookpick">${[["today","Today","Soft and rounded, with a colour for each tab. Calm for everyday use."],["focus","Focus","Bold and dark, with the current set and a big Log set button. Made for the gym floor."],["classic","Classic","Clean and simple, in white, grey and blue."]].map(([v,n,d])=>`<button type="button" class="stopt lookopt" data-wstyle="${v}" aria-pressed="${styleId()===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>${n}</strong><small>${d}</small></span></button>`).join("")}</div>
+    <div class="lookpick">${[["today","Today","Soft and rounded, with a colour for each tab. Calm for everyday use."],["focus","Focus","Bold and dark, with the current set and a big Log set button. Made for the gym floor."],["journal","Training journal","Ruled paper and ink, with a stamp for every workout and meal you finish."],["night","Night gym","Black and orange, with big scoreboard numbers you can read mid-set."],["soft","Soft","Chunky, rounded and colourful, with a colour for each tab."],["earth","Earth and clay","Terracotta, olive and deep green, with arch shapes."]].map(([v,n,d])=>`<button type="button" class="stopt lookopt" data-wstyle="${v}" aria-pressed="${styleId()===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>${n}</strong><small>${d}</small></span></button>`).join("")}</div>
     <button class="btn" data-act="lookgo">Done</button><button class="linkbtn" style="margin-top:10px" data-act="lookgo">Skip for now</button></div>`;}
 function welcomeHtml(){
   const pf=Object.assign({sex:"m",act:1.55,goal:-550,w:latestWeight()},profile());
@@ -5477,7 +5547,15 @@ const ACCENTS=[["#2563EB","Blue"],["#6B4CE0","Purple"],["#0F8B8D","Teal"],["#D96
 function themeCfg(){return store.settings.theme||{};}
 function ensureTheme(){return store.settings.theme||(store.settings.theme={});}
 const darkMQ=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
-const STYLE_IDS=["today","focus","classic"];
+const STYLE_IDS=["today","focus","journal","night","soft","earth"];
+// The four 8.0 styles: fixed palettes per light/dark; Soft and Earth colour each tab
+const NEWST={journal:{l:{bg:"#F4EFE6",sf:"#FBF8F2",ink:"#1F2A44",acc:"#B5532E"},d:{bg:"#121827",sf:"#1B2236",ink:"#ECE6DA",acc:"#E07A52"}},
+  night:{d:{bg:"#0B0B0C",sf:"#151517",ink:"#F2F2F2",acc:"#FF5A1F"}},
+  soft:{l:{bg:"#F6F1EA",sf:"#FFFFFF",ink:"#2B2622"},d:{bg:"#1B1714",sf:"#28221E",ink:"#F3EDE6"},tabs:{home:"#F28C52",train:"#F28C52",eat:"#4FAE6E",body:"#5B8DEF",spend:"#D9A43A",hist:"#8A63C7",settings:"#8C8178"}},
+  earth:{l:{bg:"#F6EEE3",sf:"#EFE3D2",ink:"#24312B"},d:{bg:"#141C18",sf:"#1E2A24",ink:"#EDE3D3"},tabs:{home:"#B85C38",train:"#B85C38",eat:"#6B7A3A",body:"#2F5F52",spend:"#B9862B",hist:"#2F5F52",settings:"#8A6A4F"}}};
+const STFONT={journal:"Fraunces:opsz,wght@9..144,400..700&family=Instrument+Sans:wght@400;500;600;700",night:"Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700",soft:"Nunito:wght@500;600;700;800;900",earth:"DM+Sans:opsz,wght@9..40,400..700"};
+function ensureFont(st){const q=STFONT[st];if(!q||document.getElementById("font-"+st))return;const l=document.createElement("link");l.id="font-"+st;l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+q+"&display=swap";document.head.appendChild(l);}
+const STYLE_INFO=[["today","Today","Soft and rounded, a colour for each tab"],["focus","Focus","Bold, with a big Log set button"],["journal","Training journal","Ruled paper, ink and a stamp for what's done"],["night","Night gym","Black and orange, big scoreboard numbers"],["soft","Soft","Chunky, rounded and colourful"],["earth","Earth and clay","Terracotta and olive, arch shapes"]];
 function styleId(){const v=themeCfg().style;return STYLE_IDS.includes(v)?v:"today";}
 // Backgrounds for Today and Focus: id, light name, dark name, light colour, dark colour, paper texture
 const BG6=[["sand","Sand","Cocoa","#F6EFE6","#16120E"],["paper","Paper","Night paper","#F0E9DA","#1A1713",1],["stone","Stone","Graphite","#F2F2EF","#0B0B0C"],["white","White","Black","#FFFFFF","#000000"],["sky","Sky","Midnight","#EDF2F8","#0C1220"],["sage","Sage","Forest","#EDF2EA","#0D1511"],["blush","Blush","Wine","#F8EDED","#1A0F12"]];
@@ -5489,10 +5567,15 @@ function rgbHex(a){return "#"+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).t
 function mixHex(a,b,t){const A=hexRgb(a),B=hexRgb(b);return rgbHex(A.map((v,i)=>v+(B[i]-v)*t));}
 function lumHex(h){const L=hexRgb(h).map(c=>{c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);});return .2126*L[0]+.7152*L[1]+.0722*L[2];}
 function contrast(a,b){const x=lumHex(a),y=lumHex(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
-function isDark(){const T=themeCfg();if(styleId()!=="classic"&&T.bgc)return lumHex(T.bgc)<0.3;const m=T.mode;return m==="dark"||(m!=="light"&&!!(darkMQ&&darkMQ.matches));}
+function isDark(){const T=themeCfg(),st=styleId();if(st==="night")return true;if((st==="today"||st==="focus")&&T.bgc)return lumHex(T.bgc)<0.3;const m=T.mode;return m==="dark"||(m!=="light"&&!!(darkMQ&&darkMQ.matches));}
 function styleAccent(){const T=themeCfg(),st=styleId();if(st==="focus")return T.facc||"#C9F23E";const t=TABDEF[tab]?tab:"train";return (T.tabc||{})[t]||TABC[t]||TABC.train;}
 const THEME_VARS=["--paper","--surface","--ink","--muted","--line","--mutedbg","--ring","--field","--shadow","--shadow-sm","--blue","--acc","--accon","--segon"];
-function palette6(){const T=themeCfg(),st=styleId(),dark=isDark(),row=bg6Row(),b=T.bgc||row[dark?4:3];
+function paletteNew(st){const N=NEWST[st],dark=isDark(),P=N[dark?"d":"l"]||N.d;let acc=N.tabs?(N.tabs[TABDEF[tab]?tab:"train"]||N.tabs.train):P.acc;if(dark&&N.tabs)acc=mixHex(acc,"#FFFFFF",.15);
+  const b=st==="soft"?mixHex(P.bg,acc,dark?.06:.07):P.bg,surface=P.sf,ink=P.ink,muted=mixHex(ink,b,.42),line=mixHex(b,ink,dark?.16:.13),mutedbg=mixHex(surface,ink,dark?.08:.06);
+  let txt=acc;for(let t=.1;t<=.8&&contrast(txt,surface)<3.4;t+=.1)txt=mixHex(acc,ink,t);
+  const sh=dark?"none":st==="soft"?"0 10px 22px -12px rgb(80 55 30 / .28), 0 2px 4px rgb(80 55 30 / .06)":st==="earth"?"0 8px 20px -14px rgb(60 40 20 / .35)":"none";
+  return {"--paper":b,"--surface":surface,"--ink":ink,"--muted":muted,"--line":line,"--mutedbg":mutedbg,"--ring":mixHex(b,ink,.35),"--field":dark?mixHex(b,ink,.04):mixHex(surface,b,.3),"--shadow":sh,"--shadow-sm":dark?"none":"0 2px 8px rgb(70 45 20 / .06)","--blue":txt,"--acc":acc,"--accon":onFor(acc),"--segon":dark?mixHex(surface,ink,.16):surface,_dark:dark,_paper:false};}
+function palette6(){const T=themeCfg(),st=styleId();if(NEWST[st])return paletteNew(st);const dark=isDark(),row=bg6Row(),b=T.bgc||row[dark?4:3];
   const ink=dark?mixHex(b,"#FFFFFF",.92):mixHex(b,"#000000",.88);
   const surface=dark?mixHex(b,"#FFFFFF",st==="focus"?.075:.06):(lumHex(b)>.93&&st==="focus"?mixHex(b,"#000000",.035):mixHex(b,"#FFFFFF",.82));
   const muted=mixHex(ink,b,.45),line=mixHex(b,ink,dark?.15:.11),mutedbg=mixHex(surface,ink,dark?.08:.05);
@@ -5503,7 +5586,7 @@ function palette6(){const T=themeCfg(),st=styleId(),dark=isDark(),row=bg6Row(),b
     "--blue":txt,"--acc":acc,"--accon":onFor(acc),"--segon":dark?mixHex(surface,ink,.16):surface,_dark:dark,_paper:!T.bgc&&!!row[5]};}
 function applyTheme(){
   document.body.classList.toggle("saver",lowPower());
-  const T=themeCfg(),root=document.documentElement,st=styleId();root.dataset.style=st;root.dataset.wk=wkMode();
+  const T=themeCfg(),root=document.documentElement,st=styleId();root.dataset.style=st;root.dataset.fam=st==="focus"?"focus":"today";root.dataset.wk=wkMode();ensureFont(st);
   if(st!=="classic"){const P=palette6();for(const v of THEME_VARS)root.style.setProperty(v,P[v]);root.dataset.theme=P._dark?"dark":"light";document.body.classList.toggle("paperbg",P._paper);
     const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",P["--paper"]);return;}
   document.body.classList.remove("paperbg");for(const v of THEME_VARS)root.style.removeProperty(v);
@@ -5525,9 +5608,10 @@ const gearSvg=`<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true
 function settingsBody(){
   const T=themeCfg(),mode=T.mode||"system",PL=plansFor(sel),base=k=>plansFor(sel)[k],st=styleId(),dark=isDark();
   const days=Object.keys(PL);
-  let h=`<p class="lbl">Style</p><div class="stylepick">${[["today","Today","Soft and rounded, a colour for each tab"],["focus","Focus","Bold, with a big Log set button"],["classic","Classic","The original clean look"]].map(([v,n,d])=>`<button type="button" class="stopt" data-tstyle="${v}" aria-pressed="${st===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><strong>${n}</strong><small>${d}</small></button>`).join("")}</div>
+  let h=`<p class="lbl">Style</p><div class="stylepick">${STYLE_INFO.map(([v,n,d])=>`<button type="button" class="stopt" data-tstyle="${v}" aria-pressed="${st===v}"><span class="stprev ${v}" aria-hidden="true"><i></i><i></i><i></i></span><strong>${n}</strong><small>${d}</small></button>`).join("")}</div>
   <p class="lbl">Theme</p><div class="seg seg3" role="group" aria-label="Theme">${[["system","System"],["light","Light"],["dark","Dark"]].map(([v,l])=>`<button type="button" data-tmode="${v}" aria-pressed="${mode===v}">${l}</button>`).join("")}</div>`;
-  if(st==="classic"){
+  if(NEWST[st]){h+=`<p class="note" style="margin-top:10px">${st==="night"?"Night gym is always dark. Its colours come with the style.":"Colours come with this style, in a light and a dark version that follow the theme above."}${NEWST[st].tabs?" Each tab has its own colour.":""}</p>`;}
+  else if(false){
     h+=`<p class="lbl" style="margin-top:14px">Background</p><div class="swatches">${BGS.map(b=>{const nm=b[dark?2:1];return `<button type="button" class="swatch" data-tbg="${b[0]}" aria-pressed="${bgId()===b[0]}" aria-label="${nm} background" style="--sw:${b[dark?4:3]}"><span></span><small>${nm}</small></button>`;}).join("")}</div>
     <p class="lbl" style="margin-top:14px">Accent colour</p><div class="swatches">${ACCENTS.map(a=>`<button type="button" class="swatch" data-tacc="${a[0]}" aria-pressed="${(T.accent||"#2563EB").toLowerCase()===a[0].toLowerCase()}" aria-label="${a[1]} accent" style="--sw:${a[0]}"><span></span><small>${a[1]}</small></button>`).join("")}<label class="swatch custom" aria-label="Custom accent colour"><input type="color" data-taccc value="${T.accent||"#2563EB"}"><small>Custom</small></label></div>`;
   }else{
@@ -5554,7 +5638,7 @@ bothOn("click",e=>{
   const b=e.target.closest("[data-tbg]");if(b){const T=ensureTheme();if(b.dataset.tbg==="default")delete T.bg;else T.bg=b.dataset.tbg;themeChanged(true);return;}
   const a=e.target.closest("[data-tacc]");if(a){const T=ensureTheme();if(a.dataset.tacc==="#2563EB")delete T.accent;else T.accent=a.dataset.tacc;themeChanged(true);return;}
   const wk=e.target.closest("[data-twk]");if(wk){ensureTheme().wk=wk.dataset.twk;themeChanged(true);return;}
-  const sy=e.target.closest("[data-tstyle]");if(sy){const T=ensureTheme(),u=snap(["settings"]);if(sy.dataset.tstyle==="today")delete T.style;else T.style=sy.dataset.tstyle;themeChanged(true);toast({today:"Today style",focus:"Focus style",classic:"Classic style"}[sy.dataset.tstyle]+" on",u);return;}
+  const sy=e.target.closest("[data-tstyle]");if(sy){const T=ensureTheme(),u=snap(["settings"]);if(sy.dataset.tstyle==="today")delete T.style;else T.style=sy.dataset.tstyle;themeChanged(true);toast(((STYLE_INFO.find(x=>x[0]===sy.dataset.tstyle)||[])[1]||"Style")+" on",u);return;}
   const b6=e.target.closest("[data-tbg6]");if(b6){const T=ensureTheme();T.bg6=b6.dataset.tbg6;delete T.bgc;themeChanged(true);return;}
   if(e.target.closest("[data-tbgreset]")){delete ensureTheme().bgc;themeChanged(true);return;}
   if(e.target.closest("[data-ttabreset]")){delete ensureTheme().tabc;themeChanged(true);return;}
@@ -5580,7 +5664,7 @@ const TOUR=[
   {tab:"eat",sel:".card.meters",t:"Eat",x:"Calories, protein, carbs and fat against your daily targets. Tap + on a meal to add food by grams, pieces or ml, or copy food from another day. Suggest meals plans the rest of your day, and can fill your shopping list on the Spend tab."},
   {tab:"body",sel:".progseg",t:"Progress",x:"Body has your weight and everything about your progress, Calendar has every past day. Log your weight each morning. The weekly average shows your real trend, and the weekly check-in compares it with your goal and suggests calorie changes. Set your goal exactly, in kg a week or kcal a day, in the calculator below."},
   {tab:"spend",sel:".island",t:"Spend",x:"Spend shows what your food and supplements cost per week, two weeks or month, grouped by store. The tab bar shows icons; the tab you're on shows its name."},
-  {tab:"home",sel:"#gear",t:"Settings and help",x:"The gear at the top right opens Settings: Appearance (Today, Focus or Classic style, backgrounds and colours), tab order, kg or lb, currency, rest timer, backups, battery saver, and the full help guide. \"How your targets are worked out\" shows every formula with your numbers. You can replay this tour from there too."}
+  {tab:"home",sel:"#gear",t:"Settings and help",x:"The gear at the top right opens Settings: Appearance (six styles, backgrounds and colours), tab order, kg or lb, currency, rest timer, backups, battery saver, and the full help guide. \"How your targets are worked out\" shows every formula with your numbers. You can replay this tour from there too."}
 ];
 const tourEl=document.createElement("div");tourEl.id="tour";tourEl.setAttribute("role","dialog");tourEl.setAttribute("aria-modal","true");tourEl.setAttribute("aria-label","App tour");
 tourEl.innerHTML=`<div class="tspot"></div><div class="tcard" aria-live="polite"></div>`;document.body.appendChild(tourEl);
@@ -5953,8 +6037,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="7.6";
+const APP_VERSION="8.0";
 const CHANGELOG=[
+  {v:"8.0",d:"14 November 2026",t:"Four new styles",items:["Settings → Appearance has four new styles next to Today and Focus. Training journal: ruled paper, ink-blue serif headings, and a stamp when you finish something. Night gym: black and orange, with big condensed numbers you can read mid-set. Soft: chunky rounded type, cards that lift off the page and a colour for each tab. Earth and clay: terracotta, olive and deep green with arch-shaped buttons and bars.","Each style has its own feel when you tap: snappy in Night gym, a little bounce in Soft, calm in Journal and Earth.","Journal, Soft and Earth have light and dark versions that follow your Theme setting. Night gym is always dark.","Classic has been retired. If you used it, the app switches you to Today; pick any style in Settings.","Today is still the default for new users, and new users can pick any of the six during setup."]},
   {v:"7.6",d:"14 November 2026",t:"Calmer screens",items:["Train: the big orange sets card is gone. Your progress is now a slim bar under the workout name, with sets done next to the exercise count, and it updates as you tick sets. Home still has the full workout card.","Eat: every tile has its own icon, and the subtitles are shorter so titles like Meal builder stay on one line.","Home: the This week chart shows a slim bar for every day, filling up as you train, instead of tiny stubs in an empty space.","Small progress rings no longer show a cramped percentage: an empty ring before you start, the ring filling as you go, and a tick when done.","Nutrient names on Eat are plain text now, so only the bars carry colour."]},
   {v:"7.54",d:"14 November 2026",t:"Smoother swipes",items:["Swiping a row now has rounded edges on both sides, so it looks like the row is sliding away rather than being cut off.","Folded exercises can be swiped too: right to swap, left to remove it for today. You no longer have to open an exercise first.","The highlight when you tap a folded exercise now sits neatly between the divider lines instead of running into them."]},
   {v:"7.53",d:"14 November 2026",t:"74 more foods",items:["Plant milks (oat, soy, almond), cheddar, Emmental, kefir, buttermilk, Schmand, whipping cream and condensed milk.","Rye bread, Knäckebrot, baguette, bagels, Brezel, flour, cornstarch, breadcrumbs, semolina, Spätzle, granola, termis and baked beans.","Tomato paste, passata, pickles, pumpkin, leek, celery, radish, spring onion, rocket and parsley, plus BBQ, hot, sweet chili and pesto sauces and balsamic vinegar.","Crisps, butter biscuits, ice cream, halawa and black honey. Plums, cherries, apricots, melon, grapefruit, dried apricots, prunes and coconut. Pangasius, trout, sea bass, herring, calamari, crab sticks, duck and veal. Mango juice.","Foods whose values depend on the recipe, shop or brand are marked (estimate): basbousa, konafa, baklava, cakes, pizza, feteer, fattah, sobia, tamr hindi, sahlab, cereal bars, protein bars and halal fruit gummies. For an exact number, use the label or add your own food."]},
@@ -6309,7 +6394,7 @@ function guideHtml(){
   h+=ch("Eat",`<ul><li>The bar at the top shows calories and protein against your targets.</li><li>Each meal is folded into one line. Tap it to open, then tick what you ate.</li><li>Calories, protein, carbs and fat sit at the top.</li><li>Tap <b>+</b> on a meal to search your meals, recipes and foods. Foods that suit that meal come first, so Snack starts with fruit, nuts and yogurt. Filter by what a food is good for (Snacks, Breakfast, High protein…) or its type, and sort by protein, fibre, magnesium or another nutrient. The meal builder has the same filters. Food not in the list? Tap <b>Not in the list? Add your own food</b> at the bottom of the search. Foods you normally count can be added by the piece, and drinks in <b>ml</b> or grams (Settings → Units). Amounts the app has to guess, like the weight of one egg, are marked as estimates.</li><li><b>Copy food from</b> another day copies one meal or a whole day's food.</li><li><b>Suggest meals</b> plans the rest of your day to hit your targets, and <b>Portion my foods</b> works out amounts for foods you choose. <b>Meal sizes</b> sets how big each meal should be. Plans can go straight to your <b>shopping list</b> on the Spend tab.</li><li>Had a cheat meal? Log a rough estimate instead of weighing everything.</li><li><b>Halal:</b> in Settings → Diet, label or hide foods with alcohol, pork or gelatine. They're also left out of suggested meals.</li><li><b>Nutrients:</b> track fibre, water, vitamins and more with <b>Choose</b>.</li><li><b>Supplements:</b> pick one from the common list or add your own, then set the dose: pills × the strength of one pill, or an amount a day in g, mg, ml, teaspoons or tablespoons. The dose counts towards your nutrients, like 2 pills × 1,000 IU of vitamin D. Tap the dose under a supplement to change it. The magnifying glass shows what each is for, when to take it and what to watch out for. The pen adds your own note.</li><li>Swipe a meal right to edit it, left to remove it.</li><li>The <b>meal builder</b> combines several foods into one meal, works out one serving when you cook a batch, and saves it as a meal or recipe.</li><li><b>Recipes</b> show ingredients and steps. Tap <b>Log 1 serving today</b> after eating one, or add your own.</li></ul>`);
   h+=ch("Progress",`<p>Progress has two parts: <b>Body</b> and <b>Calendar</b>. Switch with the buttons at the top.</p><ul><li>Weigh in each morning. The <b>Progress</b> chart shows each weigh-in and the 7-day average. Tap the chart to see the numbers.</li><li><b>Calories burned</b> estimates today's total and what your training has burned since you started.</li><li><b>Your real maintenance</b> appears after about two weeks of logging weight and food. It's more accurate than any formula.</li><li>The <b>weekly check-in</b> compares your weight trend with your goal. After two weeks in a row that point the same way, it suggests a small calorie change, never below what's safe for you.</li><li>In the <b>calculator</b>, set your goal to lose, maintain or gain, either in kg a week or calories a day. The app warns you when a goal is aggressive and won't accept one that's unsafe.</li><li><b>Sets per muscle</b>, <b>Strength</b>, <b>Measurements</b>, <b>Progress photos</b> and <b>Notes</b> sit further down.</li></ul>`);
   h+=ch("Spend and Calendar",`<p><b>Spend</b> works out what your food and supplements cost per week, two weeks or month, grouped by store. Add products with how long they last, then tap a store and a product to log a purchase. The <b>shopping list</b> fills from your meal plan, for 1 to 7 days.</p><p><b>Calendar</b>, inside Progress, shows a month at a glance. Tap any day to open it.</p>`);
-  h+=ch("Settings and the tab bar",`<p><b>Settings</b> is the gear at the top right of every screen, and ✕ closes it. The tab bar shows icons, and the tab you're on shows its name. <b>Appearance</b> has three styles: <b>Today</b> (soft and rounded, a colour for each tab), <b>Focus</b> (bold, with the current set and a big Log set button at the top of Train) and <b>Classic</b>. Pick a background, including Paper or any colour you like, the colours for each tab or the accent, and how the week at the top looks: dates, workout cards, dots or circles. Also here: the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units, region and currency, rest timer, backups, <b>battery saver</b> (fewer animations when your phone is slow or low on battery), <b>how your targets are worked out</b>, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
+  h+=ch("Settings and the tab bar",`<p><b>Settings</b> is the gear at the top right of every screen, and ✕ closes it. The tab bar shows icons, and the tab you're on shows its name. <b>Appearance</b> has six styles: <b>Today</b> (soft and rounded, a colour for each tab), <b>Focus</b> (bold, with the current set and a big Log set button at the top of Train), <b>Training journal</b> (ruled paper, ink and stamps), <b>Night gym</b> (black and orange, big numbers), <b>Soft</b> (chunky and colourful) and <b>Earth and clay</b> (terracotta, olive and arches). Today and Focus let you pick the background and colours; the other four come with their own. Pick a background, including Paper or any colour you like, the colours for each tab or the accent, and how the week at the top looks: dates, workout cards, dots or circles. Also here: the tab bar (reorder with the arrows, hide Body, Spend or History), Training (experience, rep style, tips, keyword explanations), units, region and currency, rest timer, backups, <b>battery saver</b> (fewer animations when your phone is slow or low on battery), <b>how your targets are worked out</b>, and this help. Hidden tabs open from <b>Settings → Tab bar</b>.</p>`);
   h+=ch("Install it as an app",`<p>Routine can be installed on iPhone, Android and computers, and then works offline. Step-by-step instructions are in <b>Settings → Install as an app</b>.</p>`);
   h+=ch("Your data and backups",`<p>${isLocalMode()?"Everything is saved on this phone or browser only. Nobody else can see it, and everyone who uses the app has their own data. The app reminds you on the Train tab when it's time for a backup. Use <b>Settings → Backup</b> to save one, and to move to a new phone. Progress photos stay on the phone and aren't in backups.":"Your data is saved to your Claude account and syncs between your devices."}</p>`);
   h+=`<p class="gtitle">Training basics</p>`;
