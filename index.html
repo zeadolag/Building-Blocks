@@ -1477,6 +1477,22 @@ html[data-theme="dark"] .estnote{color:color-mix(in srgb,var(--amber) 70%,white)
 .pre{text-align:right;display:grid;flex:none}.pre b{font-size:17px;font-variant-numeric:tabular-nums}.pre small{color:var(--muted);font-size:12px}
 .prlist .linkbtn{padding-top:6px}
 .csvrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 6px}.csvrow .btn{margin:0;padding-left:6px;padding-right:6px;font-size:14px}
+
+/* 8.51: optional nutrients */
+.nuopt{margin-top:10px;border-top:1px solid var(--line);padding-top:4px}
+.nuopt summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:8px 0;font-weight:600;color:var(--blue)}
+.nuopt summary::-webkit-details-marker{display:none}
+.nuopt summary::after{content:"";margin-left:auto;width:8px;height:8px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-2px) rotate(45deg);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.nuopt[open] summary::after{transform:translateY(2px) rotate(-135deg)}
+.nuopt summary small{font-weight:400;color:var(--muted);font-size:13px}
+.nugrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.nuopt[open] .nugrid{animation:nuIn .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes nuIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.nuf{display:grid;gap:3px;min-width:0}.nuf>span:first-child{font-size:13px;color:var(--muted)}
+.nuin{position:relative;display:block}.nuin .field{margin:0;padding-right:38px;width:100%}
+.nuin em{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-style:normal;font-size:13px;color:var(--muted);pointer-events:none}
+.swr>.sw.holding{transform:scale(.975);transition:transform .34s cubic-bezier(.2,.8,.2,1)}
+.swr>.sw.held{transform:scale(1);transition:transform .26s cubic-bezier(.3,1.5,.5,1)}
 </style>
 </head>
 <body>
@@ -3685,6 +3701,7 @@ function savedEatHtml(){const nh=hiddenMeals().length;
     <div class="pair" style="margin-top:8px"><input class="field" id="mK" inputmode="numeric" placeholder="kcal" aria-label="Calories"><input class="field" id="mP" inputmode="decimal" placeholder="protein g" aria-label="Protein"></div>
     <div class="pair" style="margin-top:8px"><input class="field" id="mC" inputmode="decimal" placeholder="carbs g" aria-label="Carbs"><input class="field" id="mF" inputmode="decimal" placeholder="fat g" aria-label="Fat"></div>
     <p class="note" style="font-size:13px;margin-top:6px">Carbs and fat are optional. Leave one empty and the app works it out from the calories, marked as an estimate.</p>
+    ${nuFields("m")}
     <button class="btn" data-act="addmeal">Save meal</button>${nh?`<button class="linkbtn" data-act="showhidden">Show ${nh} removed sample meal${nh>1?"s":""}</button>`:""}</div>`+recipesHtml();}
 function hiddenMeals(){return Array.isArray(store.settings.hideMeals)?store.settings.hideMeals:[];}
 // carbs and fat for a saved meal: what was typed, with a missing one worked out from the calories (and marked as an estimate)
@@ -3695,7 +3712,7 @@ function slotOpts(slot){
   const hid=hiddenMeals();
   const os=store.settings.fresh?[]:slot.opts.filter(o=>!hid.includes(o.id));
   for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,cb:mm.cb,f:mm.f,cfe:mm.cfe,fb:Number(mm.fb)||0,nu:mm.nu||null,mine:1,est:!!mm.est});
-  if(slot.recipes)for(const r of allRecipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0});
+  if(slot.recipes)for(const r of allRecipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0,cb:r.cb,f:r.f,fb:Number(r.fb)||0,nu:r.nu||null});
   return os;
 }
 function chosen(slot,day){const v=(day.meals||{})[slot.id];if(!v)return null;const os=slotOpts(slot);if(v===true)return os[0];return os.find(o=>o.id===v)||null;}
@@ -3864,11 +3881,11 @@ function ownFormHtml(name){return `<div class="ownform"><p class="lbl" style="ma
   <input class="field" id="owN" placeholder="Name" aria-label="Food name" value="${esc(name||"")}">
   <div class="pair" style="margin-top:8px"><input class="field" id="owK" inputmode="decimal" placeholder="kcal" aria-label="kcal per 100 g"><input class="field" id="owP" inputmode="decimal" placeholder="protein g" aria-label="Protein per 100 g"></div>
   <div class="pair" style="margin-top:8px"><input class="field" id="owC" inputmode="decimal" placeholder="carbs g" aria-label="Carbs per 100 g"><input class="field" id="owF" inputmode="decimal" placeholder="fat g" aria-label="Fat per 100 g"></div>
-  <input class="field" id="owB" style="margin-top:8px" inputmode="decimal" placeholder="fibre g (optional)" aria-label="Fibre per 100 g"></div>`;}
+  <input class="field" id="owB" style="margin-top:8px" inputmode="decimal" placeholder="fibre g (optional)" aria-label="Fibre per 100 g">${nuFields("ow",{nofb:true,per:"per 100 g"})}</div>`;}
 // saves the form; returns the new food's name, or null if something is missing
 function ownSave(){const v=id=>{const x=$(id);return x?x.value.trim():"";},n=v("owN");if(!n){$("owN").focus();return null;}if(v("owK")===""||!(num(v("owK"))>=0)){$("owK").focus();return null;}
   const S=store.settings;
-  S.ingredients=(S.ingredients||[]).filter(x=>x.n!==n).concat([{n,k:num(v("owK")),p:num(v("owP")),cb:num(v("owC")),f:num(v("owF")),fb:num(v("owB"))}]);persist("settings");return n;}
+  S.ingredients=(S.ingredients||[]).filter(x=>x.n!==n).concat([Object.assign({n,k:num(v("owK")),p:num(v("owP")),cb:num(v("owC")),f:num(v("owF")),fb:num(v("owB"))},(()=>{const x=nuRead("ow");return x.nu?{nu:x.nu,g:100}:{};})())]);persist("settings");return n;}
 function ownSheet(){openSheet("Add your own food",ownFormHtml(fcQ),[{label:"Save food",fn:()=>{const u=snap(["settings"]),n=ownSave();if(!n)return false;fcF="c:Mine";fcQ="";fcPick=n;renderEat();toast("Saved to your foods",u);}},{label:"Cancel",cls:"btn ghost"}]);}
 let afQ="",afSlot=null,afPick=null;
 function mealDesc(s0,o){return `${s0.name} · ${fmt(o.k)} kcal, ${Math.round(o.p)} g protein${o.cb!=null&&o.f!=null&&o.cb!==""?`, ${Math.round(num(o.cb))} g carbs, ${Math.round(num(o.f))} g fat`:""}`;}
@@ -4146,13 +4163,13 @@ function quickAdd(slot){
   const sl=SLOTS.find(x=>x.id===slot);
   openSheet(sl?"Quick add to "+sl.name:"Quick add food",`<input class="field" id="qkN" placeholder="What did you eat?" aria-label="Food name">
    <div class="pair" style="margin-top:8px"><input class="field" id="qkK" inputmode="decimal" placeholder="kcal" aria-label="Calories"><input class="field" id="qkP" inputmode="decimal" placeholder="protein g" aria-label="Protein"></div>
-   <div class="qa3" style="margin-top:8px"><input class="field" id="qkC" inputmode="decimal" placeholder="carbs g" aria-label="Carbs (optional)"><input class="field" id="qkT" inputmode="decimal" placeholder="fat g" aria-label="Fat (optional)"><input class="field" id="qkF" inputmode="decimal" placeholder="fibre g" aria-label="Fibre (optional)"></div>
+   <div class="qa3" style="margin-top:8px"><input class="field" id="qkC" inputmode="decimal" placeholder="carbs g" aria-label="Carbs (optional)"><input class="field" id="qkT" inputmode="decimal" placeholder="fat g" aria-label="Fat (optional)"><input class="field" id="qkF" inputmode="decimal" placeholder="fibre g" aria-label="Fibre (optional)"></div>${nuFields("qk",{nofb:true})}
    ${sl?`<button type="button" class="toggle mini-t" style="margin-top:8px;width:100%" data-qsave aria-pressed="false"><span class="box">✓</span><span class="txt"><strong>Also save it as a ${sl.name.toLowerCase()} option</strong></span></button>`:""}
    <p class="note">Don't know the numbers? Use the meal builder under Plan, or log a cheat meal from the calorie card.</p>`,
    [{label:"Add to "+(sel===todayKey()?"today":shortDate(sel)),fn:()=>{const n=$("qkN").value.trim(),kc=num($("qkK").value);if(!(kc>0)){$("qkK").focus();return false;}
-      const k=sel,day=ensureDay(k),u=snap(["day-"+k,"settings"]),e={n:n||(sl?sl.name:"Food"),k:Math.round(kc),p:r1(num($("qkP").value))};const fb=num($("qkF").value);if(fb>0)e.fb=r1(fb);if($("qkC").value.trim()!=="")e.cb=r1(num($("qkC").value));if($("qkT").value.trim()!=="")e.f=r1(num($("qkT").value));if(sl)e.slot=slot;
+      const k=sel,day=ensureDay(k),u=snap(["day-"+k,"settings"]),e={n:n||(sl?sl.name:"Food"),k:Math.round(kc),p:r1(num($("qkP").value))};const fb=num($("qkF").value);if(fb>0)e.fb=r1(fb);if($("qkC").value.trim()!=="")e.cb=r1(num($("qkC").value));if($("qkT").value.trim()!=="")e.f=r1(num($("qkT").value));{const x=nuRead("qk");if(x.nu)e.nu=x.nu;}if(sl)e.slot=slot;
       (day.extras=day.extras||[]).push(e);persist("day-"+k);
-      const sv=sheetEl.querySelector("[data-qsave]");if(sl&&sv&&sv.getAttribute("aria-pressed")==="true"){store.settings.myMeals=myMeals().concat([{id:Date.now().toString(36),slot,n:e.n,d:"Your meal",k:e.k,p:e.p,fb:e.fb||0}]);persist("settings");}
+      const sv=sheetEl.querySelector("[data-qsave]");if(sl&&sv&&sv.getAttribute("aria-pressed")==="true"){store.settings.myMeals=myMeals().concat([{id:Date.now().toString(36),slot,n:e.n,d:"Your meal",k:e.k,p:e.p,fb:e.fb||0,cb:e.cb,f:e.f,nu:e.nu}]);persist("settings");}
       renderEat();toast("Added "+e.n,u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function cheatSheet(){
@@ -4222,7 +4239,7 @@ function renderEat(){
    const chip=(q,i)=>`<span class="chip-row"><button class="chip" data-act="quick" data-i="${i}">${esc(q.n)}<small>${fmt(q.k)} kcal, ${Math.round(q.p*10)/10} g</small></button><button class="chip-x" data-act="rmquick" data-i="${i}" aria-label="Remove ${esc(q.n)} from tap options">×</button></span>`;
    for(const g of QCATS.concat(["Saved"])){const items=Q.map((q,i)=>({q,i})).filter(x=>(QCATS.includes(x.q.c)?x.q.c:"Saved")===g);if(items.length)b+=`<p class="lbl">${g}</p><div class="chips">${items.map(x=>chip(x.q,x.i)).join("")}</div>`;}
    if(loose.length)b+=loose.map(x=>foodRow(x.e,x.i)).join("")+`<div style="height:10px"></div>`;
-   b+=`<div class="qa"><input class="field" id="qaN" placeholder="Something else" aria-label="Food name"><input class="field" id="qaK" inputmode="numeric" placeholder="kcal" aria-label="Calories"><input class="field" id="qaP" inputmode="decimal" placeholder="protein g" aria-label="Protein in grams"></div>
+   b+=`<div class="qa"><input class="field" id="qaN" placeholder="Something else" aria-label="Food name"><input class="field" id="qaK" inputmode="numeric" placeholder="kcal" aria-label="Calories"><input class="field" id="qaP" inputmode="decimal" placeholder="protein g" aria-label="Protein in grams"></div>${nuFields("qa",{cf:true})}
    <button class="btn" data-act="addfood">Add food</button><button class="linkbtn" data-act="addfood" data-save="1">Add and save as a tap option</button></div>`;
    const ek=loose.reduce((a,x)=>a+(Number(x.e.k)||0),0);
    h+=eatTile("addons","Extra food",loose.length?`${loose.length} added · ${fmt(ek)} kcal`:"Snacks and drinks",loose.length?ring(1,true):`<span class="secic">${ICO('<path d="M7 4h10l-1.5 16h-7zM6.5 9h11"/>').replace('<svg ','<svg width="15" height="15" ')}</span>`,b,{done:loose.length>0});}
@@ -4893,7 +4910,7 @@ function recipesHtml(){
     ${r.mi>=0&&!r.b?`<button type="button" class="linkbtn" style="color:var(--red)" data-act="rmrecipe" data-i="${r.mi}">Delete recipe</button>`:""}</div>`:""}</div>`;}).join("");
   h+=`<details class="card addrec"><summary>Add your own recipe</summary>
     <input class="field" id="rN" style="margin-top:10px" placeholder="Recipe name" aria-label="Recipe name">
-    <div class="qa" style="margin-top:8px"><input class="field" id="rK" inputmode="numeric" placeholder="kcal each" aria-label="Calories per serving"><input class="field" id="rP" inputmode="decimal" placeholder="protein g" aria-label="Protein per serving"><input class="field" id="rS" inputmode="numeric" placeholder="servings" aria-label="Number of servings"></div>
+    <div class="qa" style="margin-top:8px"><input class="field" id="rK" inputmode="numeric" placeholder="kcal each" aria-label="Calories per serving"><input class="field" id="rP" inputmode="decimal" placeholder="protein g" aria-label="Protein per serving"><input class="field" id="rS" inputmode="numeric" placeholder="servings" aria-label="Number of servings"></div>${nuFields("r",{cf:true,per:"per serving"})}
     <textarea class="field area" id="rI" style="margin-top:8px" placeholder="Ingredients, one per line" aria-label="Ingredients"></textarea>
     <textarea class="field area" id="rM" style="margin-top:8px" placeholder="Steps, one per line" aria-label="Method"></textarea>
     <button class="btn" data-act="addrecipe">Add recipe</button>
@@ -5022,7 +5039,7 @@ $("panel").addEventListener("click",e=>{
   else if(act==="addrecipe"){
     const n=$("rN").value.trim(),kc=num($("rK").value),pr=num($("rP").value),sv=Math.round(num($("rS").value))||1;
     if(!n){$("rN").focus();return;} if(!(kc>0)){$("rK").focus();return;}
-    const id=Date.now().toString(36);ensureRecipes().push({id,n,k:kc,p:pr,s:sv,ing:lines($("rI").value),steps:lines($("rM").value)});openRec.add(id);persist("settings");renderEat();toast("Recipe added");
+    const id=Date.now().toString(36);const xr=nuRead("r");ensureRecipes().push(Object.assign({id,n,k:kc,p:pr,s:sv,ing:lines($("rI").value),steps:lines($("rM").value)},xr.cb!=null?{cb:xr.cb}:{},xr.f!=null?{f:xr.f}:{},xr.fb?{fb:xr.fb}:{},xr.nu?{nu:xr.nu}:{}));openRec.add(id);persist("settings");renderEat();toast("Recipe added");
   }else if(act==="rmrecipe"){ensureRecipes().splice(+b.dataset.i,1);persist("settings");renderEat();}
   else if(act==="view"){store.settings.spendView=b.dataset.v;persist("settings");renderSpend();}
   else if(act==="bulk"){const c=ensureChicken();c.bulk=!c.bulk;persist("settings");renderSpend();}
@@ -5030,10 +5047,11 @@ $("panel").addEventListener("click",e=>{
   else if(act==="addfood"){
     const n=$("qaN").value.trim(),kc=Number($("qaK").value),pr=Number($("qaP").value)||0;
     if(!(kc>0)){$("qaK").focus();return;}
-    const day=ensureDay(k);(day.extras=day.extras||[]).push({n:n||"Food",k:kc,p:pr});persist(docId);
-    if(b.dataset.save&&n){ensureQuick().push({n,k:kc,p:pr});persist("settings");}
+    const x=nuRead("qa"),e={n:n||"Food",k:kc,p:pr};if(x.cb!=null)e.cb=x.cb;if(x.f!=null)e.f=x.f;if(x.fb)e.fb=x.fb;if(x.nu)e.nu=x.nu;
+    const day=ensureDay(k);(day.extras=day.extras||[]).push(e);persist(docId);
+    if(b.dataset.save&&n){const q={n,k:kc,p:pr};if(x.fb)q.fb=x.fb;if(x.cb!=null)q.cb=x.cb;if(x.f!=null)q.f=x.f;if(x.nu)q.nu=x.nu;ensureQuick().push(q);persist("settings");}
     renderEat();
-  }else if(act==="quick"){const q=quick()[+b.dataset.i];if(q){const day=ensureDay(k);(day.extras=day.extras||[]).push(Object.assign({n:q.n,k:q.k,p:q.p},quickNu(q)));persist(docId);renderEat();}
+  }else if(act==="quick"){const q=quick()[+b.dataset.i];if(q){const day=ensureDay(k);(day.extras=day.extras||[]).push(Object.assign({n:q.n,k:q.k,p:q.p},quickNu(q),q.fb?{fb:q.fb}:{},q.cb!=null?{cb:q.cb}:{},q.f!=null?{f:q.f}:{},q.nu?{nu:q.nu}:{}));persist(docId);renderEat();}
   }else if(act==="rmquick"){ensureQuick().splice(+b.dataset.i,1);persist("settings");renderEat();
   }else if(act==="rmfood"){const day=ensureDay(k);day.extras.splice(+b.dataset.i,1);persist(docId);renderEat();}
   else if(act==="addbuy"){
@@ -5139,7 +5157,7 @@ $("panel").addEventListener("click",e=>{
   else if(act==="addmeal"){
     const n=$("mN").value.trim(),kc=num($("mK").value),pr=num($("mP").value);
     if(!n){$("mN").focus();return;} if(!(kc>0)){$("mK").focus();return;}
-    S.myMeals=myMeals().concat([Object.assign({id:Date.now().toString(36),slot:$("mSl").value,n,d:$("mD").value.trim(),k:kc,p:pr},mealCF(kc,pr,$("mC").value,$("mF").value))]);persist("settings");renderEat();toast("Saved under "+((SLOTS.find(x=>x.id===$("mSl").value)||{}).name||"your meals"));
+    const xn=nuRead("m");S.myMeals=myMeals().concat([Object.assign({id:Date.now().toString(36),slot:$("mSl").value,n,d:$("mD").value.trim(),k:kc,p:pr},mealCF(kc,pr,$("mC").value,$("mF").value),xn.fb!=null?{fb:xn.fb}:{},xn.nu?{nu:xn.nu}:{})]);persist("settings");renderEat();toast("Saved under "+((SLOTS.find(x=>x.id===$("mSl").value)||{}).name||"your meals"));
   }
   else if(act==="buyname"){const f=$("buyN");f.value=b.dataset.n;$("buyE").focus();}
   else if(act==="openday"){sel=b.dataset.day;tab="train";render();window.scrollTo(0,0);}
@@ -5212,6 +5230,18 @@ function isEstFood(it){return !!it&&(/estimate/i.test(it.n||"")||!!it.est);}
 function allIngr(){return INGR.map(x=>({c:x[0],n:x[1],k:x[2],p:x[3],cb:x[4],f:x[5],fb:x[6]||0,mi:MICRO[x[1]]||null})).concat((store.settings.ingredients||[]).map(x=>({c:"Mine",n:x.n,k:+x.k||0,p:+x.p||0,cb:+x.cb||0,f:+x.f||0,fb:+x.fb||0,mine:1})));}
 let fcCat="",fcQ="",fcPick=null,mb=[];
 const r1=v=>Math.round(v*10)/10;
+// 8.51: every form where you type values has an optional fold for fibre, minerals, vitamins and the rest
+const NUEXTRA=[["fb","Fibre","g"],["mg","Magnesium","mg"],["k","Potassium","mg"],["ca","Calcium","mg"],["fe","Iron","mg"],["zn","Zinc","mg"],["d","Vitamin D","IU"],["o3","Omega-3","mg"],["b12","Vitamin B12","µg"],["vc","Vitamin C","mg"],["fol","Folate","µg"],["io","Iodine","µg"],["salt","Salt","g"],["su","Added sugar","g"],["sf","Saturated fat","g"],["al","Alcohol","g"]];
+function nuFields(pfx,o){o=o||{};const V=o.v||{},nv=V.nu||{},val=k=>{const x=k==="cb"||k==="f"||k==="fb"?V[k]:k==="salt"?(nv.na!=null?r1(nv.na/400):null):nv[k];return x!=null&&x!==""&&!(k==="fb"&&!num(x))?` value="${esc(String(r1(num(x))))}"`:"";};
+  const L=(o.cf?[["cb","Carbs","g"],["f","Fat","g"]]:[]).concat(NUEXTRA.filter(x=>!(o.nofb&&x[0]==="fb")));
+  const filled=L.filter(([k])=>val(k)).length;
+  return `<details class="nuopt"${o.open?" open":""}><summary><span>More nutrients</span><small>${o.per?esc(o.per)+", ":""}${filled?filled+" filled in":"all optional"}</small></summary><div class="nugrid">${L.map(([k,l,u])=>`<label class="nuf"><span>${l}</span><span class="nuin"><input class="field" id="${pfx}_${k}" inputmode="decimal" placeholder="–" aria-label="${l} in ${u}"${val(k)}><em>${u}</em></span></label>`).join("")}</div><p class="note" style="margin:8px 0 0;font-size:13px">Fill in any you know, like from the label. They count towards your nutrients in Eat and Progress.</p></details>`;}
+function nuRead(pfx){const nu={},r={fb:null,cb:null,f:null,nu:null};let any=false;
+  for(const k of ["cb","f"].concat(NUEXTRA.map(x=>x[0]))){const el=$(pfx+"_"+k);if(!el)continue;const v=el.value.trim();if(v==="")continue;const x=num(v.replace(",","."));if(!(x>=0))continue;
+    if(k==="fb"||k==="cb"||k==="f")r[k]=r1(x);else if(k==="salt"){nu.na=Math.round(x*400);any=true;}else{nu[k]=x;any=true;}}
+  if(any)r.nu=nu;return r;}
+function nuMerge(old,x){const keep={};const ed=new Set(NUEXTRA.map(y=>y[0]).concat(["na"]));for(const k in (old||{}))if(!ed.has(k))keep[k]=old[k];const o=Object.assign(keep,x.nu||{});return Object.keys(o).length?o:null;}
+const NUIDS=p=>["cb","f"].concat(NUEXTRA.map(x=>x[0])).map(k=>p+"_"+k);
 function macrosFor(it,g){const m=g/100;return {k:it.k*m,p:it.p*m,cb:it.cb*m,f:it.f*m,fb:(it.fb||0)*m,nu:it.mi?nuScale(it.mi,m):(it.nu?nuMul(it.nu,m*100/(it.g||100)):null)};}
 // micronutrients carried on logged food: k, mg, ca, fe (mg), d (IU), o3 (mg), cr (g)
 const NUK=["k","mg","ca","fe","d","o3","cr","na","su","sf","zn","b12","vc","fol","io","al"];
@@ -5770,8 +5800,10 @@ function editEx(id){
 // list entries
 function editFood(i){
   const k=sel,day=ensureDay(k),e=(day.extras||[])[i];if(!e)return;
-  openSheet("Edit food",fld("Name","sN",e.n)+`<div class="pair">${fld("kcal","sK",e.k,"numeric")}${fld("Protein (g)","sP",e.p,"decimal")}</div>`,
-    [{label:"Save",fn:()=>{const kc=num(sv("sK"));if(!(kc>=0)||sv("sK")==="")return false;const u=snap(["day-"+k]);e.n=sv("sN")||"Food";e.k=kc;e.p=num(sv("sP"));persist("day-"+k);renderEat();toast("Food updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
+  openSheet("Edit food",fld("Name","sN",e.n)+`<div class="pair">${fld("kcal","sK",e.k,"numeric")}${fld("Protein (g)","sP",e.p,"decimal")}</div>`+nuFields("s",{cf:true,v:e})+(e.est?`<p class="note estnote" style="margin-top:8px">This is an estimate. Changing the numbers keeps it marked as one.</p>`:""),
+    [{label:"Save",fn:()=>{const kc=num(sv("sK"));if(!(kc>=0)||sv("sK")==="")return false;const u=snap(["day-"+k]);e.n=sv("sN")||"Food";e.k=kc;e.p=num(sv("sP"));
+      const x=nuRead("s");for(const f of ["cb","f","fb"]){if(x[f]!=null)e[f]=x[f];else delete e[f];}const nn=nuMerge(e.nu,x);if(nn)e.nu=nn;else delete e.nu;
+      persist("day-"+k);renderEat();toast("Food updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function editBuy(dk,i){
   const day=ensureDay(dk),b=(day.buys||[])[i];if(!b)return;
@@ -5788,9 +5820,9 @@ function editCardio(i){
 function editRecipe(i){
   const list=ensureRecipes(),r=list[i];if(!r)return;
   const B=RECIPES.find(x=>x.id===r.id)||{},ing=(r.ing&&r.ing.length?r.ing:B.ing)||[],stp=(r.steps&&r.steps.length?r.steps:B.steps)||[];
-  openSheet("Edit recipe",fld("Name","sN",r.n)+`<div class="pair">${fld("kcal per serving","sK",r.k,"numeric")}${fld("Protein per serving (g)","sP",r.p,"decimal")}</div>`+fld("Servings","sS",r.s,"numeric")+
+  openSheet("Edit recipe",fld("Name","sN",r.n)+`<div class="pair">${fld("kcal per serving","sK",r.k,"numeric")}${fld("Protein per serving (g)","sP",r.p,"decimal")}</div>`+fld("Servings","sS",r.s,"numeric")+nuFields("s",{cf:true,v:r,per:"per serving"})+
     `<label class="sfld"><span class="lbl">Ingredients, one per line</span><textarea class="field area" id="sI">${esc(ing.join("\n"))}</textarea></label><label class="sfld"><span class="lbl">Steps, one per line</span><textarea class="field area" id="sM">${esc(stp.join("\n"))}</textarea></label>`+fld("Note (optional)","sD",r.note||""),
-    [{label:"Save",fn:()=>{const kc=num(sv("sK"));if(!(kc>0)||!sv("sN"))return false;const u=snap(["settings"]);r.n=sv("sN");r.k=kc;r.p=num(sv("sP"));r.s=Math.max(1,Math.round(num(sv("sS")))||1);r.note=sv("sD");r.ing=lines(sheetEl.querySelector("#sI").value);r.steps=lines(sheetEl.querySelector("#sM").value);persist("settings");renderEat();toast("Recipe updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
+    [{label:"Save",fn:()=>{const kc=num(sv("sK"));if(!(kc>0)||!sv("sN"))return false;const u=snap(["settings"]);r.n=sv("sN");r.k=kc;r.p=num(sv("sP"));r.s=Math.max(1,Math.round(num(sv("sS")))||1);r.note=sv("sD");r.ing=lines(sheetEl.querySelector("#sI").value);r.steps=lines(sheetEl.querySelector("#sM").value);{const x=nuRead("s");for(const f of ["cb","f","fb"]){if(x[f]!=null)r[f]=x[f];else delete r[f];}const nn=nuMerge(r.nu,x);if(nn)r.nu=nn;else delete r.nu;}persist("settings");renderEat();toast("Recipe updated",u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
 function editMeal(slotId,opt){
   if(opt.startsWith("r:")){const i=recipes().findIndex(r=>"r:"+r.id===opt);if(i>=0)editRecipe(i);return;}
@@ -5799,16 +5831,28 @@ function editMeal(slotId,opt){
   openSheet(mine?"Edit meal":"Edit sample meal",
     (mine?"":`<p class="note" style="margin-top:0">Saving creates your own version of this meal and hides the sample.</p>`)+
     `<label class="sfld"><span class="lbl">Meal</span><select class="field" id="sSl">${SLOTS.map(x=>`<option value="${x.id}"${x.id===slotId?" selected":""}>${x.name}</option>`).join("")}</select></label>`+
-    fld("Name","sN",o.n)+fld("What's in it","sD",mine?((myMeals().find(x=>"m:"+x.id===opt)||{}).d||""):o.d)+`<div class="pair">${fld("kcal","sK",o.k,"numeric")}${fld("Protein (g)","sP",o.p,"decimal")}</div><div class="pair">${fld("Carbs (g)","sC",o.cb!=null&&o.cfe!=="cb"?o.cb:"","decimal")}${fld("Fat (g)","sF",o.f!=null&&o.cfe!=="f"?o.f:"","decimal")}</div><p class="note" style="font-size:13px;margin-top:0">Optional. Leave one empty and the app works it out from the calories.</p>`,
+    fld("Name","sN",o.n)+fld("What's in it","sD",mine?((myMeals().find(x=>"m:"+x.id===opt)||{}).d||""):o.d)+`<div class="pair">${fld("kcal","sK",o.k,"numeric")}${fld("Protein (g)","sP",o.p,"decimal")}</div><div class="pair">${fld("Carbs (g)","sC",o.cb!=null&&o.cfe!=="cb"?o.cb:"","decimal")}${fld("Fat (g)","sF",o.f!=null&&o.cfe!=="f"?o.f:"","decimal")}</div>${nuFields("s",{v:o})}<p class="note" style="font-size:13px;margin-top:0">Optional. Leave one empty and the app works it out from the calories.</p>`,
     [{label:"Save",fn:()=>{
       const kc=num(sv("sK")),n=sv("sN");if(!n||!(kc>0))return false;
       const k=sel,u=snap(["settings","day-"+k]),S=store.settings,ns=sv("sSl");
-      const cf=mealCF(kc,num(sv("sP")),sv("sC"),sv("sF"));
-      if(mine){const mm=myMeals().find(x=>"m:"+x.id===opt);if(mm){mm.n=n;mm.d=sv("sD");mm.k=kc;mm.p=num(sv("sP"));mm.slot=ns;delete mm.cb;delete mm.f;delete mm.cfe;Object.assign(mm,cf);}S.myMeals=myMeals();}
-      else{const nid=Date.now().toString(36);S.myMeals=myMeals().concat([Object.assign({id:nid,slot:ns,n,d:sv("sD"),k:kc,p:num(sv("sP"))},cf)]);S.hideMeals=hiddenMeals().concat([opt]);
+      const cf=mealCF(kc,num(sv("sP")),sv("sC"),sv("sF")),xs=nuRead("s");
+      if(mine){const mm=myMeals().find(x=>"m:"+x.id===opt);if(mm){mm.n=n;mm.d=sv("sD");mm.k=kc;mm.p=num(sv("sP"));mm.slot=ns;delete mm.cb;delete mm.f;delete mm.cfe;Object.assign(mm,cf);if(xs.fb!=null)mm.fb=xs.fb;else delete mm.fb;const nn=nuMerge(mm.nu,xs);if(nn)mm.nu=nn;else delete mm.nu;}S.myMeals=myMeals();}
+      else{const nid=Date.now().toString(36);S.myMeals=myMeals().concat([Object.assign({id:nid,slot:ns,n,d:sv("sD"),k:kc,p:num(sv("sP"))},cf,xs.fb!=null?{fb:xs.fb}:{},(()=>{const nn=nuMerge(o.nu,xs);return nn?{nu:nn}:{};})())]);S.hideMeals=hiddenMeals().concat([opt]);
         const d=store.days[k];if(d&&d.meals&&d.meals[slotId]===opt){delete d.meals[slotId];d.meals[ns]="m:"+nid;persist("day-"+k);}}
       persist("settings");renderEat();toast("Meal saved",u);}},{label:"Cancel",cls:"btn ghost"}]);
 }
+// 8.51: hold a meal, food, recipe or supplement on Eat to edit it
+const LP_KINDS=new Set(["meal","food","recipe","supp","shop"]);let lpS=null,lpFired=0;
+document.addEventListener("pointerdown",e=>{if(e.button>0)return;const fg=e.target.closest&&e.target.closest("#panel .swr>.sw");if(!fg)return;const wr=fg.parentElement;if(!LP_KINDS.has(wr.dataset.sw))return;
+  if(e.target.closest("input,textarea,select,.chip-x"))return;
+  lpEnd();lpS={wr,fg,x:e.clientX,y:e.clientY,t0:setTimeout(()=>{if(lpS&&lpS.fg===fg)fg.classList.add("holding");},140),t:setTimeout(()=>{if(!lpS||lpS.fg!==fg)return;lpEnd();lpFired=Date.now();try{navigator.vibrate&&navigator.vibrate(10);}catch(_){}
+    fg.classList.add("held");setTimeout(()=>fg.classList.remove("held"),260);doEdit(wr);},480)};},true);
+function lpEnd(){if(!lpS)return;clearTimeout(lpS.t);clearTimeout(lpS.t0);lpS.fg.classList.remove("holding");lpS=null;}
+document.addEventListener("pointermove",e=>{if(lpS&&Math.hypot(e.clientX-lpS.x,e.clientY-lpS.y)>8)lpEnd();},true);
+document.addEventListener("pointerup",()=>lpEnd(),true);document.addEventListener("pointercancel",()=>lpEnd(),true);
+addEventListener("scroll",()=>lpEnd(),{passive:true});
+document.addEventListener("click",e=>{if(Date.now()-lpFired<600&&e.target.closest&&e.target.closest("#panel .swr")){e.stopPropagation();e.preventDefault();}},true);
+document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest("#panel .swr>.sw"))e.preventDefault();});
 function doEdit(wr){
   const kind=wr.dataset.sw,i=+wr.dataset.i;
   if(kind==="set"||kind==="ex")editEx(wr.closest("[data-ex]").dataset.ex);
@@ -6451,8 +6495,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.5";
+const APP_VERSION="8.51";
 const CHANGELOG=[
+  {v:"8.51",d:"15 November 2026",t:"Optional nutrients, and hold to edit",items:["Everywhere you type a food's values yourself, there's now a More nutrients fold. That's quick add, Extra food, your own meals, recipes, and your own foods per 100 g. You can fill in fibre, magnesium, potassium, calcium, iron, zinc, vitamin D, omega-3, B12, vitamin C, folate, iodine, salt, added sugar, saturated fat and alcohol.","All of them are optional. What you fill in counts towards your nutrients in Eat and Progress, and saved meals, recipes and tap options keep the values for next time.","Extra food and recipes can now take carbs and fat too.","Hold a meal, food, recipe or supplement on Eat to edit it, the same as swiping it to the right. Editing your own meals, foods and recipes now lets you change carbs, fat, fibre and the other nutrients too. Editing a sample meal saves your own version of it."]},
   {v:"8.5",d:"14 November 2026",t:"Takeaway, records and spreadsheets",items:["21 new foods: shawarma, döner and falafel sandwiches, dürüm, liver sandwich, hawawshi, fast-food burgers, fries in three portion sizes, a takeaway pizza slice, grilled chicken, kofta, chicken ramen, macarona béchamel, shakshuka, om ali, high-protein pudding, tempeh and maple syrup.","A new Takeaway and dishes filter in the food search groups takeaway food with dishes like koshari, ful, fattah and feteer.","Foods whose recipe varies by shop or home are clearly estimates. Koshari, ful, ta'ameya, lentil soup, molokhia, mahshi, hummus, croissant, simit, Brezel, sugarcane juice and karkade are now marked too. Even if you type the exact grams, the app says it's an estimate, and the food is logged as one. Food you logged from them before is marked as an estimate as well.","Meals you build or save with an estimated food are marked as estimates.","Personal records under Progress: your heaviest set for every exercise, when you did it, and your estimated max. Tap one to see it on the Strength chart.","Export to a spreadsheet: Settings → Backup has Workouts, Food, and Weight and body buttons that save a CSV file for Excel, Numbers or Google Sheets."]},
   {v:"8.42",d:"14 November 2026",t:"Cleaner swipes",items:["When you swipe a row, its content now slides and fades out at the edge instead of being cut off, and the action shows up as its own rounded button in the space the row leaves, shaped to match your style. It fills with colour once letting go will do the action.","Dragging your finger across a chart, or swiping a row, no longer brings up the text-selection magnifier."]},
   {v:"8.41",d:"14 November 2026",t:"Turn off warm-ups or stretches",items:["Settings → Training has new switches to turn the warm-up or the stretches off for every day. Edit → Page layout does the same.","If you're new or have some experience, the app first explains what you lose by turning them off. Turning them back on is one tap."]},
@@ -7123,7 +7168,7 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
 // ---------- Start ----------
 // ---------- Drafts: what you type in Eat forms survives re-renders, and the phone closing the app in the background ----------
 // Phones (iPhones especially) close a home-screen web app that sits in the background, and it reloads when you come back.
-const DRAFT_FORMS={addmeal:["mN","mD","mK","mP","mC","mF","mSl"],addfood:["qaK","qaN","qaP"],addrecipe:["rN","rK","rP","rS","rI","rM"],niadd:["niN","niK","niP","niC","niF","niB"],mbadd:["mbN"],mbsave:["mbN"],mbrecipe:["mbN"]};
+const DRAFT_FORMS={addmeal:["mN","mD","mK","mP","mC","mF","mSl"].concat(NUIDS("m")),addfood:["qaK","qaN","qaP"].concat(NUIDS("qa")),addrecipe:["rN","rK","rP","rS","rI","rM"].concat(NUIDS("r")),niadd:["niN","niK","niP","niC","niF","niB"],mbadd:["mbN"],mbsave:["mbN"],mbrecipe:["mbN"]};
 const DRAFT_IDS=new Set(Object.values(DRAFT_FORMS).flat());
 let drafts=(()=>{try{const o=JSON.parse(localStorage.getItem("bb-drafts")||"null");return o&&typeof o==="object"&&!Array.isArray(o)?o:{};}catch(_){return {};}})(),draftHold=false;
 function draftSave(){try{if(Object.keys(drafts).length)localStorage.setItem("bb-drafts",JSON.stringify(drafts));else localStorage.removeItem("bb-drafts");}catch(_){}}
