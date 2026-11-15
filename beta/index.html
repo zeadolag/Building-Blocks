@@ -4936,6 +4936,10 @@ function chick(){return Object.assign({},DEFAULT_CHICKEN,store.settings.chicken|
 function ensureChicken(){store.settings.chicken=chick();return store.settings.chicken;}
 const eur=n=>money(n);
 const num=v=>Number(String(v).replace(",","."))||0;
+// 8.53: in number boxes, typing .1 or ,5 fills in the 0 for you; a trailing . or , is dropped when you leave the box
+function isNumBox(t){return t&&t.tagName==="INPUT"&&(/^(decimal|numeric)$/.test(t.getAttribute("inputmode")||"")||t.type==="number");}
+document.addEventListener("input",e=>{const t=e.target;if(!isNumBox(t)||t.type==="number")return;const v=t.value;if(/^[.,]/.test(v)){const p=t.selectionStart;t.value="0"+v;try{t.setSelectionRange((p||0)+1,(p||0)+1);}catch(_){}}},true);
+document.addEventListener("change",e=>{const t=e.target;if(!isNumBox(t)||t.type==="number")return;const v=t.value.trim();if(/^\d+[.,]$/.test(v)){t.value=v.slice(0,-1);}},true);
 function othersWk(){return prices().reduce((a,p)=>a+num(p.e)*num(p.q),0);}
 function chickenWk(){const c=chick(),kgWk=num(c.g)*7/1000;return c.bulk?(num(c.packKg)?kgWk/num(c.packKg)*num(c.packEur):0):kgWk*num(c.kg);}
 function packDays(){const c=chick();return num(c.g)?num(c.packKg)*1000/num(c.g):0;}
@@ -5048,7 +5052,7 @@ $("panel").addEventListener("click",e=>{
   else if(act==="bulk"){const c=ensureChicken();c.bulk=!c.bulk;persist("settings");renderSpend();}
   else if(act==="buychicken"){const day=ensureDay(k);(day.buys=day.buys||[]).push({n:"Chicken, "+chick().packKg+" kg pack",e:num(chick().packEur)});persist(docId);renderSpend();}
   else if(act==="addfood"){
-    const n=$("qaN").value.trim(),kc=Number($("qaK").value),pr=Number($("qaP").value)||0;
+    const n=$("qaN").value.trim(),kc=num($("qaK").value),pr=num($("qaP").value);
     if(!(kc>0)){$("qaK").focus();return;}
     const x=nuRead("qa"),e={n:n||"Food",k:kc,p:pr};if(x.cb!=null)e.cb=x.cb;if(x.f!=null)e.f=x.f;if(x.fb)e.fb=x.fb;if(x.nu)e.nu=x.nu;
     const day=ensureDay(k);(day.extras=day.extras||[]).push(e);persist(docId);
@@ -5084,7 +5088,7 @@ $("panel").addEventListener("input",e=>{
   }else if(t.dataset.ch){
     if(t.value.trim()!==""&&num(t.value)>0){ensureChicken()[t.dataset.ch]=num(t.value);persist("settings");}
   }else if(t.dataset.set){
-    const v=Number(t.value);if(v>0){store.settings[t.dataset.set]=v;persist("settings");}
+    const v=num(t.value);if(v>0){store.settings[t.dataset.set]=v;persist("settings");}
   }
 });
 $("panel").addEventListener("change",e=>{
@@ -6536,8 +6540,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.52";
+const APP_VERSION="8.53";
 const CHANGELOG=[
+  {v:"8.53",d:"15 November 2026",t:"Easier decimals",items:["In any number box, typing .1 or ,5 fills in the 0 for you as you type, so it becomes 0.1 or 0,5. A stray . or , at the end is dropped when you leave the box.","A comma now works as a decimal point in every number box, including Extra food."]},
   {v:"8.52",d:"15 November 2026",t:"More things to hold",items:["Hold a set to copy its weight and reps into the empty sets below it. Sets you already ticked, drop sets and sets with numbers in them are left alone.","Hold a day in the week strip for a quick menu: change that day's workout, swap it with another day this week, or copy that day's food to another day.","The rest time you get by holding the rest chip now has a box for your own time, like 2:15 or 100 seconds.","Hold a tap option under Extra food to edit it, including its nutrients, or remove it.","The tips on Train and Eat now mention holding.","Fix: tap options like Chicken thigh, 200 g now take their carbs, fat and nutrients from the right food. Since 8.5 they could pick up a takeaway food with a similar name."]},
   {v:"8.51",d:"15 November 2026",t:"Optional nutrients, and hold to edit",items:["Everywhere you type a food's values yourself, there's now a More nutrients fold. That's quick add, Extra food, your own meals, recipes, and your own foods per 100 g. You can fill in fibre, magnesium, potassium, calcium, iron, zinc, vitamin D, omega-3, B12, vitamin C, folate, iodine, salt, added sugar, saturated fat and alcohol.","All of them are optional. What you fill in counts towards your nutrients in Eat and Progress, and saved meals, recipes and tap options keep the values for next time.","Extra food and recipes can now take carbs and fat too.","Hold a meal, food, recipe or supplement on Eat to edit it, the same as swiping it to the right. Editing your own meals, foods and recipes now lets you change carbs, fat, fibre and the other nutrients too. Editing a sample meal saves your own version of it."]},
   {v:"8.5",d:"14 November 2026",t:"Takeaway, records and spreadsheets",items:["21 new foods: shawarma, döner and falafel sandwiches, dürüm, liver sandwich, hawawshi, fast-food burgers, fries in three portion sizes, a takeaway pizza slice, grilled chicken, kofta, chicken ramen, macarona béchamel, shakshuka, om ali, high-protein pudding, tempeh and maple syrup.","A new Takeaway and dishes filter in the food search groups takeaway food with dishes like koshari, ful, fattah and feteer.","Foods whose recipe varies by shop or home are clearly estimates. Koshari, ful, ta'ameya, lentil soup, molokhia, mahshi, hummus, croissant, simit, Brezel, sugarcane juice and karkade are now marked too. Even if you type the exact grams, the app says it's an estimate, and the food is logged as one. Food you logged from them before is marked as an estimate as well.","Meals you build or save with an estimated food are marked as estimates.","Personal records under Progress: your heaviest set for every exercise, when you did it, and your estimated max. Tap one to see it on the Strength chart.","Export to a spreadsheet: Settings → Backup has Workouts, Food, and Weight and body buttons that save a CSV file for Excel, Numbers or Google Sheets."]},
