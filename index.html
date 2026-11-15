@@ -5743,7 +5743,22 @@ function annKey(el,sel){const c=el.closest("[data-ex],[data-tile],[data-sec],[da
 function countUp(el,from,to,fmtFn){if(calm())return;const t0=performance.now(),d=420;const step=now=>{const u=Math.min(1,(now-t0)/d),e=1-Math.pow(1-u,3);el.textContent=fmtFn(from+(to-from)*e);if(u<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
 function animPass(){const P=$("panel");if(!P)return;
   const now=new Set();P.querySelectorAll('.tick[aria-pressed="true"]').forEach(el=>{const k=annKey(el,".tick");now.add(k);if(!AN.first&&!AN.tick.has(k)&&!RM()){el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");}});AN.tick=now;
-  AN.first=false;}
+  fillPass();AN.first=false;}
+// 8.55: when you open a tab, bars, rings and charts fill in quickly; when a value changes (like +250 ml water) they glide to it
+const VAL_SEL=".bar>span,.hbar>i,.nutbar>span,.msbar2>i,.hwb .bt>i,.dbar>i,.dbar>span",EASE="cubic-bezier(.2,.8,.2,1)";
+function fillPass(){const P=$("panel");if(!P)return;const entrance=AN.lastTab!==tab;AN.lastTab=tab;
+  const bars=new Map(),rings=new Map(),pr=new Map();let n=0;const go=!calm();
+  P.querySelectorAll(VAL_SEL).forEach(el=>{const prop=el.matches(".hwb .bt>i")?"height":"width",v=el.style[prop];if(!v)return;const key=prop+"|"+annKey(el,VAL_SEL);bars.set(key,v);
+    const from=entrance?"0%":AN.bar.get(key);if(!go||from==null||from===v||parseFloat(v)===0&&entrance)return;
+    try{el.animate([{[prop]:from},{[prop]:v}],{duration:entrance?560:420,delay:entrance?Math.min(10,n++)*28:0,easing:EASE,fill:"backwards"});}catch(_){}});
+  P.querySelectorAll("svg circle[stroke-dasharray]").forEach(c=>{if(c.closest(".chart"))return;const da=c.getAttribute("stroke-dasharray"),key=annKey(c,"svg circle[stroke-dasharray]");rings.set(key,da);
+    const from=entrance?"0 400":AN.ring.get(key);if(!go||from==null||from===da)return;try{c.animate([{strokeDasharray:from},{strokeDasharray:da}],{duration:entrance?720:450,easing:EASE});}catch(_){}});
+  P.querySelectorAll('.pring[style*="--p"]').forEach(el=>{const v=parseFloat(el.style.getPropertyValue("--p"))||0,key=annKey(el,".pring");pr.set(key,v);
+    const from=entrance?0:AN.pring.get(key);if(!go||from==null||Math.abs(from-v)<.002)return;try{el.animate([{"--p":from},{"--p":v}],{duration:entrance?600:420,delay:entrance?Math.min(10,n++)*22:0,easing:EASE,fill:"backwards"});}catch(_){}});
+  AN.bar=bars;AN.ring=rings;AN.pring=pr;if(!go||!entrance)return;
+  P.querySelectorAll('svg.chart path[fill="none"]').forEach(p=>{let L=0;try{L=p.getTotalLength();}catch(_){}if(!(L>0))return;try{p.animate([{strokeDasharray:L+" "+L,strokeDashoffset:L},{strokeDasharray:L+" "+L,strokeDashoffset:0}],{duration:760,easing:"cubic-bezier(.45,0,.2,1)"});}catch(_){}});
+  P.querySelectorAll(".hrc b").forEach(b=>{const t=b.textContent,v=num(t.replace(/[^\d.-]/g,""));if(!(v>0)||t.includes("."))return;countUp(b,0,v,x=>fmt(Math.round(x)));});}
+AN.pring=new Map();
 let anQ=0;new MutationObserver(()=>{if(anQ)return;anQ=requestAnimationFrame(()=>{anQ=0;animPass();});}).observe($("panel"),{childList:true,subtree:true});
 // moving things up or down: every row glides from where it was to where it is now
 const MOVESEL=".edrow,.tabrow,#panel article.ex";
@@ -6540,8 +6555,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.54";
+const APP_VERSION="8.55";
 const CHANGELOG=[
+  {v:"8.55",d:"15 November 2026",t:"Bars that fill in",items:["When you open a tab, the calorie ring, the protein, carbs and fat bars, the nutrient bars, workout progress rings, the budget bar and the week bars fill in quickly instead of just appearing. Charts on Progress draw their line from left to right, and the kcal left number counts up.","When a number changes, like adding 250 ml of water or ticking a set, the bar or ring glides to the new value instead of jumping.","All of it stays off with Battery saver, or if your phone is set to reduce motion."]},
   {v:"8.54",d:"15 November 2026",t:"Removing sample meal preps",items:["Fix: the sample meal preps, like the creamy Cajun chicken with mash, can now be removed from Lunch and Dinner like any other meal. Before, they came straight back. Bring them back with Show removed sample meals under Saved."]},
   {v:"8.53",d:"15 November 2026",t:"Easier decimals",items:["In any number box, typing .1 or ,5 fills in the 0 for you as you type, so it becomes 0.1 or 0,5. A stray . or , at the end is dropped when you leave the box.","A comma now works as a decimal point in every number box, including Extra food."]},
   {v:"8.52",d:"15 November 2026",t:"More things to hold",items:["Hold a set to copy its weight and reps into the empty sets below it. Sets you already ticked, drop sets and sets with numbers in them are left alone.","Hold a day in the week strip for a quick menu: change that day's workout, swap it with another day this week, or copy that day's food to another day.","The rest time you get by holding the rest chip now has a box for your own time, like 2:15 or 100 seconds.","Hold a tap option under Extra food to edit it, including its nutrients, or remove it.","The tips on Train and Eat now mention holding.","Fix: tap options like Chicken thigh, 200 g now take their carbs, fat and nutrients from the right food. Since 8.5 they could pick up a takeaway food with a similar name."]},
