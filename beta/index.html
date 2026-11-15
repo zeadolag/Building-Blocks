@@ -3714,7 +3714,7 @@ function slotOpts(slot){
   const hid=hiddenMeals();
   const os=store.settings.fresh?[]:slot.opts.filter(o=>!hid.includes(o.id));
   for(const mm of myMeals())if(mm.slot===slot.id)os.push({id:"m:"+mm.id,n:mm.n,d:mm.d||"Your meal",k:Number(mm.k)||0,p:Number(mm.p)||0,cb:mm.cb,f:mm.f,cfe:mm.cfe,fb:Number(mm.fb)||0,nu:mm.nu||null,mine:1,est:!!mm.est});
-  if(slot.recipes)for(const r of allRecipes())os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0,cb:r.cb,f:r.f,fb:Number(r.fb)||0,nu:r.nu||null});
+  if(slot.recipes)for(const r of allRecipes())if(!hiddenMeals().includes("r:"+r.id))os.push({id:"r:"+r.id,n:r.n,d:"Meal prep, one of "+r.s+" servings"+(r.note?". "+r.note:""),k:Number(r.k)||0,p:Number(r.p)||0,cb:r.cb,f:r.f,fb:Number(r.fb)||0,nu:r.nu||null});
   return os;
 }
 function chosen(slot,day){const v=(day.meals||{})[slot.id];if(!v)return null;const os=slotOpts(slot);if(v===true)return os[0];return os.find(o=>o.id===v)||null;}
@@ -5923,7 +5923,7 @@ function doDelete(wr){
   else if(kind==="supp"){const u=snap(["settings"]);ensureSupps().splice(i,1);persist("settings");renderEat();toast("Supplement removed",u);}
   else if(kind==="recipe"){const u=snap(["settings"]);ensureRecipes().splice(i,1);persist("settings");renderEat();toast("Recipe deleted",u);}
   else if(kind==="meal"){const opt=wr.dataset.opt,u=snap(["settings"]);
-    if(opt.startsWith("r:"))S.recipes=recipes().filter(r=>"r:"+r.id!==opt);
+    if(opt.startsWith("r:")){const id=opt.slice(2);if(RECIPES.some(r=>r.id===id))S.hideMeals=hiddenMeals().concat([opt]);else S.recipes=recipes().filter(r=>"r:"+r.id!==opt);}
     else if(opt.startsWith("m:"))S.myMeals=myMeals().filter(x=>"m:"+x.id!==opt);
     else S.hideMeals=hiddenMeals().concat([opt]);
     persist("settings");renderEat();toast("Meal removed",u);}
@@ -6540,8 +6540,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.53";
+const APP_VERSION="8.54";
 const CHANGELOG=[
+  {v:"8.54",d:"15 November 2026",t:"Removing sample meal preps",items:["Fix: the sample meal preps, like the creamy Cajun chicken with mash, can now be removed from Lunch and Dinner like any other meal. Before, they came straight back. Bring them back with Show removed sample meals under Saved."]},
   {v:"8.53",d:"15 November 2026",t:"Easier decimals",items:["In any number box, typing .1 or ,5 fills in the 0 for you as you type, so it becomes 0.1 or 0,5. A stray . or , at the end is dropped when you leave the box.","A comma now works as a decimal point in every number box, including Extra food."]},
   {v:"8.52",d:"15 November 2026",t:"More things to hold",items:["Hold a set to copy its weight and reps into the empty sets below it. Sets you already ticked, drop sets and sets with numbers in them are left alone.","Hold a day in the week strip for a quick menu: change that day's workout, swap it with another day this week, or copy that day's food to another day.","The rest time you get by holding the rest chip now has a box for your own time, like 2:15 or 100 seconds.","Hold a tap option under Extra food to edit it, including its nutrients, or remove it.","The tips on Train and Eat now mention holding.","Fix: tap options like Chicken thigh, 200 g now take their carbs, fat and nutrients from the right food. Since 8.5 they could pick up a takeaway food with a similar name."]},
   {v:"8.51",d:"15 November 2026",t:"Optional nutrients, and hold to edit",items:["Everywhere you type a food's values yourself, there's now a More nutrients fold. That's quick add, Extra food, your own meals, recipes, and your own foods per 100 g. You can fill in fibre, magnesium, potassium, calcium, iron, zinc, vitamin D, omega-3, B12, vitamin C, folate, iodine, salt, added sugar, saturated fat and alcohol.","All of them are optional. What you fill in counts towards your nutrients in Eat and Progress, and saved meals, recipes and tap options keep the values for next time.","Extra food and recipes can now take carbs and fat too.","Hold a meal, food, recipe or supplement on Eat to edit it, the same as swiping it to the right. Editing your own meals, foods and recipes now lets you change carbs, fat, fibre and the other nutrients too. Editing a sample meal saves your own version of it."]},
