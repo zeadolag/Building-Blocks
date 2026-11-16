@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Champ Guess</title>
+<style>
+:root{
+  --bg:#0a1018;--panel:#111a26;--panel2:#16212f;--line:#24324a;--ink:#eef2f7;--muted:#93a1b5;
+  --gold:#c8aa6e;--gold2:#f0e6d2;--green:#2f9e5b;--orange:#d08a1f;--red:#b8384a;--blue:#0ac8b9;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(1200px 500px at 50% -200px,#1b2a40 0%,var(--bg) 70%) fixed}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 40px}
+h1{margin:4px 0 2px;text-align:center;font-size:30px;letter-spacing:.08em;color:var(--gold2);text-transform:uppercase;font-weight:800}
+h1 span{color:var(--gold)}
+.sub{text-align:center;color:var(--muted);margin:0 0 14px;font-size:13px}
+nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+nav button{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+nav button[aria-pressed="true"]{border-color:var(--gold);background:#2a2416;color:var(--gold2)}
+nav button .ok{color:var(--green);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 4px;font-size:18px;text-align:center}
+.card .hint{color:var(--muted);text-align:center;margin:0;font-size:13.5px}
+.inrow{position:relative;display:flex;gap:8px;margin:0 0 14px}
+.inrow input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;outline:none}
+.inrow input:focus{border-color:var(--gold)}
+.inrow button{background:var(--gold);color:#1a1408;border:0;border-radius:10px;padding:0 18px;font:inherit;font-weight:800;cursor:pointer}
+.inrow button:disabled{opacity:.5;cursor:default}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--panel2);border:1px solid var(--line);border-radius:10px;max-height:300px;overflow:auto;z-index:20;display:none}
+.sugg.on{display:block}
+.sugg button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;color:var(--ink);padding:7px 10px;font:inherit;text-align:left;cursor:pointer}
+.sugg button:hover,.sugg button.act{background:#22314a}
+.sugg img{width:32px;height:32px;border-radius:6px}
+.ic{width:44px;height:44px;border-radius:8px;display:block;background:#000}
+/* classic table */
+.ctable{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chead,.crow{display:grid;grid-template-columns:repeat(8,minmax(74px,1fr));gap:6px;min-width:640px}
+.chead div{font-size:11.5px;color:var(--muted);text-align:center;padding-bottom:4px;border-bottom:1px solid var(--line);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.crow{margin-top:6px}
+.crow>div{min-height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;font-weight:600;padding:4px;line-height:1.2;animation:flip .45s both}
+.crow>div:first-child{background:none;padding:0}
+.crow>div:first-child img{width:64px;height:64px;border-radius:8px}
+.g{background:var(--green)}.o{background:var(--orange)}.x{background:var(--red)}
+.yr{flex-direction:column;gap:2px}.yr b{font-size:18px}
+@keyframes flip{from{transform:rotateX(90deg);opacity:0}to{transform:none;opacity:1}}
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+/* other modes */
+.glist{display:flex;flex-direction:column;gap:6px}
+.gitem{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:10px;font-weight:700;animation:flip .4s both}
+.gitem img{width:40px;height:40px;border-radius:8px}
+.clue{display:flex;justify-content:center;margin-top:12px}
+.abil{width:96px;height:96px;border-radius:12px;border:2px solid var(--gold);transition:filter .4s,transform .4s}
+.abil.gray{filter:grayscale(1)}
+.splash{width:100%;max-width:520px;aspect-ratio:1215/717;border-radius:12px;border:2px solid var(--gold);overflow:hidden;background:#000}
+.splash img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.quote{font-size:20px;font-style:italic;text-align:center;color:var(--gold2);margin:10px 4px 0;line-height:1.4}
+.emojis{display:flex;gap:10px;justify-content:center;font-size:44px;margin-top:10px}
+.emojis span{width:64px;height:64px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+.emojis span.hid{font-size:26px;color:var(--muted)}
+.tgl{display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:13px;color:var(--muted)}
+.tgl label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.win{text-align:center;border-color:var(--gold);background:linear-gradient(180deg,#1f2a1e,var(--panel))}
+.win img.big{width:88px;height:88px;border-radius:12px;border:2px solid var(--gold)}
+.win h2{color:var(--gold2);margin:8px 0 2px}
+.win p{margin:4px 0;color:var(--muted)}
+.btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:10px 16px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:#1a1408}
+.share{width:100%;margin-top:10px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:13px/1.4 ui-monospace,monospace;resize:none;display:none}
+.count{color:var(--muted);font-size:13px;text-align:center;margin:-6px 0 10px}
+.msg{text-align:center;color:var(--muted);padding:40px 0}
+footer{color:#5d6b80;font-size:11px;text-align:center;margin-top:24px;line-height:1.5}
+@media (max-width:520px){h1{font-size:24px}.emojis{font-size:34px}.emojis span{width:52px;height:52px}.quote{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Champ <span>Guess</span></h1>
+  <p class="sub" id="sub">Guess today's League of Legends champion</p>
+  <nav id="modes"></nav>
+  <div id="game"><p class="msg">Loading champions…</p></div>
+  <footer>Champ Guess isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</footer>
+</div>
+<script type="module">
+// Inside a Discord Activity everything must go through Discord's proxy (URL mappings set in the Developer Portal):
+//   /        -> where this page is hosted
+//   /ddragon -> ddragon.leagueoflegends.com   (Riot's champion data, icons and splash arts)
+//   /npm     -> cdn.jsdelivr.net/npm           (Discord's Embedded App SDK)
+const IN_DISCORD=/\.discordsays\.com$/.test(location.hostname);
+const DD=IN_DISCORD?"/ddragon":"https://ddragon.leagueoflegends.com";
+if(IN_DISCORD){
+  import("/npm/@discord/embedded-app-sdk@2.1.0/+esm").then(({DiscordSDK})=>{const sdk=new DiscordSDK(location.hostname.split(".")[0]);return sdk.ready();}).catch(e=>console.warn("Discord SDK",e));
+}
+
+// name|gender|positions|species|resource|range|regions|year|emojis|quote
+const RAW=`Aatrox|Male|Top|Darkin|Bloodthirst|Melee|Runeterra,Shurima|2013|🗡️🩸👹🌋|
+Ahri|Female|Middle|Vastaya|Mana|Ranged|Ionia|2011|🦊💗🔮✨|Don't you trust me?
+Akali|Female|Middle,Top|Human|Energy|Melee|Ionia|2010|🥷💨🎤🌫️|
+Akshan|Male|Middle,Top|Human|Mana|Ranged|Shurima|2021|🔫🪝😎🧣|
+Alistar|Male|Support|Minotaur|Mana|Melee|Runeterra|2009|🐂💥🔗🥛|
+Ambessa|Female|Top|Human|Energy|Melee|Noxus|2024|🐺⚔️👑👩‍👧|
+Amumu|Male|Jungle,Support|Yordle,Undead|Mana|Melee|Shurima|2009|😭🧻🧟💔|
+Anivia|Female|Middle,Support|Spirit|Mana|Ranged|Freljord|2009|🐦‍⬛❄️🥚🧱|
+Annie|Female|Middle,Support|Human|Mana|Ranged|Noxus|2009|👧🔥🧸💥|Have you seen my bear Tibbers?
+Aphelios|Male|Bottom|Human|Mana|Ranged|Targon|2019|🌙🔫🤐👯|
+Ashe|Female|Bottom,Support|Human,Iceborn|Mana|Ranged|Freljord|2009|🏹❄️👑🦅|
+Aurelion Sol|Male|Middle|Celestial,Dragon|Mana|Ranged|Targon,Runeterra|2016|🐉🌌⭐☄️|
+Aurora|Female|Middle,Top|Vastaya|Mana|Ranged|Freljord|2024|🐰🌌👻🔮|
+Azir|Male|Middle|God-Warrior|Mana|Ranged|Shurima|2014|🦅🏜️👑🪖|
+Bard|Male|Support|Celestial|Mana|Ranged|Runeterra|2015|🔔🎵🌀🧚|
+Bel'Veth|Female|Jungle|Void-Being|Manaless|Melee|The Void|2022|🪼👸🟣🌊|
+Blitzcrank|Male|Support|Golem|Mana|Melee|Zaun|2009|🤖🦾🪝⚙️|Fired up and ready to serve.
+Brand|Male|Support,Middle|Human|Mana|Ranged|Runeterra|2011|🔥🧍🔥💀|
+Braum|Male|Support|Human,Iceborn|Mana|Melee|Freljord|2014|🛡️🥸❄️💪|Stand behind Braum!
+Briar|Female|Jungle|Magically Altered|Manaless|Melee|Noxus|2023|🩸🦷🪵😋|
+Caitlyn|Female|Bottom|Human|Mana|Ranged|Piltover|2011|🎯🎩🪤🔍|
+Camille|Female|Top|Human,Cyborg|Mana|Melee|Piltover|2016|🦵✂️🪝💎|
+Cassiopeia|Female|Middle|Human,Magically Altered|Mana|Ranged|Noxus,Shurima|2010|🐍👁️🗿💚|
+Cho'Gath|Male|Top|Void-Being|Mana|Melee|The Void|2009|👾🍖📈🦷|
+Corki|Male|Middle|Yordle|Mana|Ranged|Bandle City|2009|✈️🚀👨‍✈️📦|
+Darius|Male|Top|Human|Mana|Melee|Noxus|2012|🪓🩸🔪👑|Noxus will rise!
+Diana|Female|Jungle,Middle|Human|Mana|Melee|Targon|2012|🌙⚔️🌑🌀|
+Dr. Mundo|Male|Top|Human,Chemically Altered|Health costs|Melee|Zaun|2009|💉💪🔪🟣|
+Draven|Male|Bottom|Human|Mana|Ranged|Noxus|2012|🪓🪓🥸🎪|Welcome to the League of Draven.
+Ekko|Male|Jungle,Middle|Human|Mana|Melee|Zaun|2015|⏳🔄👦🏏|It's not how much time you have, it's how you use it.
+Elise|Female|Jungle|Human,Magically Altered|Mana|Melee,Ranged|Shadow Isles|2012|🕷️👩🕸️🍷|
+Evelynn|Female|Jungle|Demon|Mana|Melee|Runeterra|2009|😈💋👻💅|
+Ezreal|Male|Bottom|Human|Mana|Ranged|Piltover|2010|🧭✨🧤😏|
+Fiddlesticks|Other|Jungle|Demon|Mana|Ranged|Runeterra|2009|🌾🐦‍⬛😱🎃|
+Fiora|Female|Top|Human|Mana|Melee|Demacia|2012|🤺💃🌹⚔️|
+Fizz|Male|Middle|Yordle|Mana|Melee|Bilgewater|2011|🐟🔱🦈🌊|
+Galio|Male|Middle,Support|Golem|Mana|Melee|Demacia|2010|🗿🪽🛡️💥|
+Gangplank|Male|Top|Human|Mana|Melee|Bilgewater|2009|🏴‍☠️🍊💣🔫|
+Garen|Male|Top|Human|Manaless|Melee|Demacia|2010|🗡️🌀👑🦁|Demacia!
+Gnar|Male|Top|Yordle|Rage|Melee,Ranged|Freljord|2014|🦖🪃😡🦣|
+Gragas|Male|Jungle,Top|Human|Mana|Melee|Freljord|2010|🍺🛢️🤰🎉|
+Graves|Male|Jungle|Human|Mana|Ranged|Bilgewater|2011|🚬🔫🧔💨|
+Gwen|Female|Top|Magically Altered|Mana|Melee|Shadow Isles|2021|✂️🧵🪡🎀|
+Hecarim|Male|Jungle|Undead|Mana|Melee|Shadow Isles|2012|🐎👻💨🔱|
+Heimerdinger|Male|Middle,Support|Yordle|Mana|Ranged|Piltover|2009|🔧🗼🧑‍🔬👴|
+Hwei|Male|Middle,Support|Human|Mana|Ranged|Ionia|2023|🎨🖌️👁️🌈|
+Illaoi|Female|Top|Human|Mana|Melee|Bilgewater|2015|🐙🗿👊💪|
+Irelia|Female|Top,Middle|Human|Mana|Melee|Ionia|2010|🗡️💃🔪🌸|
+Ivern|Male|Jungle|Human|Mana|Melee|Ionia|2016|🌳🧔🪨🌸|
+Janna|Female|Support|Spirit|Mana|Ranged|Zaun|2009|🌪️🌬️🛡️🧚|
+Jarvan IV|Male|Jungle|Human|Mana|Melee|Demacia|2011|🚩👑🏟️⚔️|By my will, this shall be finished!
+Jax|Male|Top,Jungle|Unknown|Mana|Melee|Runeterra|2009|🏮🥷🌀👊|Who wants a piece of the champ?
+Jayce|Male|Top,Middle|Human|Mana|Melee,Ranged|Piltover|2012|🔨🔫⚡🧑‍🔬|
+Jhin|Male|Bottom|Human|Mana|Ranged|Ionia|2016|🎭4️⃣🌸🔫|In carnage, I bloom, like a flower in the dawn.
+Jinx|Female|Bottom|Human|Mana|Ranged|Zaun|2013|🔫🚀🦈💙|Rules are made to be broken... like buildings! Or people!
+K'Sante|Male|Top|Human|Mana|Melee|Shurima|2022|🛡️🦏💪✨|
+Kai'Sa|Female|Bottom|Human,Void-Being|Mana|Ranged|The Void|2018|🦋🟣🚀🎤|
+Kalista|Female|Bottom|Undead|Mana|Ranged|Shadow Isles|2014|🔱👻🤝💀|
+Karma|Female|Support|Human|Mana|Ranged|Ionia|2011|🪷🧘‍♀️🔥🛡️|
+Karthus|Male|Jungle,Middle|Undead|Mana|Ranged|Shadow Isles|2009|💀🎶☠️⏳|
+Kassadin|Male|Middle|Human,Void-Being|Mana|Melee|The Void|2009|🟣🌀🗡️🕳️|
+Katarina|Female|Middle|Human|Manaless|Melee|Noxus|2009|🔪🔪🌀💃|Violence solves everything.
+Kayle|Female|Top|Celestial|Mana|Melee,Ranged|Demacia|2009|👼🔥⚔️⚖️|
+Kayn|Male|Jungle|Human,Darkin|Mana|Melee|Ionia|2017|🌾😈🧱🔵|
+Kennen|Male|Top|Yordle|Energy|Ranged|Ionia|2010|⚡🐿️🥷🌩️|
+Kha'Zix|Male|Jungle|Void-Being|Mana|Melee|The Void|2012|🦗🗡️🧬🎯|Change is good.
+Kindred|Other|Jungle|Spirit|Mana|Ranged|Runeterra|2015|🐑🐺🏹💀|Never one without the other.
+Kled|Male|Top|Yordle|Courage|Melee|Noxus|2016|🦎🤠😤🏃|
+Kog'Maw|Male|Bottom|Void-Being|Mana|Ranged|The Void|2010|🐶🤮🟢👅|
+LeBlanc|Female|Middle|Human|Mana|Ranged|Noxus|2010|🌹🪞🎭⛓️|Things are not what they seem.
+Lee Sin|Male|Jungle|Human|Energy|Melee|Ionia|2011|🙈🦵🐉🥋|
+Leona|Female|Support|Human|Mana|Melee|Targon|2011|☀️🛡️🗡️🌅|
+Lillia|Female|Jungle|Spirit|Mana|Melee|Ionia|2020|🦌🌸😴🌙|
+Lissandra|Female|Middle|Human,Iceborn|Mana|Ranged|Freljord|2013|🧊👸🖤❄️|
+Lucian|Male|Bottom|Human|Mana|Ranged|Demacia|2013|🔫🔫⛪💔|Everyone dies. Some just need a little help.
+Lulu|Female|Support|Yordle|Mana|Ranged|Bandle City|2012|🧚🐿️📈🪄|
+Lux|Female|Support,Middle|Human,Magicborn|Mana|Ranged|Demacia|2010|🌟🔦🌈👱‍♀️|
+Malphite|Male|Top,Support|Golem|Mana|Melee|Ixtal|2009|🪨💥🏔️🛡️|
+Malzahar|Male|Middle|Human|Mana|Ranged|Shurima|2010|🔮🟣🐛🧞|
+Maokai|Male|Support,Jungle|Spirit|Mana|Melee|Shadow Isles|2011|🌳😠🌱👣|
+Master Yi|Male|Jungle|Human|Mana|Melee|Ionia|2009|🗡️🥽🧘‍♂️⚡|My Wuju style is superior!
+Mel|Female|Middle,Support|Human,Magicborn|Mana|Ranged|Noxus|2025|✨💰🪞👑|
+Milio|Male|Support|Human|Mana|Ranged|Ixtal|2023|🔥🧒🫂⚽|
+Miss Fortune|Female|Bottom|Human|Mana|Ranged|Bilgewater|2010|🔫🔫🏴‍☠️💋|Fortune doesn't favor fools.
+Mordekaiser|Male|Top|Undead|Shield|Melee|Noxus|2010|🔨⛓️👑🌑|
+Morgana|Female|Support|Celestial|Mana|Ranged|Demacia|2009|⛓️🖤🪽🛡️|
+Naafiri|Female|Middle|Darkin|Manaless|Melee|Shurima|2023|🐺🐺🐺🗡️|
+Nami|Female|Support|Vastaya|Mana|Ranged|Runeterra|2012|🧜‍♀️🌊🫧🐚|
+Nasus|Male|Top|God-Warrior|Mana|Melee|Shurima|2009|🐕📈🦴🏜️|The cycle of life and death continues. We will live, they will die.
+Nautilus|Male|Support|Undead|Mana|Melee|Bilgewater|2012|⚓🤿🪝🌊|
+Neeko|Female|Middle,Support|Vastaya|Mana|Ranged|Ixtal|2018|🦎🌈🎭💐|
+Nidalee|Female|Jungle|Human|Mana|Melee,Ranged|Ixtal|2009|🐆🔱🌿💚|
+Nilah|Female|Bottom|Human|Manaless|Melee|Bilgewater|2022|💧⛓️😄🌊|
+Nocturne|Male|Jungle|Demon|Mana|Melee|Runeterra|2011|🌑😱🗡️💤|
+Nunu & Willump|Male|Jungle|Human,Yeti|Mana|Melee|Freljord|2009|❄️⚽👦🦍|
+Olaf|Male|Jungle,Top|Human|Manaless|Melee|Freljord|2010|🪓😡🍺🔥|
+Orianna|Female|Middle|Golem|Mana|Ranged|Piltover|2011|⚙️⚽💃🎶|
+Ornn|Male|Top|God|Manaless|Melee|Freljord|2017|🐏🔨🌋⚒️|
+Pantheon|Male|Support,Top,Middle|Human|Manaless|Melee|Targon|2010|🛡️🔱⭐☄️|
+Poppy|Female|Top,Jungle|Yordle|Mana|Melee|Demacia|2010|🔨👧🛡️💥|
+Pyke|Male|Support|Undead|Mana|Melee|Bilgewater|2018|🪝🌊💀💰|
+Qiyana|Female|Middle,Jungle|Human|Mana|Melee|Ixtal|2019|👑🌊🪨🌿|
+Quinn|Female|Top|Human|Mana|Ranged|Demacia|2013|🦅🏹👩‍✈️🪶|
+Rakan|Male|Support|Vastaya|Mana|Melee|Ionia|2017|🦚💃💛🪶|
+Rammus|Male|Jungle|Unknown|Mana|Melee|Shurima|2009|🐢🌀🌵👌|Ok.
+Rek'Sai|Female|Jungle|Void-Being|Rage|Melee|The Void|2014|🦈⛏️🕳️🟣|
+Rell|Female|Support|Human,Magicborn|Mana|Melee|Noxus|2020|🐎⚙️🧲🛡️|
+Renata Glasc|Female|Support|Human,Chemically Altered|Mana|Ranged|Zaun|2022|💼🧪🦾💰|
+Renekton|Male|Top|God-Warrior|Fury|Melee|Shurima|2011|🐊😡🗡️🏜️|
+Rengar|Male|Jungle,Top|Vastaya|Ferocity|Melee|Ixtal|2012|🦁🌿🦴🎯|
+Riven|Female|Top|Human|Manaless|Melee|Noxus|2011|💔🗡️🐰🌀|What is broken can be reforged.
+Rumble|Male|Top,Middle|Yordle|Heat|Melee|Bandle City|2011|🤖🔥🐭🔧|
+Ryze|Male|Middle,Top|Human,Magicborn|Mana|Ranged|Runeterra|2009|📜🔵🧔⚡|
+Samira|Female|Bottom|Human|Mana|Ranged|Noxus|2020|🔫🗡️😎🌟|
+Sejuani|Female|Jungle|Human,Iceborn|Mana|Melee|Freljord|2012|🐗❄️⛓️🪓|
+Senna|Female|Support,Bottom|Human|Mana|Ranged|Runeterra|2019|🔫🌑👻💚|
+Seraphine|Female|Support,Middle|Human,Magicborn|Mana|Ranged|Piltover,Zaun|2020|🎤🎶⭐💙|
+Sett|Male|Top,Support|Human,Vastaya|Grit|Melee|Ionia|2020|👊🥊🐺🫁|
+Shaco|Male|Jungle,Support|Spirit|Mana|Melee|Runeterra|2009|🤡📦🗡️🃏|
+Shen|Male|Top,Support|Human|Energy|Melee|Ionia|2010|🥷⚖️🛡️🌙|The eye is blind to what the mind cannot see.
+Shyvana|Female|Jungle|Human,Dragon|Fury|Melee|Demacia|2011|🐉🔥👩‍🦰🪓|
+Singed|Male|Top|Human,Chemically Altered|Mana|Melee|Zaun|2009|☠️🧪🏃💨|
+Sion|Male|Top|Undead|Mana|Melee|Noxus|2009|🧟🪓🐂💥|
+Sivir|Female|Bottom|Human|Mana|Ranged|Shurima|2009|🪃💰🛡️🏜️|
+Skarner|Male|Jungle,Top|Brackern|Mana|Melee|Ixtal|2011|🦂💎🪨🗿|
+Smolder|Male|Bottom,Middle|Dragon|Mana|Ranged|Camavor|2024|🐉🔥👶📚|
+Sona|Female|Support|Human,Magicborn|Mana|Ranged|Demacia|2010|🎻🎶🤐💙|
+Soraka|Female|Support|Celestial|Mana|Ranged|Targon|2009|🦄🌟💚🍌|
+Swain|Male|Support,Middle|Human,Magicborn|Mana|Ranged|Noxus|2010|🐦‍⬛👁️🦾👑|
+Sylas|Male|Middle,Jungle|Human,Magicborn|Mana|Melee|Demacia|2019|⛓️✊🔄🧔|
+Syndra|Female|Middle|Human,Magicborn|Mana|Ranged|Ionia|2012|🔮⚫⚫⚫|
+Tahm Kench|Male|Top,Support|Demon|Mana|Melee|Bilgewater|2015|🐸🎩👅🍽️|
+Taliyah|Female|Jungle,Middle|Human,Magicborn|Mana|Ranged|Shurima|2016|🪨🧶🌊🏄|
+Talon|Male|Middle,Jungle|Human|Mana|Melee|Noxus|2011|🗡️🧥🧗🔪|
+Taric|Male|Support|Human|Mana|Melee|Targon|2009|💎✨🛡️💖|Truly outrageous!
+Teemo|Male|Top|Yordle|Mana|Ranged|Bandle City|2009|🍄🐹🎯🪖|Captain Teemo on duty!
+Thresh|Male|Support|Undead|Mana|Ranged|Shadow Isles|2013|⛓️🏮👻🪝|What delightful agony we shall inflict.
+Tristana|Female|Bottom,Middle|Yordle|Mana|Ranged|Bandle City|2009|💣🔫🐹🚀|
+Trundle|Male|Jungle,Top|Troll|Mana|Melee|Freljord|2010|🧌🏏❄️👑|
+Tryndamere|Male|Top|Human|Fury|Melee|Freljord|2009|🗡️😡💀⏳|
+Twisted Fate|Male|Middle|Human,Magicborn|Mana|Ranged|Bilgewater|2009|🃏🎩🌀🎲|Lady Luck is smilin'.
+Twitch|Male|Bottom,Jungle|Chemically Altered|Mana|Ranged|Zaun|2009|🐀🏹☠️🧀|
+Udyr|Male|Jungle,Top|Human,Spiritualist|Mana|Melee|Freljord|2009|🐻🐯🐢🦅|
+Urgot|Male|Top|Human,Cyborg|Mana|Ranged|Zaun|2010|🦀🔫⛓️🦿|
+Varus|Male|Bottom,Middle|Darkin|Mana|Ranged|Ionia|2012|🏹🟣😈⛓️|
+Vayne|Female|Bottom,Top|Human|Mana|Ranged|Demacia|2011|🏹🦇🕶️🌙|Let us hunt those who have fallen to darkness.
+Veigar|Male|Middle,Bottom|Yordle|Mana|Ranged|Bandle City|2009|🧙📈🎩⭐|
+Vel'Koz|Male|Support,Middle|Void-Being|Mana|Ranged|The Void|2014|👁️🦑⚡🔬|
+Vex|Female|Middle|Yordle|Mana|Ranged|Shadow Isles|2021|🖤😒👤🙄|
+Vi|Female|Jungle|Human|Mana|Melee|Piltover,Zaun|2012|🥊💗🔨🚪|Punch first, ask questions while punching.
+Viego|Male|Jungle|Undead|Manaless|Melee|Shadow Isles|2021|👑💔🌫️🎭|
+Viktor|Male|Middle|Human,Cyborg|Mana|Ranged|Zaun|2011|🦾⚙️🔬⚡|Join the glorious evolution.
+Vladimir|Male|Middle,Top|Human,Magicborn|Health costs|Ranged|Noxus|2010|🩸🧛🌊🍷|
+Volibear|Male|Top,Jungle|God|Mana|Melee|Freljord|2011|🐻⚡🌩️❄️|
+Warwick|Male|Jungle,Top|Human,Chemically Altered|Mana|Melee|Zaun|2009|🐺🩸🧪🌕|
+Wukong|Male|Top,Jungle|Vastaya|Mana|Melee|Ionia|2011|🐒🪄🌀👑|
+Xayah|Female|Bottom|Vastaya|Mana|Ranged|Ionia|2017|🪶🐦💜🗡️|
+Xerath|Male|Middle,Support|God-Warrior|Mana|Ranged|Shurima|2011|⚡🔵🏺🏜️|
+Xin Zhao|Male|Jungle|Human|Mana|Melee|Demacia|2010|🔱🐉🛡️⚔️|
+Yasuo|Male|Middle,Top,Bottom|Human|Flow|Melee|Ionia|2013|🌪️🗡️💨🍶|Death is like the wind; always by my side.
+Yone|Male|Top,Middle|Human|Manaless|Melee|Ionia|2020|🗡️🗡️👹👻|One to kill, one to seal.
+Yorick|Male|Top|Human|Mana|Melee|Shadow Isles|2011|⚰️🪦👻🧟|
+Yunara|Female|Bottom|Human|Mana|Ranged|Ionia|2025|📿🏹🌸🙏|
+Yuumi|Female|Support|Cat|Mana|Ranged|Bandle City|2019|🐱📖🧚💤|
+Zac|Male|Jungle,Top|Chemically Altered|Health costs|Melee|Zaun|2013|🟢🫧🦘🧪|Let's bounce!
+Zed|Male|Middle,Jungle|Human|Energy|Melee|Ionia|2012|🥷👤🗡️🌑|The unseen blade is the deadliest.
+Zeri|Female|Bottom|Human,Magicborn|Manaless|Ranged|Zaun|2022|⚡👟🔫💚|
+Ziggs|Male|Middle,Bottom|Yordle|Mana|Ranged|Zaun|2012|💣🐹💥🔥|
+Zilean|Male|Support,Middle|Human,Magicborn|Mana|Ranged|Runeterra|2009|⏰💣🧓⏳|
+Zoe|Female|Middle,Support|Celestial|Mana|Ranged|Targon|2017|🌈💤⭐🍭|
+Zyra|Female|Support|Plant|Mana|Ranged|Ixtal|2012|🌹🌿🌱🥀|`;
+const INFO={};
+for(const line of RAW.split("\n")){const [n,g,pos,sp,res,rng,reg,yr,em,q]=line.split("|");INFO[n]={gender:g,pos:pos.split(","),species:sp.split(","),resource:res,range:rng.split(","),regions:reg.split(","),year:+yr,emojis:[...new Intl.Segmenter(undefined,{granularity:"grapheme"}).segment(em)].map(s=>s.segment),quote:q||""};}
+
+const MODES=[["classic","Classic","🧩"],["ability","Ability","✨"],["splash","Splash","🖼️"],["quote","Quote","💬"],["emoji","Emoji","😀"]];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g,"");
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){let a=seed;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const load=k=>{try{return JSON.parse(localStorage.getItem(k)||"null");}catch(_){return null;}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(_){}};
+
+let V,CH=[],BY={},mode=load("cg-mode")||"classic",S=null;const DETAIL={};
+const icon=c=>`${DD}/cdn/${V}/img/champion/${c.img}`;
+
+async function init(){
+  try{
+    V=(await (await fetch(`${DD}/api/versions.json`)).json())[0];
+    const data=(await (await fetch(`${DD}/cdn/${V}/data/en_US/champion.json`)).json()).data;
+    CH=Object.values(data).map(c=>({id:c.id,name:c.name,img:c.image.full,info:INFO[c.name]||null})).sort((a,b)=>a.name.localeCompare(b.name));
+    for(const c of CH)BY[c.name]=c;
+  }catch(e){$("game").innerHTML=`<p class="msg">Couldn't load the champion list from Riot. Check your connection and reload.</p>`;console.error(e);return;}
+  if(!MODES.some(m=>m[0]===mode))mode="classic";
+  start();
+}
+function pool(m){return m==="classic"?CH.filter(c=>c.info):m==="quote"?CH.filter(c=>c.info&&c.info.quote):m==="emoji"?CH.filter(c=>c.info):CH;}
+function pick(m,seedStr){const P=pool(m);const r=rng(hash(m+"|"+seedStr));return {target:P[Math.floor(r()*P.length)].name,r1:r(),r2:r(),r3:r()};}
+function start(){
+  const key="cg-"+mode;let st=load(key);
+  if(!st||(st.day!==today()&&!st.random)||!BY[st.target]){const p=pick(mode,today());st={day:today(),random:false,target:p.target,r:[p.r1,p.r2,p.r3],guesses:[],done:false};save(key,st);}
+  S=st;save("cg-mode",mode);renderNav();render();
+}
+function randomRound(){const seed=String(Math.random());const p=pick(mode,seed);S={day:today(),random:true,target:p.target,r:[p.r1,p.r2,p.r3],guesses:[],done:false};save("cg-"+mode,S);render();}
+function dailyDone(m){const st=load("cg-"+m);return st&&st.day===today()&&!st.random&&st.done;}
+function renderNav(){$("modes").innerHTML=MODES.map(([k,l,e])=>`<button type="button" data-mode="${k}" aria-pressed="${mode===k}">${e} ${l}${dailyDone(k)?' <span class="ok">✓</span>':""}</button>`).join("");}
+$("modes").addEventListener("click",e=>{const b=e.target.closest("[data-mode]");if(!b)return;mode=b.dataset.mode;start();});
+
+async function detail(c){if(DETAIL[c.id])return DETAIL[c.id];const j=await (await fetch(`${DD}/cdn/${V}/data/en_US/champion/${c.id}.json`)).json();return DETAIL[c.id]=j.data[c.id];}
+
+// ---------- comparing (Classic) ----------
+function cmpList(a,b){const A=new Set(a),B=new Set(b);if(a.length===b.length&&a.every(x=>B.has(x)))return "g";return a.some(x=>B.has(x))?"o":"x";}
+function classicCells(g,t){const G=g.info,T=t.info;return [
+  ["gender",G.gender,G.gender===T.gender?"g":"x"],
+  ["pos",G.pos.join(", "),cmpList(G.pos,T.pos)],
+  ["species",G.species.join(", "),cmpList(G.species,T.species)],
+  ["resource",G.resource,G.resource===T.resource?"g":"x"],
+  ["range",G.range.join(", "),cmpList(G.range,T.range)],
+  ["regions",G.regions.join(", "),cmpList(G.regions,T.regions)],
+  ["year",G.year,G.year===T.year?"g":"x",G.year<T.year?"↑":G.year>T.year?"↓":""]];}
+
+// ---------- rendering ----------
+function render(){
+  const t=BY[S.target],wrong=S.guesses.filter(n=>n!==S.target).length;
+  let h=`<div class="card">${clueHtml(t,wrong)}</div>`;
+  if(S.done)h+=winHtml(t);
+  else h+=`<div class="inrow"><input id="gIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type a champion name…" aria-label="Champion name"><button id="gBtn" type="button" disabled>Guess</button><div class="sugg" id="sugg" role="listbox"></div></div>`;
+  if(S.guesses.length)h+=`<p class="count">${S.guesses.length} guess${S.guesses.length===1?"":"es"}${S.random?" · random round":""}</p>`;
+  h+=guessesHtml(t);
+  $("game").innerHTML=h;
+  $("sub").textContent=S.random?"Random round: not today's champion":"Guess today's League of Legends champion";
+  if(!S.done)bindInput();
+  afterRender(t,wrong);
+}
+function clueHtml(t,wrong){
+  if(mode==="classic")return `<h2>Guess today's champion</h2><p class="hint">Type any champion to begin. Each guess shows how close it is.</p>`;
+  if(mode==="ability")return `<h2>Which champion has this ability?</h2><div class="clue"><img class="abil${!S.done&&S.gray!==false?" gray":""}" id="abImg" alt="Ability icon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></div><div class="tgl"><label><input type="checkbox" id="grayT" ${S.gray!==false?"checked":""}> Grayscale (harder)</label></div>`;
+  if(mode==="splash")return `<h2>Which champion is in this splash art?</h2><div class="clue"><div class="splash"><img id="spImg" alt="Part of a splash art"></div></div><p class="hint" style="margin-top:8px">It zooms out a bit with every wrong guess.</p>`;
+  if(mode==="quote"){const i=t.info;return `<h2>Which champion says this?</h2><p class="quote">“${esc(i.quote)}”</p>${!S.done&&wrong>=4?`<p class="hint" style="margin-top:10px">Hint: from ${esc(i.regions.join(" / "))}</p>`:""}`;}
+  if(mode==="emoji"){const E=t.info.emojis,show=S.done?E.length:Math.min(E.length,1+wrong);return `<h2>Which champion do these emojis describe?</h2><div class="emojis">${E.map((e,i)=>i<show?`<span>${e}</span>`:`<span class="hid">?</span>`).join("")}</div><p class="hint" style="margin-top:8px">A new emoji appears after each wrong guess.</p>`;}
+  return "";
+}
+function guessesHtml(t){
+  if(!S.guesses.length)return "";
+  const list=S.guesses.slice().reverse();
+  if(mode==="classic"){
+    return `<div class="card ctable"><div class="chead"><div>Champion</div><div>Gender</div><div>Position(s)</div><div>Species</div><div>Resource</div><div>Range</div><div>Region(s)</div><div>Release</div></div>${list.map(n=>{const g=BY[n];return `<div class="crow"><div><img src="${icon(g)}" alt="${esc(n)}" title="${esc(n)}"></div>${classicCells(g,t).map(([k,v,c,arr],i)=>`<div class="${c}${k==="year"?" yr":""}" style="animation-delay:${(i+1)*.12}s">${k==="year"?`<b>${v}</b>${arr?`<span>${arr==="↑"?"↑ later":"↓ earlier"}</span>`:""}`:esc(v)}</div>`).join("")}</div>`;}).join("")}<div class="legend"><span><i style="background:var(--green)"></i>Correct</span><span><i style="background:var(--orange)"></i>Partly right</span><span><i style="background:var(--red)"></i>Wrong</span><span>↑↓ released later or earlier</span></div></div>`;
+  }
+  return `<div class="glist">${list.map(n=>`<div class="gitem ${n===S.target?"g":"x"}"><img src="${icon(BY[n])}" alt="">${esc(n)}</div>`).join("")}</div>`;
+}
+function winHtml(t){
+  const n=S.guesses.length;
+  return `<div class="card win"><img class="big" src="${icon(t)}" alt=""><h2>${esc(t.name)}</h2><p>${S.extra?esc(S.extra)+" · ":""}Found in ${n} guess${n===1?"":"es"}</p>
+  <div class="btns"><button class="btn pri" id="shareB" type="button">Copy result</button><button class="btn" id="randB" type="button">Play a random one</button>${nextMode()?`<button class="btn" id="nextB" type="button">Next: ${nextMode()[1]}</button>`:""}</div><textarea class="share" id="shareT" rows="5" readonly aria-label="Result to share"></textarea></div>`;
+}
+const nextMode=()=>MODES.find(m=>m[0]!==mode&&!dailyDone(m[0]));
+async function afterRender(t,wrong){
+  if(mode==="ability"){
+    const d=await detail(t).catch(()=>null);if(!d||mode!=="ability")return;
+    const all=[{k:"Passive",n:d.passive.name,src:`${DD}/cdn/${V}/img/passive/${d.passive.image.full}`},...d.spells.map((s,i)=>({k:"QWER"[i],n:s.name,src:`${DD}/cdn/${V}/img/spell/${s.image.full}`}))];
+    const a=all[Math.floor(S.r[0]*all.length)];const im=$("abImg");if(im){im.src=a.src;im.style.transform=S.done?"none":`rotate(${[0,90,180,270][Math.floor(S.r[1]*4)]}deg)`;}
+    S.extra=`${a.k}: ${a.n}`;if(S.done){const p=document.querySelector(".win p");if(p)p.textContent=`${a.k}: ${a.n} · Found in ${S.guesses.length} guess${S.guesses.length===1?"":"es"}`;}
+    const gt=$("grayT");if(gt)gt.onchange=()=>{S.gray=gt.checked;save("cg-"+mode,S);if(im)im.classList.toggle("gray",gt.checked&&!S.done);};
+  }
+  if(mode==="splash"){
+    const d=await detail(t).catch(()=>null);if(!d||mode!=="splash")return;
+    const sk=d.skins[Math.floor(S.r[0]*d.skins.length)],im=$("spImg");if(!im)return;
+    im.src=`${DD}/cdn/img/champion/splash/${t.id}_${sk.num}.jpg`;
+    const z=S.done?1:Math.max(1.4,6-wrong*0.75);im.style.transformOrigin=`${15+S.r[1]*70}% ${15+S.r[2]*70}%`;im.style.transform=`scale(${z})`;
+    S.extra=sk.num===0?"Default skin":sk.name;if(S.done){const p=document.querySelector(".win p");if(p)p.textContent=`${S.extra} · Found in ${S.guesses.length} guess${S.guesses.length===1?"":"es"}`;}
+  }
+  if(S.done){
+    $("shareB").onclick=share;$("randB").onclick=randomRound;const nb=$("nextB");if(nb)nb.onclick=()=>{mode=nextMode()[0];start();};
+  }
+}
+function shareText(){
+  const t=BY[S.target],lbl=MODES.find(m=>m[0]===mode)[1];
+  let rows;
+  if(mode==="classic")rows=S.guesses.map(n=>classicCells(BY[n],t).map(c=>({g:"🟩",o:"🟨",x:"🟥"})[c[2]]).join("")).join("\n");
+  else rows=S.guesses.map(n=>n===S.target?"🟩":"🟥").join("");
+  return `Champ Guess · ${lbl}${S.random?" (random)":" · "+S.day}\nFound in ${S.guesses.length} 🎯\n${rows}`;
+}
+async function share(){
+  const txt=shareText(),ta=$("shareT");
+  try{await navigator.clipboard.writeText(txt);$("shareB").textContent="Copied!";}
+  catch(_){ta.style.display="block";ta.value=txt;ta.select();$("shareB").textContent="Copy the text below";}
+}
+
+// ---------- input with suggestions ----------
+function bindInput(){
+  const inp=$("gIn"),box=$("sugg"),btn=$("gBtn");let act=0,items=[];
+  const used=new Set(S.guesses);
+  const draw=()=>{
+    const q=norm(inp.value);
+    items=q?CH.filter(c=>!used.has(c.name)&&(mode==="classic"?c.info:true)&&norm(c.name).startsWith(q)).concat(CH.filter(c=>!used.has(c.name)&&(mode==="classic"?c.info:true)&&!norm(c.name).startsWith(q)&&norm(c.name).includes(q))).slice(0,8):[];
+    act=0;box.classList.toggle("on",items.length>0);
+    box.innerHTML=items.map((c,i)=>`<button type="button" role="option" data-n="${esc(c.name)}" class="${i===act?"act":""}"><img src="${icon(c)}" alt="">${esc(c.name)}</button>`).join("");
+    btn.disabled=!items.length;
+  };
+  inp.addEventListener("input",draw);
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){if(!items.length)return;e.preventDefault();act=(act+(e.key==="ArrowDown"?1:-1)+items.length)%items.length;[...box.children].forEach((b,i)=>b.classList.toggle("act",i===act));}
+    else if(e.key==="Enter"){e.preventDefault();if(items[act])guess(items[act].name);}
+    else if(e.key==="Escape")box.classList.remove("on");
+  });
+  box.addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(b)guess(b.dataset.n);});
+  btn.addEventListener("click",()=>{if(items[act])guess(items[act].name);});
+  if(matchMedia("(hover:hover)").matches)inp.focus();
+}
+function guess(name){
+  if(S.done||S.guesses.includes(name))return;
+  S.guesses.push(name);if(name===S.target)S.done=true;
+  save("cg-"+mode,S);renderNav();render();
+  if(!S.done&&matchMedia("(hover:hover)").matches){const i=$("gIn");if(i)i.focus();}
+  if(S.done)window.scrollTo({top:0,behavior:"smooth"});
+}
+init();
+</script>
+</body>
+</html>
