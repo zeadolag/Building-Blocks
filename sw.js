@@ -19,7 +19,6 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.pathname.includes("/beta/")) return; // the beta has its own worker
-  if (url.pathname.includes("/loldle/")) return; // a separate game hosted alongside, not part of Routine
   // The page itself: try the network first so updates arrive, fall back to the saved copy offline.
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).then(res => {
