@@ -1229,7 +1229,7 @@ body.touring{overflow:hidden}
 html.tsdrag,html.tsdrag body{overflow-x:hidden}
 html{touch-action:manipulation}html,body{overflow-x:clip}@supports not (overflow-x:clip){body{overflow-x:hidden}}
 .segpill{position:absolute;z-index:0;border-radius:calc(var(--radius) - 3px);background:var(--surface);box-shadow:var(--shadow-sm);pointer-events:none}:root[data-theme="dark"] .segpill{background:#3F3F46}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .segpill{background:#3F3F46}}.seg{position:relative}.seg>button{position:relative;z-index:1}.seg.segmoving>button[aria-pressed="true"]{background:transparent!important;box-shadow:none!important}
-.tspeek{position:fixed;left:0;right:0;bottom:0;overflow:hidden;background:var(--paper);z-index:5;pointer-events:none;will-change:transform}.tsin{padding:0}
+.tspeek{position:fixed;left:0;right:0;bottom:0;overflow:hidden;background:transparent;z-index:5;pointer-events:none;will-change:transform}.tsin{padding:0}
 #panel{will-change:auto}
 html[data-style] .island{-webkit-backdrop-filter:none;backdrop-filter:none}
 #rotcover{display:none;position:fixed;inset:0;z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:var(--paper);color:var(--ink);text-align:center}
@@ -3204,7 +3204,7 @@ const TAB_ORDER=["home","train","eat","body","spend"],TAB_LOCKED=["home","train"
 // Tab order and hidden tabs are kept from 7.0 on (the tab list changed then, so older choices start fresh)
 function tabCfg(){const c0=store.settings.tabs||{},c=c0.v===7?c0:{};const order=(Array.isArray(c.order)?c.order:[]).filter((t,i,a)=>TAB_ORDER.includes(t)&&a.indexOf(t)===i);for(const t of TAB_ORDER)if(!order.includes(t))order.push(t);
   const hidden=(Array.isArray(c.hidden)?c.hidden:[]).filter(t=>TAB_ORDER.includes(t)&&!TAB_LOCKED.includes(t));return {order,hidden};}
-function openTab(t){if(t==="hist"){t="body";progView="cal";}if(!TABDEF[t])return;const _L=[...document.querySelectorAll("#island .itab[data-tab]")].map(b=>b.dataset.tab),_d=Math.sign(_L.indexOf(t)-_L.indexOf(tab));if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);if(_d&&typeof slidePanel==="function")slidePanel(_d);}
+function openTab(t){if(t==="hist"){t="body";progView="cal";}if(!TABDEF[t])return;const _L=[...document.querySelectorAll("#island .itab[data-tab]")].map(b=>b.dataset.tab),_d=Math.sign(_L.indexOf(t)-_L.indexOf(tab)),_A=curPal();if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);if(_d&&typeof slidePanel==="function")slidePanel(_d);morphTheme(_A,320);}
 function renderTabs(){let ID=null;try{ID=islandDrag;}catch(_){}if(ID&&ID.on&&ID.moved)return;const {order,hidden}=tabCfg(),vis=order.filter(t=>!hidden.includes(t)),i=vis.indexOf(tab);
   const I=$("island");I.style.setProperty("--n",vis.length);I.style.setProperty("--i",Math.max(0,i));I.classList.toggle("nothumb",i<0);
   // 8.56: same tabs as before? just move the highlight, so it glides instead of being rebuilt
@@ -4997,11 +4997,11 @@ $("island").addEventListener("pointermove",e=>{if(!islandDrag.on)return;if(!isla
   const th=I.querySelector(".ithumb"),r=I.getBoundingClientRect();if(th){const w=th.offsetWidth;th.style.transition="none";th.style.left=Math.max(5,Math.min(r.width-w-5,e.clientX-r.left-w/2))+"px";}I.classList.remove("nothumb");
   const bs=[...I.querySelectorAll(".itab")];let i=-1;bs.forEach((b,k)=>{const q=b.getBoundingClientRect(),pad=q.width*.18;if(e.clientX>=q.left+pad&&e.clientX<=q.right-pad)i=k;});
   if(i>=0&&i!==islandDrag.i){islandDrag.i=i;if(navigator.vibrate)try{navigator.vibrate(4);}catch(_){}const t=bs[i].dataset.tab;if(t!==tab)scrubTo(t);}});
-let scrubQ=0;function scrubTo(t){cancelAnimationFrame(scrubQ);scrubQ=requestAnimationFrame(()=>{if(t===tab)return;const P=$("panel");AN.lastTab=t;
-  if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);if(!calm())try{P.animate([{opacity:.35},{opacity:1}],{duration:140,easing:"ease-out"});}catch(_){}});}
+let scrubQ=0;function scrubTo(t){cancelAnimationFrame(scrubQ);scrubQ=requestAnimationFrame(()=>{if(t===tab)return;const L=tabList(),d=Math.sign(L.indexOf(t)-L.indexOf(tab)),A=curPal();AN.lastTab=t;
+  if(t==="settings"&&typeof setPage!=="undefined")setPage=null;tab=t;render();window.scrollTo(0,0);if(d)slidePanel(d);morphTheme(A,260);});}
 function islandEnd(){if(!islandDrag.on)return;islandDrag.on=false;const I=$("island");I.classList.remove("dragging");
   if(islandDrag.moved){const b=I.querySelectorAll(".itab")[islandDrag.i];const t=b&&b.dataset.tab;islandDrag.moved=false;cancelAnimationFrame(scrubQ);
-    if(t&&t!==tab){AN.lastTab=t;tab=t;if(t==="settings"&&typeof setPage!=="undefined")setPage=null;render();window.scrollTo(0,0);}else renderTabs();
+    if(t&&t!==tab){const L=tabList(),d=Math.sign(L.indexOf(t)-L.indexOf(tab)),A=curPal();AN.lastTab=t;tab=t;if(t==="settings"&&typeof setPage!=="undefined")setPage=null;render();window.scrollTo(0,0);if(d)slidePanel(d);morphTheme(A,260);}else renderTabs();
     islandDrag.moved=true;setTimeout(()=>{islandDrag.moved=false;},50);}}
 $("island").addEventListener("pointerup",islandEnd);$("island").addEventListener("pointercancel",islandEnd);
 $("dSub").onclick=e=>{if(e.target.closest('[data-act="today"]')){sel=todayKey();render();}};
@@ -5702,7 +5702,7 @@ function tsRender(t){const P=$("panel"),cur=tab,sp=typeof setPage!=="undefined"?
 function tsPrebuild(){const L=tabList(),i=L.indexOf(tab);TS.pre={};if(i<0)return;for(const j of [i-1,i+1])if(j>=0&&j<L.length)TS.pre[L[j]]=tsRender(L[j]);}
 function tsBuild(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>=L.length)return false;const P=$("panel");
   const R=TS.pre[L[j]]&&TS.pre[L[j]].key===L[j]+"|"+sel?TS.pre[L[j]]:tsRender(L[j]),html=R.html,nTop=R.nTop;
-  const g=document.createElement("div");g.className="tspeek";if(R.pal)for(const [k,v] of Object.entries(R.pal))if(k.startsWith("--"))g.style.setProperty(k,v);g.style.top=Math.max(0,P.offsetTop-scrollY)+"px";const cs=getComputedStyle(P);g.innerHTML=`<div class="tsin" style="box-sizing:border-box;width:${P.offsetWidth}px;margin-left:${P.getBoundingClientRect().left}px;padding:${cs.paddingTop} ${cs.paddingRight} 0 ${cs.paddingLeft}">${html}</div>`;
+  const g=document.createElement("div");g.className="tspeek";cancelAnimationFrame(morphRaf);TS.palA=curPal();TS.palB=R.pal;g.style.top=Math.max(0,P.offsetTop-scrollY)+"px";const cs=getComputedStyle(P);g.innerHTML=`<div class="tsin" style="box-sizing:border-box;width:${P.offsetWidth}px;margin-left:${P.getBoundingClientRect().left}px;padding:${cs.paddingTop} ${cs.paddingRight} 0 ${cs.paddingLeft}">${html}</div>`;
   TS.W=document.documentElement.clientWidth;document.documentElement.classList.add("tsdrag");g.style.transform=`translateX(${dir*TS.W}px)`;document.body.appendChild(g);
   // line the preview up exactly where the next tab will sit, keeping the page where it is if you had scrolled down
   if(nTop!=null){const want=Math.max(0,nTop-scrollY),gf=g.querySelector(".tsin").firstElementChild,have=gf?gf.getBoundingClientRect().top:want;g.style.top=(parseFloat(g.style.top)+want-have)+"px";TS.scrollTo=Math.max(0,nTop-want);}else TS.scrollTo=0;TS.ghost=g;TS.dir=dir;TS.to=L[j];
@@ -5710,7 +5710,7 @@ function tsBuild(dir){const L=tabList(),i=L.indexOf(tab),j=i+dir;if(i<0||j<0||j>
   // where the highlight will end up once the next tab is the active one
   if(a&&b2){a.setAttribute("aria-current","false");b2.setAttribute("aria-current","page");TS.rb={l:b2.offsetLeft,w:b2.offsetWidth};b2.setAttribute("aria-current","false");a.setAttribute("aria-current","page");}if(TS.th)TS.th.style.transition="none";
   return true;}
-function tsMove(dx){TS.dx=dx;const P=$("panel"),d=TS.dir,clamp=d>0?Math.min(0,dx):Math.max(0,dx);P.style.transform=`translateX(${clamp}px)`;if(TS.ghost)TS.ghost.style.transform=`translateX(${clamp+d*TS.W}px)`;tsThumb(Math.abs(clamp)/TS.W);}
+function tsMove(dx){TS.dx=dx;const P=$("panel"),d=TS.dir,clamp=d>0?Math.min(0,dx):Math.max(0,dx),p=Math.abs(clamp)/TS.W;P.style.transform=`translateX(${clamp}px)`;if(TS.ghost)TS.ghost.style.transform=`translateX(${clamp+d*TS.W}px)`;tsThumb(p);if(!calm())morphSet(TS.palA,TS.palB,p);TS.p=p;}
 function tsThumb(p){if(!TS.th||!TS.ra||!TS.rb)return;p=Math.max(0,Math.min(1,p));TS.th.style.left=(TS.ra.l+(TS.rb.l-TS.ra.l)*p)+"px";TS.th.style.width=(TS.ra.w+(TS.rb.w-TS.ra.w)*p)+"px";}
 function tsEnd(commit,v){const P=$("panel"),g=TS.ghost,d=TS.dir,W=TS.W||innerWidth,left=commit?W-Math.abs(TS.dx):Math.abs(TS.dx),dur=Math.round(Math.max(130,Math.min(260,left/Math.max(1.1,v||0)))),ease="cubic-bezier(.25,.9,.3,1)";TS.on=false;TS.lock=false;
   const th=TS.th;TS.th=null;
@@ -5718,7 +5718,10 @@ function tsEnd(commit,v){const P=$("panel"),g=TS.ghost,d=TS.dir,W=TS.W||innerWid
     if(commit){tab=TS.to;AN.lastTab=tab;if(tab==="settings")setPage=null;render();window.scrollTo(0,TS.scrollTo||0);if(navigator.vibrate)try{navigator.vibrate(6);}catch(_){}}else renderTabs();
     if(g)requestAnimationFrame(()=>g.remove());if(th)requestAnimationFrame(()=>{th.style.transition="";});};
   P.style.transition=`transform ${dur}ms ${ease}`;if(g)g.style.transition=`transform ${dur}ms ${ease}`;if(th){th.style.transition=`left ${dur}ms ${ease},width ${dur}ms ${ease}`;}
-  requestAnimationFrame(()=>{P.style.transform=commit?`translateX(${-d*W}px)`:"translateX(0)";if(g)g.style.transform=commit?"translateX(0)":`translateX(${d*W}px)`;tsThumb(commit?1:0);});setTimeout(fin,dur+16);}
+  requestAnimationFrame(()=>{P.style.transform=commit?`translateX(${-d*W}px)`:"translateX(0)";if(g)g.style.transform=commit?"translateX(0)":`translateX(${d*W}px)`;tsThumb(commit?1:0);});
+  // the colours finish blending in step with the slide
+  const A=TS.palA,B=TS.palB,p0=TS.p||0,p1=commit?1:0,t0=performance.now();if(A&&B&&!calm()){cancelAnimationFrame(morphRaf);const step=now=>{const u=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-u,3);morphSet(A,B,p0+(p1-p0)*e);if(u<1)morphRaf=requestAnimationFrame(step);};morphRaf=requestAnimationFrame(step);}
+  setTimeout(()=>{cancelAnimationFrame(morphRaf);fin();if(!commit)applyTheme();},dur+16);}
 document.addEventListener("touchmove",e=>{if(!GS.on||!GS.edge||GS.el||RM()||XD.on||XD.timer)return;const t=e.touches[0],dx=t.clientX-GS.x,dy=t.clientY-GS.y;
   if(!TS.on){if(Math.abs(dx)<10||Math.abs(dx)<Math.abs(dy)*1.3){if(Math.abs(dy)>14)GS.on=false;return;}const dir=dx<0?1:-1;if(!tsBuild(dir)){GS.on=false;return;}TS.on=true;TS.t0=Date.now();TS.v=0;TS.lt=0;}
   e.preventDefault();if(GS.sy!=null&&Math.abs(scrollY-GS.sy)>0)window.scrollTo(scrollX,GS.sy);
@@ -6138,6 +6141,12 @@ function applyTheme(){
   if(T.accent)root.style.setProperty("--blue",dark?`color-mix(in srgb, ${T.accent} 70%, white)`:T.accent);else root.style.removeProperty("--blue");
 }
 if(darkMQ&&darkMQ.addEventListener)darkMQ.addEventListener("change",()=>{applyTheme();render();});
+// 8.57: when you change tabs, the colours glide from the old tab's to the new one's instead of switching at once
+const MORPH_VARS=["--paper","--surface","--ink","--muted","--line","--mutedbg","--ring","--field","--blue","--acc","--segon"];let morphRaf=0;
+function curPal(){try{return styleId()!=="classic"?palette6():null;}catch(_){return null;}}
+function morphSet(A,B,p){const r=document.documentElement;for(const k of MORPH_VARS){const a=A&&A[k],b=B&&B[k];if(/^#[0-9a-f]{6}$/i.test(a||"")&&/^#[0-9a-f]{6}$/i.test(b||""))r.style.setProperty(k,mixHex(a,b,p));}}
+function morphTheme(A,dur){cancelAnimationFrame(morphRaf);if(!A||calm())return;const B=curPal();if(!B||!MORPH_VARS.some(k=>A[k]!==B[k]))return;const t0=performance.now();
+  morphSet(A,B,0);const step=now=>{const u=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-u,3);morphSet(A,B,e);if(u<1)morphRaf=requestAnimationFrame(step);};morphRaf=requestAnimationFrame(step);}
 function cssHex(v){const m=/^var\((--[\w-]+)\)$/.exec(String(v||"").trim());const x=m?getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim():String(v||"");return /^#[0-9a-f]{6}$/i.test(x)?x:"#888888";}
 function onFor(hex){const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;const L=[r,g,b].map(c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4));const lum=.2126*L[0]+.7152*L[1]+.0722*L[2];return lum>.45?"#18222E":"#FFFFFF";}
 function withColors(PL){
@@ -6579,8 +6588,9 @@ $("panel").addEventListener("click",e=>{if(tab!=="settings")return;const b=e.tar
 });
 // ---------- Version and change log ----------
 // Major.Minor: a new major number for a redesign, a new minor number for each update.
-const APP_VERSION="8.56";
+const APP_VERSION="8.57";
 const CHANGELOG=[
+  {v:"8.57",d:"17 November 2026",t:"Colours that blend",items:["Swiping between tabs no longer looks split down the middle. Both pages share one background, and the colours blend from the old tab's into the new one's as you swipe.","Tapping or sliding along the tab bar now slides the page in from the side you're heading to, and the colours glide over instead of switching at once."]},
   {v:"8.56",d:"17 November 2026",t:"Smoother tab switching",items:["Sliding along the tab bar: the highlight now stays under your finger the whole way, and the page switches as soon as you're over a tab instead of when you let go. When you let go, the highlight settles into place.","Swiping from the edge of the screen: the next tab is ready before you start moving, so the drag starts straight away. It's shown in its own colours, the highlight in the tab bar slides along with your finger, and a quick flick finishes faster than a slow drag.","After a swipe, the page doesn't replay its fill-in animation, since you've already seen it slide in."]},
   {v:"8.55",d:"15 November 2026",t:"Bars that fill in",items:["When you open a tab, the calorie ring, the protein, carbs and fat bars, the nutrient bars, workout progress rings, the budget bar and the week bars fill in quickly instead of just appearing. Charts on Progress draw their line from left to right, and the kcal left number counts up.","When a number changes, like adding 250 ml of water or ticking a set, the bar or ring glides to the new value instead of jumping.","All of it stays off with Battery saver, or if your phone is set to reduce motion."]},
   {v:"8.54",d:"15 November 2026",t:"Removing sample meal preps",items:["Fix: the sample meal preps, like the creamy Cajun chicken with mash, can now be removed from Lunch and Dinner like any other meal. Before, they came straight back. Bring them back with Show removed sample meals under Saved."]},
